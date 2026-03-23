@@ -95,6 +95,7 @@ Vista ilustrativa del panel principal y del estado operativo de la interfaz.
   <img src="./assets/architecture.svg" alt="Diagrama de arquitectura del frontend ImageFlow" width="100%">
 </p>
 
+- La estructura sigue un enfoque de `Screaming Architecture`: las carpetas principales expresan capacidades del producto como `auth`, `dashboard`, `upload`, `progress`, `results`, `history`, `nodes` o `settings`.
 - `lib/main.dart` inicia Flutter y delega en `ImageFlowApp`.
 - `lib/features/shell/presentation/shell.dart` concentra autenticacion, navegacion y layout responsive.
 - `lib/core/theme/app_theme.dart` define colores, tipografia y estilo global.

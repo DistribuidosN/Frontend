@@ -1,16 +1,18 @@
-# imageflow_flutter
+# ImageFlow Frontend App
 
-A new Flutter project.
+This folder contains the Flutter application for ImageFlow.
 
-## Getting Started
+For the full project overview, visuals and architecture notes, see the repository README in `../README.md`.
 
-This project is a starting point for a Flutter application.
+## Quick Start
 
-A few resources to get you started if this is your first Flutter project:
+```bash
+flutter pub get
+flutter run
+```
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+## Notes
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- The current build is mock-driven.
+- No environment variables are required.
+- The app uses the feature modules under `lib/features/`.

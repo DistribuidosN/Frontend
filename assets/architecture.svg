@@ -1,0 +1,86 @@
+<svg width="1600" height="900" viewBox="0 0 1600 900" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="archTitle archDesc">
+  <title id="archTitle">ImageFlow Frontend architecture</title>
+  <desc id="archDesc">Architecture diagram showing app entry, shell, feature modules, shared UI systems and local mock data.</desc>
+  <defs>
+    <linearGradient id="archBg" x1="80" y1="80" x2="1520" y2="820" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F6F4EE"/>
+      <stop offset="1" stop-color="#F8FAFC"/>
+    </linearGradient>
+    <filter id="archShadow" x="0" y="0" width="1600" height="900" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="20" stdDeviation="20" flood-color="#0F172A" flood-opacity="0.10"/>
+    </filter>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth">
+      <path d="M0 0L10 5L0 10V0Z" fill="#64748B"/>
+    </marker>
+  </defs>
+
+  <rect width="1600" height="900" rx="36" fill="url(#archBg)"/>
+
+  <text x="92" y="92" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="16" font-weight="700" letter-spacing="2">ARCHITECTURE</text>
+  <text x="92" y="150" fill="#0F172A" font-family="Georgia, 'Times New Roman', serif" font-size="48" font-weight="700">How the frontend is organized today</text>
+  <text x="92" y="190" fill="#475569" font-family="Verdana, Arial, sans-serif" font-size="22">The codebase already separates app shell concerns, feature screens, shared UI and local data sources for easier backend integration later.</text>
+
+  <g filter="url(#archShadow)">
+    <rect x="116" y="256" width="260" height="128" rx="26" fill="#FFFFFF"/>
+    <text x="146" y="296" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="14" font-weight="700" letter-spacing="1.6">ENTRY</text>
+    <text x="146" y="344" fill="#0F172A" font-family="Verdana, Arial, sans-serif" font-size="28" font-weight="700">main.dart</text>
+    <text x="146" y="376" fill="#475569" font-family="Verdana, Arial, sans-serif" font-size="18">Bootstraps Flutter and hands off to `ImageFlowApp`.</text>
+
+    <rect x="468" y="232" width="664" height="176" rx="30" fill="#FFFFFF"/>
+    <text x="500" y="274" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="14" font-weight="700" letter-spacing="1.6">APP SHELL</text>
+    <text x="500" y="322" fill="#0F172A" font-family="Verdana, Arial, sans-serif" font-size="30" font-weight="700">ImageFlowApp and responsive shell</text>
+    <text x="500" y="356" fill="#475569" font-family="Verdana, Arial, sans-serif" font-size="18">Auth gating, sidebar, top bar, page switching and local navigation state.</text>
+    <rect x="500" y="378" width="150" height="34" rx="17" fill="#0F172A"/>
+    <text x="528" y="400" fill="#FFFFFF" font-family="Verdana, Arial, sans-serif" font-size="15" font-weight="700">auth views</text>
+    <rect x="666" y="378" width="176" height="34" rx="17" fill="#FACC15"/>
+    <text x="694" y="400" fill="#0F172A" font-family="Verdana, Arial, sans-serif" font-size="15" font-weight="700">workspace shell</text>
+    <rect x="858" y="378" width="240" height="34" rx="17" fill="#EEF2FF"/>
+    <text x="886" y="400" fill="#1E3A8A" font-family="Verdana, Arial, sans-serif" font-size="15" font-weight="700">responsive layout decisions</text>
+
+    <rect x="468" y="474" width="664" height="244" rx="30" fill="#FFFFFF"/>
+    <text x="500" y="516" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="14" font-weight="700" letter-spacing="1.6">FEATURE MODULES</text>
+    <text x="500" y="560" fill="#0F172A" font-family="Verdana, Arial, sans-serif" font-size="30" font-weight="700">Screens grouped by feature</text>
+
+    <rect x="500" y="590" width="150" height="44" rx="22" fill="#F8FAFC" stroke="#E2E8F0"/>
+    <text x="544" y="618" fill="#0F172A" font-family="Verdana, Arial, sans-serif" font-size="18" font-weight="700">Dashboard</text>
+    <rect x="668" y="590" width="120" height="44" rx="22" fill="#F8FAFC" stroke="#E2E8F0"/>
+    <text x="705" y="618" fill="#0F172A" font-family="Verdana, Arial, sans-serif" font-size="18" font-weight="700">Upload</text>
+    <rect x="806" y="590" width="160" height="44" rx="22" fill="#F8FAFC" stroke="#E2E8F0"/>
+    <text x="834" y="618" fill="#0F172A" font-family="Verdana, Arial, sans-serif" font-size="18" font-weight="700">Task Builder</text>
+    <rect x="984" y="590" width="124" height="44" rx="22" fill="#F8FAFC" stroke="#E2E8F0"/>
+    <text x="1015" y="618" fill="#0F172A" font-family="Verdana, Arial, sans-serif" font-size="18" font-weight="700">Progress</text>
+
+    <rect x="500" y="650" width="124" height="44" rx="22" fill="#F8FAFC" stroke="#E2E8F0"/>
+    <text x="534" y="678" fill="#0F172A" font-family="Verdana, Arial, sans-serif" font-size="18" font-weight="700">Results</text>
+    <rect x="642" y="650" width="124" height="44" rx="22" fill="#F8FAFC" stroke="#E2E8F0"/>
+    <text x="678" y="678" fill="#0F172A" font-family="Verdana, Arial, sans-serif" font-size="18" font-weight="700">History</text>
+    <rect x="784" y="650" width="176" height="44" rx="22" fill="#F8FAFC" stroke="#E2E8F0"/>
+    <text x="812" y="678" fill="#0F172A" font-family="Verdana, Arial, sans-serif" font-size="18" font-weight="700">Worker Nodes</text>
+    <rect x="978" y="650" width="92" height="44" rx="22" fill="#F8FAFC" stroke="#E2E8F0"/>
+    <text x="1006" y="678" fill="#0F172A" font-family="Verdana, Arial, sans-serif" font-size="18" font-weight="700">Logs</text>
+    <rect x="1088" y="650" width="124" height="44" rx="22" fill="#F8FAFC" stroke="#E2E8F0"/>
+    <text x="1118" y="678" fill="#0F172A" font-family="Verdana, Arial, sans-serif" font-size="18" font-weight="700">Settings</text>
+
+    <rect x="1224" y="256" width="256" height="192" rx="26" fill="#FFFFFF"/>
+    <text x="1254" y="296" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="14" font-weight="700" letter-spacing="1.6">DESIGN SYSTEM</text>
+    <text x="1254" y="344" fill="#0F172A" font-family="Verdana, Arial, sans-serif" font-size="28" font-weight="700">Theme and shared UI</text>
+    <text x="1254" y="380" fill="#475569" font-family="Verdana, Arial, sans-serif" font-size="18">`core/theme` and `shared/widgets` keep cards, pills, grids and typography consistent.</text>
+
+    <rect x="116" y="474" width="260" height="244" rx="26" fill="#FFFFFF"/>
+    <text x="146" y="516" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="14" font-weight="700" letter-spacing="1.6">DATA TODAY</text>
+    <text x="146" y="562" fill="#0F172A" font-family="Verdana, Arial, sans-serif" font-size="28" font-weight="700">Local models and mocks</text>
+    <text x="146" y="602" fill="#475569" font-family="Verdana, Arial, sans-serif" font-size="18">Feature `data` folders provide dashboard stats, history rows, logs, node health and request details.</text>
+    <rect x="146" y="642" width="148" height="34" rx="17" fill="#F0FDF4"/>
+    <text x="178" y="664" fill="#166534" font-family="Verdana, Arial, sans-serif" font-size="15" font-weight="700">mock datasets</text>
+    <rect x="146" y="684" width="164" height="34" rx="17" fill="#EFF6FF"/>
+    <text x="178" y="706" fill="#1D4ED8" font-family="Verdana, Arial, sans-serif" font-size="15" font-weight="700">domain models</text>
+  </g>
+
+  <path d="M376 320H468" stroke="#64748B" stroke-width="3" marker-end="url(#arrow)"/>
+  <path d="M800 408V474" stroke="#64748B" stroke-width="3" marker-end="url(#arrow)"/>
+  <path d="M1224 352H1132" stroke="#64748B" stroke-width="3" marker-end="url(#arrow)"/>
+  <path d="M376 596H468" stroke="#64748B" stroke-width="3" marker-end="url(#arrow)"/>
+  <path d="M1248 520C1188 520 1158 520 1132 534" stroke="#64748B" stroke-width="3" marker-end="url(#arrow)"/>
+
+  <text x="94" y="808" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="18">Next step: swap mock sources for real repositories or service adapters without rewriting the presentation layer.</text>
+</svg>

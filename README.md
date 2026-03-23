@@ -1,152 +1,238 @@
-# Frontend
+<p align="center">
+  <img src="./assets/banner.svg" alt="ImageFlow Frontend banner showing a premium distributed image operations dashboard" width="100%">
+</p>
 
-## Prompt para generar un README premium
+<p align="center">
+  <img alt="Flutter frontend" src="https://img.shields.io/badge/Flutter-Frontend-02569B?style=for-the-badge&logo=flutter&logoColor=white">
+  <img alt="Dart 3.9 plus" src="https://img.shields.io/badge/Dart-3.9%2B-0175C2?style=for-the-badge&logo=dart&logoColor=white">
+  <img alt="Material 3 responsive UI" src="https://img.shields.io/badge/Material%203-Responsive%20UI-1F2937?style=for-the-badge&logo=materialdesign&logoColor=white">
+  <img alt="Current state mock data" src="https://img.shields.io/badge/State-Mock%20Data-FACC15?style=for-the-badge&labelColor=111827&color=FACC15">
+</p>
 
-````text
-Quiero que actues como un Senior Technical Writer, maintainer open source y disenador visual experto en GitHub READMEs.
+<h1 align="center">ImageFlow Frontend</h1>
 
-Tu tarea es crear un README espectacular, claro, profesional y visualmente memorable para mi proyecto, junto con los archivos SVG necesarios para que el repositorio se vea premium en GitHub.
+<p align="center">
+  A premium Flutter control surface for distributed image-processing operations.
+</p>
 
-Objetivo:
-- Redactar un `README.md` que convierta visitas en uso, contribuciones o stars.
-- Hacer que el README sea limpio, moderno, escaneable y confiable.
-- Disenar assets SVG coherentes con la identidad del proyecto.
-- Mantener compatibilidad real con GitHub.
+<p align="center">
+  The repository currently ships a polished frontend prototype for authentication, upload, task configuration, progress tracking, results review and cluster observability.
+</p>
 
-Entrega exactamente esto:
-1. `README.md`
-2. `assets/banner.svg`
-3. `assets/separator.svg`
-4. `assets/stack.svg`
-5. `assets/architecture.svg` (solo si aplica)
-6. `assets/demo-placeholder.svg` (si no tengo screenshots reales)
+<p align="center">
+  <a href="#overview">Overview</a> |
+  <a href="#demo">Demo</a> |
+  <a href="#tech-stack">Tech Stack</a> |
+  <a href="#architecture">Architecture</a> |
+  <a href="#getting-started">Getting Started</a> |
+  <a href="#roadmap">Roadmap</a>
+</p>
 
-Reglas criticas:
-- Usa Markdown + HTML simple compatible con GitHub.
-- No uses JavaScript.
-- No dependas de CSS externo.
-- No insertes SVG inline dentro del README si puede afectar compatibilidad; usa archivos `.svg` locales y refierete a ellos con `<img src="./assets/...">`.
-- Usa una estetica consistente, moderna y no generica.
-- Prioriza legibilidad, jerarquia visual, buen espaciado y contraste.
-- El tono debe ser profesional, preciso y persuasivo, sin frases vacias.
-- Si falta informacion, no inventes datos criticos: usa placeholders claros como `[AGREGA TU URL]`, `[AGREGA SCREENSHOT]`, `[AGREGA TOKEN]`.
-- Adapta el README al tipo de proyecto: app web, API, libreria, CLI, bot, SaaS, plantilla, etc.
-- Si algo no aplica, omitelo con criterio.
-- Si una seccion no tiene informacion suficiente, entrega una version minima util con placeholders claros en vez de eliminar valor innecesariamente.
-- Manten todo listo para copiar y pegar en un repositorio real.
+<p align="center">
+  <img src="./assets/separator.svg" alt="Decorative separator" width="100%">
+</p>
 
-Quiero que el `README.md` incluya, si corresponde:
-- Hero section centrada con banner SVG.
-- Nombre del proyecto y tagline potente de una linea.
-- Badges utiles y elegantes.
-- Descripcion breve del problema que resuelve.
-- Seccion "Demo" con screenshot, GIF o placeholder.
-- Tabla de contenidos.
-- Seccion "Features" con beneficios claros.
-- Seccion "Tech Stack".
-- Seccion "Arquitectura" o diagrama si aporta valor.
-- Instalacion paso a paso.
-- Variables de entorno en bloque claro.
-- Uso rapido con ejemplos reales.
-- Scripts disponibles.
-- Estructura del proyecto.
-- Flujo de desarrollo o despliegue si aplica.
-- Roadmap.
-- Contribucion.
-- Licencia.
-- Autor, contacto y links relevantes.
-- FAQ breve si aporta claridad.
+## Overview
 
-Criterios de diseno:
-- Disena un README que se sienta como un mini landing page dentro de GitHub.
-- Usa `p align="center"` e imagenes con tamanos razonables cuando mejore el layout.
-- Evita tablas pesadas si perjudican mobile.
-- Usa separadores SVG con buen gusto, no adornos innecesarios.
-- El banner SVG debe verse limpio, tecnologico y con personalidad.
-- El SVG de stack debe mostrar tecnologias de forma visual y ordenada.
-- El SVG de arquitectura debe ser minimalista, entendible y profesional.
-- Si no hay branding definido, propon una direccion visual sobria y moderna.
-- Incluye `alt` text util en imagenes.
-- Manten el resultado listo para copiar y pegar.
-- Evita una estetica generica de plantilla; busca un look mas editorial, tecnico y premium.
-- Asegurate de que el README sea escaneable tanto en desktop como en mobile.
+`ImageFlow Frontend` lives in `flutter_app/` and models the operator-facing experience of a distributed image pipeline. The app is structured around the workflow an operations team would actually use: sign in, upload a batch, configure transformations, monitor execution, inspect results and review historical or system-level activity.
 
-Logica de adaptacion:
-- Si el proyecto es una API o backend, prioriza endpoints, auth, ejemplos de requests/responses y arquitectura.
-- Si el proyecto es una libreria o SDK, prioriza instalacion, ejemplos de uso, API surface y casos de uso.
-- Si el proyecto es una app web o SaaS, prioriza valor del producto, screenshots/demo, features y flujo de uso.
-- Si el proyecto es CLI, prioriza instalacion, comandos, flags, ejemplos y output esperado.
-- Si el proyecto es un template o boilerplate, prioriza stack, estructura, setup y casos de uso.
-- Si la arquitectura no aporta valor real, omite `assets/architecture.svg`.
+> Current state: this repository is a frontend prototype. The UI is powered by local state, mock datasets and simulated progress. Real authentication, file upload, persistence and backend APIs are not connected yet.
 
-Formato de salida obligatorio:
-- Primero escribe una sola linea muy corta con la identidad visual propuesta.
-- Luego entrega cada archivo por separado.
-- Cada archivo debe venir con este formato exacto:
+## Demo
 
-### README.md
-```md
-...contenido completo...
+<p align="center">
+  <img src="./assets/demo-placeholder.svg" alt="Placeholder preview for the ImageFlow Frontend interface" width="100%">
+</p>
+
+No screenshots are committed yet. Replace the placeholder above with a real dashboard, upload flow or results capture once you want to showcase the live interface.
+
+## Table of Contents
+
+- [Why It Matters](#why-it-matters)
+- [Core Views](#core-views)
+- [Tech Stack](#tech-stack)
+- [Architecture](#architecture)
+- [Project Structure](#project-structure)
+- [Getting Started](#getting-started)
+- [Environment Variables](#environment-variables)
+- [Useful Commands](#useful-commands)
+- [App Flow](#app-flow)
+- [Current Limitations](#current-limitations)
+- [Roadmap](#roadmap)
+- [Contributing](#contributing)
+- [FAQ](#faq)
+- [License](#license)
+- [Maintainer](#maintainer)
+
+## Why It Matters
+
+- It validates the full operator journey for a distributed image-processing product before backend wiring is finished.
+- It establishes a strong visual system with responsive layouts, editorial typography and reusable dashboard primitives.
+- It gives the project a feature-based Flutter foundation that can later be connected to real services without rewriting the UI from scratch.
+
+## Core Views
+
+- `Auth`: login, registration and multi-step password reset screens.
+- `Dashboard`: throughput, queue pressure, recent batches and node health summaries.
+- `Upload`: batch intake surface with simulated file cards and size totals.
+- `Task Builder`: transformation controls, output settings and live preview states.
+- `Progress`: job-level processing status with simulated completion across worker nodes.
+- `Results`: success metrics, before and after comparison, asset grid and download actions.
+- `History`: request listing with filters, status chips and quick drill-down access.
+- `Request Detail`: per-request metrics, transformation values, image details and logs.
+- `Worker Nodes`: cluster monitoring, load distribution and heartbeat visibility.
+- `Logs`: operational event stream with severity and source labels.
+- `Settings`: profile, password, notification and API access surfaces.
+
+## Tech Stack
+
+<p align="center">
+  <img src="./assets/stack.svg" alt="ImageFlow Frontend technology stack overview" width="100%">
+</p>
+
+- `Flutter` for the cross-platform application shell.
+- `Dart` for UI logic, state transitions and feature modules.
+- `Material 3` as the component baseline, customized through a project-specific theme.
+- `google_fonts` for the `Fraunces` plus `Manrope` typography pairing.
+- Feature-first folders with `presentation`, `domain` and `data` slices where appropriate.
+- Mock data sources for dashboard, history, nodes, request detail, results and logs.
+
+## Architecture
+
+<p align="center">
+  <img src="./assets/architecture.svg" alt="Architecture diagram for the ImageFlow Frontend Flutter app" width="100%">
+</p>
+
+- `lib/main.dart` boots the app and hands control to `ImageFlowApp`.
+- `lib/features/shell/presentation/shell.dart` owns auth gating, navigation state and the responsive workspace shell.
+- `lib/core/theme/app_theme.dart` defines the visual language, colors, typography and component theming.
+- `lib/shared/widgets/shared_widgets.dart` contains reusable UI primitives such as panels, metric cards, pills and grid helpers.
+- Feature modules under `lib/features/` keep screens close to their supporting models and mock datasets.
+- The current data layer is local-only. Pages read mock models and simulated timers instead of network responses.
+
+## Project Structure
+
+```text
+Frontend/
+|-- assets/                      # README visuals
+`-- flutter_app/
+    |-- lib/
+    |   |-- app.dart
+    |   |-- main.dart
+    |   |-- core/
+    |   |   `-- theme/
+    |   |-- shared/
+    |   |   `-- widgets/
+    |   `-- features/
+    |       |-- auth/
+    |       |-- dashboard/
+    |       |-- history/
+    |       |-- logs/
+    |       |-- nodes/
+    |       |-- progress/
+    |       |-- request_detail/
+    |       |-- results/
+    |       |-- settings/
+    |       |-- shell/
+    |       |-- task_builder/
+    |       `-- upload/
+    |-- android/
+    |-- ios/
+    |-- linux/
+    |-- macos/
+    |-- web/
+    `-- windows/
 ```
 
-### assets/banner.svg
-```svg
-...contenido completo...
+## Getting Started
+
+### Prerequisites
+
+- A working Flutter SDK installation.
+- A target device, emulator or browser.
+- `flutter doctor` passing for the platform you want to run.
+
+### Install and run
+
+```bash
+cd flutter_app
+flutter pub get
+flutter run -d chrome
 ```
 
-### assets/separator.svg
-```svg
-...contenido completo...
+If you prefer desktop on Windows:
+
+```bash
+cd flutter_app
+flutter run -d windows
 ```
 
-### assets/stack.svg
-```svg
-...contenido completo...
-```
+## Environment Variables
 
-### assets/architecture.svg
-```svg
-...contenido completo...
-```
+No environment variables are required for the current mock-driven build.
 
-### assets/demo-placeholder.svg
-```svg
-...contenido completo...
-```
+## Useful Commands
 
-Reglas de salida:
-- No expliques lo que vas a hacer.
-- No des consejos aparte.
-- No entregues borradores parciales.
-- No dejes texto fuera del formato pedido, excepto la linea inicial de identidad visual.
-- Entrega directamente los archivos finales listos para usar.
-- Si `assets/architecture.svg` no aplica, escribe exactamente: `No aplica para este proyecto.` en lugar de inventar un diagrama.
-- Si ya hay screenshots reales, no generes `assets/demo-placeholder.svg`; escribe exactamente: `No aplica porque hay screenshots reales.`
+- `flutter pub get` installs dependencies.
+- `flutter run` launches the app on the default target.
+- `flutter analyze` runs static analysis.
+- `flutter test` is available, but there are currently no project-specific automated tests in `test/`.
+- `flutter build web` creates a web build.
+- `flutter build windows` creates a Windows desktop build.
 
-Usa estos datos del proyecto:
+## App Flow
 
-- Nombre del proyecto: [NOMBRE]
-- Tipo de proyecto: [WEB / API / LIBRERIA / CLI / BOT / SAAS / OTRO]
-- Descripcion corta: [QUE HACE]
-- Problema que resuelve: [PROBLEMA]
-- Publico objetivo: [USUARIOS]
-- Propuesta de valor: [POR QUE ES DIFERENTE]
-- Features principales: [LISTA]
-- Tech stack: [TECNOLOGIAS]
-- Comando de instalacion: [COMANDO]
-- Comando de desarrollo: [COMANDO]
-- Comando de build: [COMANDO]
-- Comando de test: [COMANDO]
-- Variables de entorno: [LISTA]
-- Estructura de carpetas: [ARBOL O RESUMEN]
-- Demo URL: [URL]
-- Repo URL: [URL]
-- Documentacion URL: [URL]
-- Licencia: [LICENCIA]
-- Autor / organizacion: [NOMBRE]
-- Email o contacto: [CONTACTO]
-- Screenshots disponibles: [SI/NO]
-- Idioma del README: [ES / EN / BILINGUE]
+1. Sign in through the branded auth surface.
+2. Move into the workspace shell and review cluster health from the dashboard.
+3. Upload a sample batch and continue into the task builder.
+4. Configure transforms such as brightness, contrast, blur, rotation and output format.
+5. Start processing and watch simulated progress advance across worker nodes.
+6. Review output metrics, results and operational history.
 
-Si detectas que mi proyecto encaja mejor con otra estructura de README, ajustala sin perder calidad visual ni claridad.
-````
+## Current Limitations
+
+- Upload interactions are simulated and do not use a real file picker or storage backend.
+- Authentication is local UI state only.
+- Progress, logs, history, node health and results are all mock-driven.
+- Navigation is handled inside the shell state rather than a dedicated routing package.
+- The repository does not currently include a CI pipeline definition or a license file.
+
+## Roadmap
+
+- Connect the UI to real authentication, upload and job-processing APIs.
+- Replace mock datasets with repository or service abstractions.
+- Add persistent state, richer error handling and real request retries.
+- Introduce widget and integration tests for the main user journeys.
+- Add actual screenshots or GIF demos to replace the placeholder artwork.
+- Package the web build or desktop target for easier stakeholder review.
+
+## Contributing
+
+- Keep new work aligned with the existing feature-first folder structure.
+- Reuse `core/theme` and `shared/widgets` before introducing one-off styles.
+- If you change a mock workflow, update the related `data` and `domain` files together.
+- Run `flutter analyze` before opening a pull request.
+
+## FAQ
+
+**Is the app connected to a backend already?**
+
+No. The current implementation is a frontend prototype with local state and mock datasets.
+
+**Does the upload screen handle real files?**
+
+Not yet. The upload experience is simulated to validate layout and interactions.
+
+**Which platforms are supported?**
+
+The Flutter project includes Android, iOS, web, Windows, Linux and macOS scaffolding. Use the targets that match your local Flutter setup.
+
+## License
+
+This repository does not currently include a license file. Add one before publishing the project publicly or accepting outside contributions.
+
+## Maintainer
+
+- Owner: `[ADD OWNER OR TEAM]`
+- Contact: `[ADD EMAIL OR PROJECT URL]`
+- Demo URL: `[ADD DEPLOYED WEB OR DESKTOP DEMO LINK]`

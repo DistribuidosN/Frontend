@@ -16,49 +16,50 @@
   <text x="88" y="92" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="16" font-weight="700" letter-spacing="2">STACK DEL FRONTEND</text>
   <text x="88" y="152" fill="#0F172A" font-family="Georgia, 'Times New Roman', serif" font-size="46" font-weight="700">Decisiones tecnicas</text>
   <text x="88" y="206" fill="#0F172A" font-family="Georgia, 'Times New Roman', serif" font-size="46" font-weight="700">que ya definen el producto</text>
-  <text x="88" y="248" fill="#475569" font-family="Verdana, Arial, sans-serif" font-size="22">La implementacion actual prioriza claridad visual, layout responsive y una migracion ordenada hacia servicios reales.</text>
+  <text x="88" y="248" fill="#475569" font-family="Verdana, Arial, sans-serif" font-size="22">La implementacion actual prioriza claridad visual, layout responsive</text>
+  <text x="88" y="278" fill="#475569" font-family="Verdana, Arial, sans-serif" font-size="22">y una migracion ordenada hacia servicios reales.</text>
 
   <g filter="url(#stackShadow)">
     <rect x="88" y="300" width="372" height="148" rx="26" fill="#FFFFFF"/>
     <rect x="116" y="328" width="62" height="62" rx="18" fill="#02569B"/>
     <text x="198" y="356" fill="#0F172A" font-family="Verdana, Arial, sans-serif" font-size="26" font-weight="700">Flutter</text>
-    <text x="198" y="386" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="17">Shell multiplataforma y base para</text>
-    <text x="198" y="410" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="17">escritorio, web y mobile.</text>
-    <text x="116" y="430" fill="#0F172A" font-family="Verdana, Arial, sans-serif" font-size="16" font-weight="700">El proyecto ya puede correr en varios targets.</text>
+    <text x="198" y="386" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="17">Base multiplataforma para</text>
+    <text x="198" y="410" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="17">web, escritorio y mobile.</text>
+    <text x="116" y="430" fill="#0F172A" font-family="Verdana, Arial, sans-serif" font-size="15" font-weight="700">Lista para correr en varios targets.</text>
 
     <rect x="514" y="300" width="372" height="148" rx="26" fill="#FFFFFF"/>
     <rect x="542" y="328" width="62" height="62" rx="18" fill="#0175C2"/>
     <text x="624" y="356" fill="#0F172A" font-family="Verdana, Arial, sans-serif" font-size="26" font-weight="700">Dart 3.9+</text>
-    <text x="624" y="386" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="17">Estado, navegacion local y logica</text>
-    <text x="624" y="410" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="17">para flujos simulados.</text>
-    <text x="542" y="430" fill="#0F172A" font-family="Verdana, Arial, sans-serif" font-size="16" font-weight="700">Mantiene el prototipo simple y legible.</text>
+    <text x="624" y="386" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="17">Estado, navegacion local</text>
+    <text x="624" y="410" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="17">y flujos simulados.</text>
+    <text x="542" y="430" fill="#0F172A" font-family="Verdana, Arial, sans-serif" font-size="15" font-weight="700">Mantiene el prototipo facil de extender.</text>
 
     <rect x="940" y="300" width="372" height="148" rx="26" fill="#FFFFFF"/>
     <rect x="968" y="328" width="62" height="62" rx="18" fill="#1F2937"/>
     <text x="1050" y="356" fill="#0F172A" font-family="Verdana, Arial, sans-serif" font-size="26" font-weight="700">Material 3</text>
-    <text x="1050" y="386" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="17">Componentes base ajustados con</text>
-    <text x="1050" y="410" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="17">un tema propio del proyecto.</text>
-    <text x="968" y="430" fill="#0F172A" font-family="Verdana, Arial, sans-serif" font-size="16" font-weight="700">Cards, pills y formularios se sienten coherentes.</text>
+    <text x="1050" y="386" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="17">Componentes base afinados</text>
+    <text x="1050" y="410" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="17">con un tema propio.</text>
+    <text x="968" y="430" fill="#0F172A" font-family="Verdana, Arial, sans-serif" font-size="15" font-weight="700">La UI se mantiene consistente entre vistas.</text>
 
     <rect x="88" y="490" width="372" height="148" rx="26" fill="#FFFFFF"/>
     <rect x="116" y="518" width="62" height="62" rx="18" fill="#FACC15"/>
     <text x="198" y="546" fill="#0F172A" font-family="Verdana, Arial, sans-serif" font-size="26" font-weight="700">Google Fonts</text>
-    <text x="198" y="576" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="17">Fraunces para titulares y Manrope</text>
-    <text x="198" y="600" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="17">para lectura operativa.</text>
-    <text x="116" y="620" fill="#0F172A" font-family="Verdana, Arial, sans-serif" font-size="16" font-weight="700">Aporta tono editorial sin perder claridad.</text>
+    <text x="198" y="576" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="17">Fraunces para titulares</text>
+    <text x="198" y="600" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="17">y Manrope para lectura.</text>
+    <text x="116" y="620" fill="#0F172A" font-family="Verdana, Arial, sans-serif" font-size="15" font-weight="700">Tono editorial con buena legibilidad.</text>
 
     <rect x="514" y="490" width="372" height="148" rx="26" fill="#FFFFFF"/>
     <rect x="542" y="518" width="62" height="62" rx="18" fill="#0F172A"/>
     <text x="624" y="546" fill="#0F172A" font-family="Verdana, Arial, sans-serif" font-size="26" font-weight="700">Modulos por feature</text>
-    <text x="624" y="576" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="17">`presentation`, `domain` y `data`</text>
-    <text x="624" y="600" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="17">se agrupan por pantalla o flujo.</text>
-    <text x="542" y="620" fill="#0F172A" font-family="Verdana, Arial, sans-serif" font-size="16" font-weight="700">Facilita crecer sin mezclar responsabilidades.</text>
+    <text x="624" y="576" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="17">presentation, domain y data</text>
+    <text x="624" y="600" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="17">se agrupan por flujo.</text>
+    <text x="542" y="620" fill="#0F172A" font-family="Verdana, Arial, sans-serif" font-size="15" font-weight="700">Facilita crecer sin mezclar capas.</text>
 
     <rect x="940" y="490" width="372" height="148" rx="26" fill="#FFFFFF"/>
     <rect x="968" y="518" width="62" height="62" rx="18" fill="#16A34A"/>
     <text x="1050" y="546" fill="#0F172A" font-family="Verdana, Arial, sans-serif" font-size="26" font-weight="700">Datos mock</text>
-    <text x="1050" y="576" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="17">Dashboard, historial, nodos, logs</text>
-    <text x="1050" y="600" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="17">y resultados usan datasets locales.</text>
-    <text x="968" y="620" fill="#0F172A" font-family="Verdana, Arial, sans-serif" font-size="16" font-weight="700">Ideal para demos, revision visual y discovery.</text>
+    <text x="1050" y="576" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="17">Dashboard, historial, nodos</text>
+    <text x="1050" y="600" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="17">y logs usan datos locales.</text>
+    <text x="968" y="620" fill="#0F172A" font-family="Verdana, Arial, sans-serif" font-size="15" font-weight="700">Ideal para demos y discovery.</text>
   </g>
 </svg>

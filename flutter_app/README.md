@@ -1,4 +1,4 @@
-# ImageFlow Frontend App
+# App Frontend de ImageFlow
 
 Esta carpeta contiene la aplicacion Flutter de ImageFlow.
 

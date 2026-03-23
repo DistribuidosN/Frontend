@@ -41,10 +41,10 @@
 ## Demo
 
 <p align="center">
-  <img src="./assets/demo-placeholder.svg" alt="Vista previa placeholder de ImageFlow Frontend" width="100%">
+  <img src="./assets/demo-placeholder.svg" alt="Vista previa de ImageFlow Frontend" width="100%">
 </p>
 
-Todavia no hay capturas reales del producto dentro del repositorio. El placeholder puede reemplazarse por screenshots o un GIF cuando quieras mostrar la interfaz final.
+Vista ilustrativa del panel principal y del estado operativo de la interfaz.
 
 ## Indice
 
@@ -62,7 +62,6 @@ Todavia no hay capturas reales del producto dentro del repositorio. El placehold
 - [Contribuir](#contribuir)
 - [Preguntas frecuentes](#preguntas-frecuentes)
 - [Licencia](#licencia)
-- [Mantenimiento](#mantenimiento)
 
 ## Por que importa
 
@@ -230,9 +229,3 @@ El proyecto Flutter incluye scaffolding para Android, iOS, web, Windows, Linux y
 ## Licencia
 
 Este repositorio todavia no incluye un archivo de licencia. Conviene agregarlo antes de abrir el proyecto a uso publico o contribuciones externas.
-
-## Mantenimiento
-
-- Responsable: `[AGREGA TU NOMBRE O EQUIPO]`
-- Contacto: `[AGREGA EMAIL O URL DEL PROYECTO]`
-- Demo: `[AGREGA URL DE DEMO WEB O BUILD COMPARTIDA]`

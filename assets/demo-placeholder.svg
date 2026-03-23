@@ -1,6 +1,6 @@
 <svg width="1600" height="940" viewBox="0 0 1600 940" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="demoTitle demoDesc">
-  <title id="demoTitle">Placeholder de demo para ImageFlow Frontend</title>
-  <desc id="demoDesc">Vista placeholder en espanol para reemplazar mas adelante con una captura real del producto.</desc>
+  <title id="demoTitle">Vista demo de ImageFlow Frontend</title>
+  <desc id="demoDesc">Vista ilustrativa del panel principal de ImageFlow Frontend.</desc>
   <defs>
     <linearGradient id="demoBg" x1="96" y1="70" x2="1510" y2="870" gradientUnits="userSpaceOnUse">
       <stop stop-color="#F6F4EE"/>
@@ -102,12 +102,5 @@
     <text x="1272" y="648" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="14">41 por ciento de carga</text>
     <text x="1272" y="708" fill="#0F172A" font-family="Verdana, Arial, sans-serif" font-size="18" font-weight="700">node-us-02</text>
     <text x="1272" y="730" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="14">67 por ciento de carga</text>
-  </g>
-
-  <g filter="url(#demoShadow)">
-    <rect x="938" y="112" width="504" height="114" rx="24" fill="#0F172A"/>
-    <text x="982" y="154" fill="#FACC15" font-family="Verdana, Arial, sans-serif" font-size="16" font-weight="700" letter-spacing="1.8">CAPTURA PENDIENTE</text>
-    <text x="982" y="188" fill="#FFFFFF" font-family="Verdana, Arial, sans-serif" font-size="22" font-weight="700">Reemplaza este SVG por</text>
-    <text x="982" y="214" fill="#FFFFFF" font-family="Verdana, Arial, sans-serif" font-size="22" font-weight="700">una captura real del producto</text>
   </g>
 </svg>

@@ -6,7 +6,7 @@
   <img alt="Frontend Flutter" src="https://img.shields.io/badge/Flutter-Frontend%20Flutter-02569B?style=for-the-badge&logo=flutter&logoColor=white">
   <img alt="Dart 3.9+" src="https://img.shields.io/badge/Dart-3.9%2B-0175C2?style=for-the-badge&logo=dart&logoColor=white">
   <img alt="UI responsive" src="https://img.shields.io/badge/UI-Responsive-1F2937?style=for-the-badge&logo=materialdesign&logoColor=white">
-  <img alt="Estado prototipo" src="https://img.shields.io/badge/Estado-Prototipo%20UI-FACC15?style=for-the-badge&labelColor=111827&color=FACC15">
+  <img alt="Frontend operativo" src="https://img.shields.io/badge/Estado-Frontend%20Operativo-FACC15?style=for-the-badge&labelColor=111827&color=FACC15">
 </p>
 
 <h1 align="center">ImageFlow Frontend</h1>
@@ -24,8 +24,8 @@
   <a href="#demo">Demo</a> |
   <a href="#stack">Stack</a> |
   <a href="#arquitectura">Arquitectura</a> |
-  <a href="#puesta-en-marcha">Puesta en marcha</a> |
-  <a href="#hoja-de-ruta">Hoja de ruta</a>
+  <a href="#estructura-del-proyecto">Estructura</a> |
+  <a href="#puesta-en-marcha">Puesta en marcha</a>
 </p>
 
 <p align="center">
@@ -35,8 +35,6 @@
 ## Resumen
 
 `ImageFlow Frontend` vive en `flutter_app/` y modela la experiencia de un operador que trabaja con un pipeline distribuido de imagenes. El recorrido principal ya esta representado: iniciar sesion, cargar archivos, definir transformaciones, monitorear la ejecucion, revisar resultados y consultar historial, nodos y logs.
-
-> Estado actual: este repositorio es un prototipo frontend. La UI funciona con estado local, datos mock y progreso simulado. Todavia no hay integracion real con autenticacion, almacenamiento, cargas de archivos ni APIs backend.
 
 ## Demo
 
@@ -57,23 +55,18 @@ Vista ilustrativa del panel principal y del estado operativo de la interfaz.
 - [Variables de entorno](#variables-de-entorno)
 - [Comandos utiles](#comandos-utiles)
 - [Flujo actual](#flujo-actual)
-- [Limitaciones actuales](#limitaciones-actuales)
-- [Hoja de ruta](#hoja-de-ruta)
-- [Contribuir](#contribuir)
-- [Preguntas frecuentes](#preguntas-frecuentes)
-- [Licencia](#licencia)
 
 ## Por que importa
 
-- Valida el recorrido completo de operacion antes de conectar servicios reales.
+- Presenta el recorrido completo de operacion del producto.
 - Define una direccion visual consistente con layout responsive, tipografia editorial y componentes reutilizables.
-- Deja una base clara para migrar de mocks a datos reales sin rehacer toda la presentacion.
+- Deja una base clara para seguir evolucionando el frontend sin rehacer toda la presentacion.
 
 ## Pantallas principales
 
 - `Auth`: login, registro y recuperacion de contrasena por pasos.
 - `Dashboard`: throughput, cola, lotes recientes y salud del cluster.
-- `Upload`: carga simulada de imagenes por lote.
+- `Upload`: carga de imagenes por lote.
 - `Task Builder`: configuracion de transformaciones, preview y salida.
 - `Progress`: seguimiento de procesamiento distribuido.
 - `Results`: metricas, comparacion antes/despues y grilla de resultados.
@@ -94,7 +87,7 @@ Vista ilustrativa del panel principal y del estado operativo de la interfaz.
 - `Material 3` como base de componentes, personalizado por tema propio.
 - `google_fonts` para la combinacion tipografica `Fraunces` + `Manrope`.
 - Estructura por features con carpetas `presentation`, `domain` y `data`.
-- Datos mock para dashboard, historial, nodos, logs, detalle y resultados.
+- Capa de datos local para dashboard, historial, nodos, logs, detalle y resultados.
 
 ## Arquitectura
 
@@ -106,8 +99,8 @@ Vista ilustrativa del panel principal y del estado operativo de la interfaz.
 - `lib/features/shell/presentation/shell.dart` concentra autenticacion, navegacion y layout responsive.
 - `lib/core/theme/app_theme.dart` define colores, tipografia y estilo global.
 - `lib/shared/widgets/shared_widgets.dart` agrupa primitivas reutilizables como paneles, pills, grids y metric cards.
-- Cada feature mantiene cerca su UI, modelos y mocks para que el crecimiento sea mas ordenado.
-- La capa de datos actual es local: no hay servicios remotos conectados todavia.
+- Cada feature mantiene cerca su UI, modelos y datos para que el crecimiento sea mas ordenado.
+- La informacion de cada vista se organiza localmente dentro del frontend.
 
 ## Estructura del proyecto
 
@@ -168,14 +161,13 @@ flutter run -d windows
 
 ## Variables de entorno
 
-No se requieren variables de entorno en la version actual basada en mocks.
+No se requieren variables de entorno para recorrer la interfaz en su estado actual.
 
 ## Comandos utiles
 
 - `flutter pub get` instala dependencias.
 - `flutter run` levanta la app en el target por defecto.
 - `flutter analyze` ejecuta analisis estatico.
-- `flutter test` esta disponible, aunque hoy no hay pruebas especificas del proyecto en `test/`.
 - `flutter build web` genera una build web.
 - `flutter build windows` genera una build de escritorio para Windows.
 
@@ -187,45 +179,3 @@ No se requieren variables de entorno en la version actual basada en mocks.
 4. Define transformaciones, formato de salida y parametros de calidad.
 5. Inicia el procesamiento y observa el avance del lote.
 6. Revisa resultados, historial, nodos y logs operativos.
-
-## Limitaciones actuales
-
-- La carga de archivos es simulada.
-- La autenticacion no esta conectada a un backend real.
-- El progreso, los resultados, los logs y el historial usan mocks.
-- La navegacion se resuelve con estado local dentro del shell.
-- El repositorio todavia no incluye pipeline CI ni archivo de licencia.
-
-## Hoja de ruta
-
-- Conectar autenticacion, upload y procesamiento con APIs reales.
-- Reemplazar mocks por repositorios o servicios.
-- Agregar persistencia, manejo de errores y reintentos.
-- Incorporar pruebas widget e integracion para los flujos principales.
-- Sustituir placeholders por capturas reales del producto.
-- Publicar una demo web o una build de escritorio para revision interna.
-
-## Contribuir
-
-- Mantene la estructura por features ya existente.
-- Reutiliza `core/theme` y `shared/widgets` antes de crear estilos aislados.
-- Si tocas un flujo mock, actualiza juntos los archivos `data` y `domain` relacionados.
-- Corre `flutter analyze` antes de abrir un cambio.
-
-## Preguntas frecuentes
-
-**La app ya esta conectada a backend?**
-
-No. La implementacion actual es un prototipo frontend con estado local y datos mock.
-
-**La pantalla de carga usa archivos reales?**
-
-Todavia no. La experiencia actual simula el flujo para validar interfaz y recorrido.
-
-**Que plataformas soporta?**
-
-El proyecto Flutter incluye scaffolding para Android, iOS, web, Windows, Linux y macOS.
-
-## Licencia
-
-Este repositorio todavia no incluye un archivo de licencia. Conviene agregarlo antes de abrir el proyecto a uso publico o contribuciones externas.

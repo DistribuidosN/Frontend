@@ -1,120 +1,120 @@
 <p align="center">
-  <img src="./assets/banner.svg" alt="ImageFlow Frontend banner showing a premium distributed image operations dashboard" width="100%">
+  <img src="./assets/banner.svg" alt="Banner de ImageFlow Frontend con un panel visual para operaciones de procesamiento distribuido de imagenes" width="100%">
 </p>
 
 <p align="center">
-  <img alt="Flutter frontend" src="https://img.shields.io/badge/Flutter-Frontend-02569B?style=for-the-badge&logo=flutter&logoColor=white">
-  <img alt="Dart 3.9 plus" src="https://img.shields.io/badge/Dart-3.9%2B-0175C2?style=for-the-badge&logo=dart&logoColor=white">
-  <img alt="Material 3 responsive UI" src="https://img.shields.io/badge/Material%203-Responsive%20UI-1F2937?style=for-the-badge&logo=materialdesign&logoColor=white">
-  <img alt="Current state mock data" src="https://img.shields.io/badge/State-Mock%20Data-FACC15?style=for-the-badge&labelColor=111827&color=FACC15">
+  <img alt="Frontend Flutter" src="https://img.shields.io/badge/Flutter-Frontend%20Flutter-02569B?style=for-the-badge&logo=flutter&logoColor=white">
+  <img alt="Dart 3.9+" src="https://img.shields.io/badge/Dart-3.9%2B-0175C2?style=for-the-badge&logo=dart&logoColor=white">
+  <img alt="UI responsive" src="https://img.shields.io/badge/UI-Responsive-1F2937?style=for-the-badge&logo=materialdesign&logoColor=white">
+  <img alt="Estado prototipo" src="https://img.shields.io/badge/Estado-Prototipo%20UI-FACC15?style=for-the-badge&labelColor=111827&color=FACC15">
 </p>
 
 <h1 align="center">ImageFlow Frontend</h1>
 
 <p align="center">
-  A premium Flutter control surface for distributed image-processing operations.
+  Interfaz Flutter para supervisar, configurar y recorrer un flujo distribuido de procesamiento de imagenes.
 </p>
 
 <p align="center">
-  The repository currently ships a polished frontend prototype for authentication, upload, task configuration, progress tracking, results review and cluster observability.
+  El repositorio contiene un frontend visualmente pulido para autenticacion, carga de lotes, configuracion de tareas, seguimiento de progreso, revision de resultados y observabilidad operativa.
 </p>
 
 <p align="center">
-  <a href="#overview">Overview</a> |
+  <a href="#resumen">Resumen</a> |
   <a href="#demo">Demo</a> |
-  <a href="#tech-stack">Tech Stack</a> |
-  <a href="#architecture">Architecture</a> |
-  <a href="#getting-started">Getting Started</a> |
-  <a href="#roadmap">Roadmap</a>
+  <a href="#stack">Stack</a> |
+  <a href="#arquitectura">Arquitectura</a> |
+  <a href="#puesta-en-marcha">Puesta en marcha</a> |
+  <a href="#hoja-de-ruta">Hoja de ruta</a>
 </p>
 
 <p align="center">
-  <img src="./assets/separator.svg" alt="Decorative separator" width="100%">
+  <img src="./assets/separator.svg" alt="Separador visual" width="100%">
 </p>
 
-## Overview
+## Resumen
 
-`ImageFlow Frontend` lives in `flutter_app/` and models the operator-facing experience of a distributed image pipeline. The app is structured around the workflow an operations team would actually use: sign in, upload a batch, configure transformations, monitor execution, inspect results and review historical or system-level activity.
+`ImageFlow Frontend` vive en `flutter_app/` y modela la experiencia de un operador que trabaja con un pipeline distribuido de imagenes. El recorrido principal ya esta representado: iniciar sesion, cargar archivos, definir transformaciones, monitorear la ejecucion, revisar resultados y consultar historial, nodos y logs.
 
-> Current state: this repository is a frontend prototype. The UI is powered by local state, mock datasets and simulated progress. Real authentication, file upload, persistence and backend APIs are not connected yet.
+> Estado actual: este repositorio es un prototipo frontend. La UI funciona con estado local, datos mock y progreso simulado. Todavia no hay integracion real con autenticacion, almacenamiento, cargas de archivos ni APIs backend.
 
 ## Demo
 
 <p align="center">
-  <img src="./assets/demo-placeholder.svg" alt="Placeholder preview for the ImageFlow Frontend interface" width="100%">
+  <img src="./assets/demo-placeholder.svg" alt="Vista previa placeholder de ImageFlow Frontend" width="100%">
 </p>
 
-No screenshots are committed yet. Replace the placeholder above with a real dashboard, upload flow or results capture once you want to showcase the live interface.
+Todavia no hay capturas reales del producto dentro del repositorio. El placeholder puede reemplazarse por screenshots o un GIF cuando quieras mostrar la interfaz final.
 
-## Table of Contents
+## Indice
 
-- [Why It Matters](#why-it-matters)
-- [Core Views](#core-views)
-- [Tech Stack](#tech-stack)
-- [Architecture](#architecture)
-- [Project Structure](#project-structure)
-- [Getting Started](#getting-started)
-- [Environment Variables](#environment-variables)
-- [Useful Commands](#useful-commands)
-- [App Flow](#app-flow)
-- [Current Limitations](#current-limitations)
-- [Roadmap](#roadmap)
-- [Contributing](#contributing)
-- [FAQ](#faq)
-- [License](#license)
-- [Maintainer](#maintainer)
+- [Por que importa](#por-que-importa)
+- [Pantallas principales](#pantallas-principales)
+- [Stack](#stack)
+- [Arquitectura](#arquitectura)
+- [Estructura del proyecto](#estructura-del-proyecto)
+- [Puesta en marcha](#puesta-en-marcha)
+- [Variables de entorno](#variables-de-entorno)
+- [Comandos utiles](#comandos-utiles)
+- [Flujo actual](#flujo-actual)
+- [Limitaciones actuales](#limitaciones-actuales)
+- [Hoja de ruta](#hoja-de-ruta)
+- [Contribuir](#contribuir)
+- [Preguntas frecuentes](#preguntas-frecuentes)
+- [Licencia](#licencia)
+- [Mantenimiento](#mantenimiento)
 
-## Why It Matters
+## Por que importa
 
-- It validates the full operator journey for a distributed image-processing product before backend wiring is finished.
-- It establishes a strong visual system with responsive layouts, editorial typography and reusable dashboard primitives.
-- It gives the project a feature-based Flutter foundation that can later be connected to real services without rewriting the UI from scratch.
+- Valida el recorrido completo de operacion antes de conectar servicios reales.
+- Define una direccion visual consistente con layout responsive, tipografia editorial y componentes reutilizables.
+- Deja una base clara para migrar de mocks a datos reales sin rehacer toda la presentacion.
 
-## Core Views
+## Pantallas principales
 
-- `Auth`: login, registration and multi-step password reset screens.
-- `Dashboard`: throughput, queue pressure, recent batches and node health summaries.
-- `Upload`: batch intake surface with simulated file cards and size totals.
-- `Task Builder`: transformation controls, output settings and live preview states.
-- `Progress`: job-level processing status with simulated completion across worker nodes.
-- `Results`: success metrics, before and after comparison, asset grid and download actions.
-- `History`: request listing with filters, status chips and quick drill-down access.
-- `Request Detail`: per-request metrics, transformation values, image details and logs.
-- `Worker Nodes`: cluster monitoring, load distribution and heartbeat visibility.
-- `Logs`: operational event stream with severity and source labels.
-- `Settings`: profile, password, notification and API access surfaces.
+- `Auth`: login, registro y recuperacion de contrasena por pasos.
+- `Dashboard`: throughput, cola, lotes recientes y salud del cluster.
+- `Upload`: carga simulada de imagenes por lote.
+- `Task Builder`: configuracion de transformaciones, preview y salida.
+- `Progress`: seguimiento de procesamiento distribuido.
+- `Results`: metricas, comparacion antes/despues y grilla de resultados.
+- `History`: historial de solicitudes con filtros y acceso a detalle.
+- `Request Detail`: detalle por solicitud, transformaciones y logs asociados.
+- `Worker Nodes`: monitoreo de nodos, carga y heartbeat.
+- `Logs`: eventos operativos por nivel y fuente.
+- `Settings`: perfil, notificaciones, defaults y acceso API.
 
-## Tech Stack
+## Stack
 
 <p align="center">
-  <img src="./assets/stack.svg" alt="ImageFlow Frontend technology stack overview" width="100%">
+  <img src="./assets/stack.svg" alt="Resumen visual del stack de ImageFlow Frontend" width="100%">
 </p>
 
-- `Flutter` for the cross-platform application shell.
-- `Dart` for UI logic, state transitions and feature modules.
-- `Material 3` as the component baseline, customized through a project-specific theme.
-- `google_fonts` for the `Fraunces` plus `Manrope` typography pairing.
-- Feature-first folders with `presentation`, `domain` and `data` slices where appropriate.
-- Mock data sources for dashboard, history, nodes, request detail, results and logs.
+- `Flutter` como shell multiplataforma.
+- `Dart` para logica de UI, estado y modulos.
+- `Material 3` como base de componentes, personalizado por tema propio.
+- `google_fonts` para la combinacion tipografica `Fraunces` + `Manrope`.
+- Estructura por features con carpetas `presentation`, `domain` y `data`.
+- Datos mock para dashboard, historial, nodos, logs, detalle y resultados.
 
-## Architecture
+## Arquitectura
 
 <p align="center">
-  <img src="./assets/architecture.svg" alt="Architecture diagram for the ImageFlow Frontend Flutter app" width="100%">
+  <img src="./assets/architecture.svg" alt="Diagrama de arquitectura del frontend ImageFlow" width="100%">
 </p>
 
-- `lib/main.dart` boots the app and hands control to `ImageFlowApp`.
-- `lib/features/shell/presentation/shell.dart` owns auth gating, navigation state and the responsive workspace shell.
-- `lib/core/theme/app_theme.dart` defines the visual language, colors, typography and component theming.
-- `lib/shared/widgets/shared_widgets.dart` contains reusable UI primitives such as panels, metric cards, pills and grid helpers.
-- Feature modules under `lib/features/` keep screens close to their supporting models and mock datasets.
-- The current data layer is local-only. Pages read mock models and simulated timers instead of network responses.
+- `lib/main.dart` inicia Flutter y delega en `ImageFlowApp`.
+- `lib/features/shell/presentation/shell.dart` concentra autenticacion, navegacion y layout responsive.
+- `lib/core/theme/app_theme.dart` define colores, tipografia y estilo global.
+- `lib/shared/widgets/shared_widgets.dart` agrupa primitivas reutilizables como paneles, pills, grids y metric cards.
+- Cada feature mantiene cerca su UI, modelos y mocks para que el crecimiento sea mas ordenado.
+- La capa de datos actual es local: no hay servicios remotos conectados todavia.
 
-## Project Structure
+## Estructura del proyecto
 
 ```text
 Frontend/
-|-- assets/                      # README visuals
+|-- assets/                      # SVG usados por este README
 `-- flutter_app/
     |-- lib/
     |   |-- app.dart
@@ -144,15 +144,15 @@ Frontend/
     `-- windows/
 ```
 
-## Getting Started
+## Puesta en marcha
 
-### Prerequisites
+### Requisitos
 
-- A working Flutter SDK installation.
-- A target device, emulator or browser.
-- `flutter doctor` passing for the platform you want to run.
+- Flutter SDK instalado correctamente.
+- Un dispositivo, emulador o navegador disponible.
+- `flutter doctor` en buen estado para la plataforma que vayas a usar.
 
-### Install and run
+### Instalacion y ejecucion
 
 ```bash
 cd flutter_app
@@ -160,79 +160,79 @@ flutter pub get
 flutter run -d chrome
 ```
 
-If you prefer desktop on Windows:
+Si prefieres escritorio en Windows:
 
 ```bash
 cd flutter_app
 flutter run -d windows
 ```
 
-## Environment Variables
+## Variables de entorno
 
-No environment variables are required for the current mock-driven build.
+No se requieren variables de entorno en la version actual basada en mocks.
 
-## Useful Commands
+## Comandos utiles
 
-- `flutter pub get` installs dependencies.
-- `flutter run` launches the app on the default target.
-- `flutter analyze` runs static analysis.
-- `flutter test` is available, but there are currently no project-specific automated tests in `test/`.
-- `flutter build web` creates a web build.
-- `flutter build windows` creates a Windows desktop build.
+- `flutter pub get` instala dependencias.
+- `flutter run` levanta la app en el target por defecto.
+- `flutter analyze` ejecuta analisis estatico.
+- `flutter test` esta disponible, aunque hoy no hay pruebas especificas del proyecto en `test/`.
+- `flutter build web` genera una build web.
+- `flutter build windows` genera una build de escritorio para Windows.
 
-## App Flow
+## Flujo actual
 
-1. Sign in through the branded auth surface.
-2. Move into the workspace shell and review cluster health from the dashboard.
-3. Upload a sample batch and continue into the task builder.
-4. Configure transforms such as brightness, contrast, blur, rotation and output format.
-5. Start processing and watch simulated progress advance across worker nodes.
-6. Review output metrics, results and operational history.
+1. El usuario entra por la capa de autenticacion.
+2. Accede al shell principal y revisa el estado del sistema.
+3. Carga un lote de imagenes y pasa al configurador de tareas.
+4. Define transformaciones, formato de salida y parametros de calidad.
+5. Inicia el procesamiento y observa el avance del lote.
+6. Revisa resultados, historial, nodos y logs operativos.
 
-## Current Limitations
+## Limitaciones actuales
 
-- Upload interactions are simulated and do not use a real file picker or storage backend.
-- Authentication is local UI state only.
-- Progress, logs, history, node health and results are all mock-driven.
-- Navigation is handled inside the shell state rather than a dedicated routing package.
-- The repository does not currently include a CI pipeline definition or a license file.
+- La carga de archivos es simulada.
+- La autenticacion no esta conectada a un backend real.
+- El progreso, los resultados, los logs y el historial usan mocks.
+- La navegacion se resuelve con estado local dentro del shell.
+- El repositorio todavia no incluye pipeline CI ni archivo de licencia.
 
-## Roadmap
+## Hoja de ruta
 
-- Connect the UI to real authentication, upload and job-processing APIs.
-- Replace mock datasets with repository or service abstractions.
-- Add persistent state, richer error handling and real request retries.
-- Introduce widget and integration tests for the main user journeys.
-- Add actual screenshots or GIF demos to replace the placeholder artwork.
-- Package the web build or desktop target for easier stakeholder review.
+- Conectar autenticacion, upload y procesamiento con APIs reales.
+- Reemplazar mocks por repositorios o servicios.
+- Agregar persistencia, manejo de errores y reintentos.
+- Incorporar pruebas widget e integracion para los flujos principales.
+- Sustituir placeholders por capturas reales del producto.
+- Publicar una demo web o una build de escritorio para revision interna.
 
-## Contributing
+## Contribuir
 
-- Keep new work aligned with the existing feature-first folder structure.
-- Reuse `core/theme` and `shared/widgets` before introducing one-off styles.
-- If you change a mock workflow, update the related `data` and `domain` files together.
-- Run `flutter analyze` before opening a pull request.
+- Mantene la estructura por features ya existente.
+- Reutiliza `core/theme` y `shared/widgets` antes de crear estilos aislados.
+- Si tocas un flujo mock, actualiza juntos los archivos `data` y `domain` relacionados.
+- Corre `flutter analyze` antes de abrir un cambio.
 
-## FAQ
+## Preguntas frecuentes
 
-**Is the app connected to a backend already?**
+**La app ya esta conectada a backend?**
 
-No. The current implementation is a frontend prototype with local state and mock datasets.
+No. La implementacion actual es un prototipo frontend con estado local y datos mock.
 
-**Does the upload screen handle real files?**
+**La pantalla de carga usa archivos reales?**
 
-Not yet. The upload experience is simulated to validate layout and interactions.
+Todavia no. La experiencia actual simula el flujo para validar interfaz y recorrido.
 
-**Which platforms are supported?**
+**Que plataformas soporta?**
 
-The Flutter project includes Android, iOS, web, Windows, Linux and macOS scaffolding. Use the targets that match your local Flutter setup.
+El proyecto Flutter incluye scaffolding para Android, iOS, web, Windows, Linux y macOS.
 
-## License
+## Licencia
 
-This repository does not currently include a license file. Add one before publishing the project publicly or accepting outside contributions.
+Este repositorio todavia no incluye un archivo de licencia. Conviene agregarlo antes de abrir el proyecto a uso publico o contribuciones externas.
 
-## Maintainer
+## Mantenimiento
 
-- Owner: `[ADD OWNER OR TEAM]`
-- Contact: `[ADD EMAIL OR PROJECT URL]`
-- Demo URL: `[ADD DEPLOYED WEB OR DESKTOP DEMO LINK]`
+- Responsable: `[AGREGA TU NOMBRE O EQUIPO]`
+- Contacto: `[AGREGA EMAIL O URL DEL PROYECTO]`
+- Demo: `[AGREGA URL DE DEMO WEB O BUILD COMPARTIDA]`

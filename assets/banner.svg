@@ -1,15 +1,15 @@
 <svg width="1600" height="720" viewBox="0 0 1600 720" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="bannerTitle bannerDesc">
-  <title id="bannerTitle">ImageFlow Frontend banner</title>
-  <desc id="bannerDesc">Premium editorial banner showing a distributed image operations dashboard in a Flutter interface.</desc>
+  <title id="bannerTitle">Banner de ImageFlow Frontend</title>
+  <desc id="bannerDesc">Hero visual en espanol para el README de ImageFlow Frontend.</desc>
   <defs>
     <linearGradient id="bg" x1="120" y1="80" x2="1500" y2="680" gradientUnits="userSpaceOnUse">
       <stop stop-color="#F6F4EE"/>
       <stop offset="0.45" stop-color="#FBFCFE"/>
       <stop offset="1" stop-color="#EEF3F9"/>
     </linearGradient>
-    <linearGradient id="inkGrad" x1="1030" y1="110" x2="1520" y2="610" gradientUnits="userSpaceOnUse">
+    <linearGradient id="inkPanel" x1="1060" y1="88" x2="1494" y2="614" gradientUnits="userSpaceOnUse">
       <stop stop-color="#172554"/>
-      <stop offset="0.5" stop-color="#0F172A"/>
+      <stop offset="0.55" stop-color="#0F172A"/>
       <stop offset="1" stop-color="#1E293B"/>
     </linearGradient>
     <linearGradient id="goldGrad" x1="240" y1="140" x2="540" y2="340" gradientUnits="userSpaceOnUse">
@@ -17,121 +17,112 @@
       <stop offset="1" stop-color="#FACC15"/>
     </linearGradient>
     <filter id="shadow" x="0" y="0" width="1600" height="720" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-      <feDropShadow dx="0" dy="28" stdDeviation="32" flood-color="#0F172A" flood-opacity="0.16"/>
+      <feDropShadow dx="0" dy="26" stdDeviation="30" flood-color="#0F172A" flood-opacity="0.16"/>
     </filter>
-    <filter id="softGlow" x="-200" y="-200" width="2000" height="1200" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-      <feGaussianBlur stdDeviation="36"/>
+    <filter id="softGlow" x="-240" y="-240" width="2100" height="1300" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="42"/>
     </filter>
   </defs>
 
   <rect width="1600" height="720" rx="40" fill="url(#bg)"/>
-
-  <circle cx="1290" cy="156" r="146" fill="#FACC15" opacity="0.14" filter="url(#softGlow)"/>
-  <circle cx="312" cy="588" r="122" fill="#EAB308" opacity="0.10" filter="url(#softGlow)"/>
-
-  <path d="M1048 76C1228 66 1406 126 1538 230V620H868C904 458 930 378 1016 242C1036 210 1032 160 1048 76Z" fill="url(#inkGrad)"/>
-
-  <g opacity="0.22" stroke="#F8FAFC" stroke-width="1.4">
-    <path d="M1046 190L1140 154L1222 218L1324 170L1414 234L1494 188"/>
-    <path d="M1020 300L1120 266L1210 328L1290 286L1388 346L1488 302"/>
-    <path d="M1010 430L1108 388L1208 448L1314 410L1406 474L1490 434"/>
-    <path d="M970 552L1080 518L1184 582L1288 538L1388 602L1490 560"/>
-    <circle cx="1046" cy="190" r="5" fill="#FACC15" stroke="none"/>
-    <circle cx="1140" cy="154" r="4" fill="#F8FAFC" stroke="none"/>
-    <circle cx="1222" cy="218" r="5" fill="#FACC15" stroke="none"/>
-    <circle cx="1324" cy="170" r="4" fill="#F8FAFC" stroke="none"/>
-    <circle cx="1414" cy="234" r="5" fill="#FACC15" stroke="none"/>
-    <circle cx="1494" cy="188" r="4" fill="#F8FAFC" stroke="none"/>
-    <circle cx="1010" cy="430" r="4" fill="#F8FAFC" stroke="none"/>
-    <circle cx="1108" cy="388" r="5" fill="#FACC15" stroke="none"/>
-    <circle cx="1208" cy="448" r="4" fill="#F8FAFC" stroke="none"/>
-    <circle cx="1314" cy="410" r="5" fill="#FACC15" stroke="none"/>
-    <circle cx="1406" cy="474" r="4" fill="#F8FAFC" stroke="none"/>
-    <circle cx="1490" cy="434" r="5" fill="#FACC15" stroke="none"/>
-  </g>
+  <circle cx="1320" cy="168" r="150" fill="#FACC15" opacity="0.12" filter="url(#softGlow)"/>
+  <circle cx="292" cy="600" r="124" fill="#EAB308" opacity="0.10" filter="url(#softGlow)"/>
 
   <g>
-    <rect x="112" y="98" width="200" height="46" rx="23" fill="#FFFFFF" stroke="#E2E8F0"/>
-    <circle cx="146" cy="121" r="7" fill="#FACC15"/>
-    <text x="166" y="128" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="15" font-weight="700" letter-spacing="2.2">IMAGEFLOW FRONTEND</text>
+    <rect x="110" y="96" width="270" height="46" rx="23" fill="#FFFFFF" stroke="#E2E8F0"/>
+    <circle cx="146" cy="119" r="7" fill="#FACC15"/>
+    <text x="166" y="126" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="15" font-weight="700" letter-spacing="2">INTERFAZ DE OPERACION</text>
 
-    <text x="112" y="234" fill="#0F172A" font-family="Georgia, 'Times New Roman', serif" font-size="78" font-weight="700">Distributed image</text>
-    <text x="112" y="316" fill="#0F172A" font-family="Georgia, 'Times New Roman', serif" font-size="78" font-weight="700">ops with a premium</text>
-    <text x="112" y="398" fill="#0F172A" font-family="Georgia, 'Times New Roman', serif" font-size="78" font-weight="700">Flutter control surface</text>
+    <text x="110" y="214" fill="#0F172A" font-family="Georgia, 'Times New Roman', serif" font-size="68" font-weight="700">Centro visual</text>
+    <text x="110" y="292" fill="#0F172A" font-family="Georgia, 'Times New Roman', serif" font-size="68" font-weight="700">para pipelines</text>
+    <text x="110" y="370" fill="#0F172A" font-family="Georgia, 'Times New Roman', serif" font-size="68" font-weight="700">de imagenes</text>
+    <text x="110" y="448" fill="#0F172A" font-family="Georgia, 'Times New Roman', serif" font-size="68" font-weight="700">distribuidas</text>
 
-    <text x="116" y="464" fill="#475569" font-family="Verdana, Arial, sans-serif" font-size="26">
-      Upload, configure, monitor and review distributed image workflows
+    <text x="114" y="510" fill="#475569" font-family="Verdana, Arial, sans-serif" font-size="24">
+      Carga, configura y supervisa lotes desde una interfaz
     </text>
-    <text x="116" y="500" fill="#475569" font-family="Verdana, Arial, sans-serif" font-size="26">
-      from a responsive dashboard built around operators, nodes and results.
+    <text x="114" y="544" fill="#475569" font-family="Verdana, Arial, sans-serif" font-size="24">
+      pensada para operadores, resultados, nodos y trazabilidad.
     </text>
 
     <g>
-      <rect x="112" y="558" width="202" height="54" rx="27" fill="#0F172A"/>
-      <text x="144" y="592" fill="#FFFFFF" font-family="Verdana, Arial, sans-serif" font-size="20" font-weight="700">8 worker nodes live</text>
+      <rect x="110" y="588" width="196" height="54" rx="27" fill="#0F172A"/>
+      <text x="144" y="621" fill="#FFFFFF" font-family="Verdana, Arial, sans-serif" font-size="20" font-weight="700">8 nodos activos</text>
 
-      <rect x="330" y="558" width="188" height="54" rx="27" fill="#FFFFFF" stroke="#E2E8F0"/>
-      <text x="364" y="592" fill="#334155" font-family="Verdana, Arial, sans-serif" font-size="20" font-weight="700">Task builder flow</text>
+      <rect x="322" y="588" width="198" height="54" rx="27" fill="#FFFFFF" stroke="#E2E8F0"/>
+      <text x="352" y="621" fill="#334155" font-family="Verdana, Arial, sans-serif" font-size="20" font-weight="700">Flujo de tareas</text>
 
-      <rect x="534" y="558" width="176" height="54" rx="27" fill="url(#goldGrad)"/>
-      <text x="568" y="592" fill="#0F172A" font-family="Verdana, Arial, sans-serif" font-size="20" font-weight="700">Results and logs</text>
+      <rect x="536" y="588" width="214" height="54" rx="27" fill="url(#goldGrad)"/>
+      <text x="568" y="621" fill="#0F172A" font-family="Verdana, Arial, sans-serif" font-size="20" font-weight="700">Resultados y logs</text>
     </g>
   </g>
 
-  <g filter="url(#shadow)">
-    <rect x="894" y="112" width="590" height="500" rx="34" fill="#FFFFFF"/>
-    <rect x="918" y="136" width="142" height="452" rx="26" fill="#0F172A"/>
-    <rect x="1084" y="136" width="376" height="74" rx="24" fill="#F8FAFC" stroke="#E2E8F0"/>
-    <rect x="1106" y="158" width="194" height="30" rx="15" fill="#FFFFFF" stroke="#E2E8F0"/>
-    <circle cx="1328" cy="173" r="16" fill="#0F172A"/>
-    <circle cx="1374" cy="173" r="16" fill="#FFFFFF" stroke="#E2E8F0"/>
-    <circle cx="1420" cy="173" r="16" fill="#FFFFFF" stroke="#E2E8F0"/>
+  <path d="M1086 68C1232 66 1390 106 1516 220V612H906C940 486 970 408 1040 292C1066 250 1070 174 1086 68Z" fill="url(#inkPanel)"/>
 
-    <rect x="948" y="168" width="82" height="82" rx="22" fill="#FACC15"/>
-    <circle cx="989" cy="209" r="18" fill="#0F172A"/>
-    <text x="948" y="284" fill="#FFFFFF" font-family="Verdana, Arial, sans-serif" font-size="16" font-weight="700">Dashboard</text>
-    <text x="948" y="316" fill="#94A3B8" font-family="Verdana, Arial, sans-serif" font-size="15">Upload</text>
-    <text x="948" y="348" fill="#94A3B8" font-family="Verdana, Arial, sans-serif" font-size="15">Task Builder</text>
-    <text x="948" y="380" fill="#94A3B8" font-family="Verdana, Arial, sans-serif" font-size="15">Progress</text>
-    <text x="948" y="412" fill="#94A3B8" font-family="Verdana, Arial, sans-serif" font-size="15">Results</text>
-    <text x="948" y="444" fill="#94A3B8" font-family="Verdana, Arial, sans-serif" font-size="15">Worker Nodes</text>
-    <text x="948" y="476" fill="#94A3B8" font-family="Verdana, Arial, sans-serif" font-size="15">Logs</text>
-    <text x="948" y="508" fill="#94A3B8" font-family="Verdana, Arial, sans-serif" font-size="15">Settings</text>
-
-    <rect x="1084" y="238" width="176" height="124" rx="24" fill="#FFFFFF" stroke="#E2E8F0"/>
-    <rect x="1274" y="238" width="186" height="124" rx="24" fill="#FFFFFF" stroke="#E2E8F0"/>
-    <rect x="1084" y="378" width="376" height="186" rx="28" fill="#FFFFFF" stroke="#E2E8F0"/>
-
-    <text x="1110" y="274" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="14" font-weight="700" letter-spacing="1.4">PROCESSED</text>
-    <text x="1110" y="328" fill="#0F172A" font-family="Georgia, 'Times New Roman', serif" font-size="42" font-weight="700">1,482</text>
-    <text x="1110" y="348" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="14">weekly volume</text>
-
-    <text x="1300" y="274" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="14" font-weight="700" letter-spacing="1.4">CLUSTER</text>
-    <text x="1300" y="328" fill="#0F172A" font-family="Georgia, 'Times New Roman', serif" font-size="42" font-weight="700">8 / 8</text>
-    <text x="1300" y="348" fill="#16A34A" font-family="Verdana, Arial, sans-serif" font-size="14" font-weight="700">healthy nodes</text>
-
-    <text x="1110" y="416" fill="#0F172A" font-family="Verdana, Arial, sans-serif" font-size="20" font-weight="700">Throughput</text>
-    <text x="1110" y="442" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="14">Processed volume against queue pressure</text>
-
-    <rect x="1110" y="490" width="26" height="42" rx="10" fill="#FACC15"/>
-    <rect x="1146" y="466" width="26" height="66" rx="10" fill="#0F172A"/>
-    <rect x="1182" y="446" width="26" height="86" rx="10" fill="#FACC15"/>
-    <rect x="1218" y="422" width="26" height="110" rx="10" fill="#0F172A"/>
-    <rect x="1254" y="456" width="26" height="76" rx="10" fill="#FACC15"/>
-    <rect x="1290" y="400" width="26" height="132" rx="10" fill="#0F172A"/>
-    <rect x="1326" y="436" width="26" height="96" rx="10" fill="#FACC15"/>
-    <rect x="1362" y="390" width="26" height="142" rx="10" fill="#0F172A"/>
-    <rect x="1398" y="424" width="26" height="108" rx="10" fill="#FACC15"/>
-
-    <path d="M1108 470H1432" stroke="#E2E8F0" stroke-width="2"/>
+  <g opacity="0.22" stroke="#F8FAFC" stroke-width="1.4">
+    <path d="M1084 182L1168 148L1242 206L1330 166L1418 226L1492 188"/>
+    <path d="M1058 292L1150 258L1230 318L1316 278L1402 338L1488 300"/>
+    <path d="M1042 414L1136 372L1224 434L1310 396L1398 456L1488 420"/>
+    <circle cx="1084" cy="182" r="5" fill="#FACC15" stroke="none"/>
+    <circle cx="1242" cy="206" r="5" fill="#FACC15" stroke="none"/>
+    <circle cx="1418" cy="226" r="5" fill="#FACC15" stroke="none"/>
+    <circle cx="1136" cy="372" r="5" fill="#FACC15" stroke="none"/>
+    <circle cx="1310" cy="396" r="5" fill="#FACC15" stroke="none"/>
   </g>
 
   <g filter="url(#shadow)">
-    <rect x="1244" y="88" width="250" height="126" rx="26" fill="#FFFFFF"/>
-    <text x="1270" y="124" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="14" font-weight="700" letter-spacing="1.4">LIVE QUEUE</text>
-    <text x="1270" y="172" fill="#0F172A" font-family="Georgia, 'Times New Roman', serif" font-size="40" font-weight="700">64 / min</text>
-    <rect x="1268" y="188" width="86" height="10" rx="5" fill="#E2E8F0"/>
-    <rect x="1268" y="188" width="60" height="10" rx="5" fill="#16A34A"/>
-    <circle cx="1434" cy="122" r="20" fill="#FACC15"/>
+    <rect x="940" y="108" width="548" height="500" rx="34" fill="#FFFFFF"/>
+    <rect x="964" y="132" width="138" height="452" rx="26" fill="#0F172A"/>
+    <rect x="1122" y="132" width="342" height="72" rx="24" fill="#F8FAFC" stroke="#E2E8F0"/>
+    <rect x="1142" y="152" width="174" height="30" rx="15" fill="#FFFFFF" stroke="#E2E8F0"/>
+    <circle cx="1338" cy="167" r="16" fill="#F0FDF4" stroke="#DCFCE7"/>
+    <circle cx="1384" cy="167" r="16" fill="#FFFFFF" stroke="#E2E8F0"/>
+    <circle cx="1430" cy="167" r="16" fill="#FFFFFF" stroke="#E2E8F0"/>
+
+    <rect x="992" y="162" width="80" height="80" rx="22" fill="#FACC15"/>
+    <circle cx="1032" cy="202" r="18" fill="#0F172A"/>
+    <text x="988" y="278" fill="#FFFFFF" font-family="Verdana, Arial, sans-serif" font-size="16" font-weight="700">Inicio</text>
+    <text x="988" y="308" fill="#CBD5E1" font-family="Verdana, Arial, sans-serif" font-size="15">Carga</text>
+    <text x="988" y="338" fill="#CBD5E1" font-family="Verdana, Arial, sans-serif" font-size="15">Tareas</text>
+    <text x="988" y="368" fill="#CBD5E1" font-family="Verdana, Arial, sans-serif" font-size="15">Progreso</text>
+    <text x="988" y="398" fill="#CBD5E1" font-family="Verdana, Arial, sans-serif" font-size="15">Resultados</text>
+    <text x="988" y="428" fill="#CBD5E1" font-family="Verdana, Arial, sans-serif" font-size="15">Nodos</text>
+    <text x="988" y="458" fill="#CBD5E1" font-family="Verdana, Arial, sans-serif" font-size="15">Logs</text>
+    <text x="988" y="488" fill="#CBD5E1" font-family="Verdana, Arial, sans-serif" font-size="15">Ajustes</text>
+
+    <rect x="1122" y="226" width="154" height="122" rx="24" fill="#FFFFFF" stroke="#E2E8F0"/>
+    <rect x="1290" y="226" width="174" height="122" rx="24" fill="#FFFFFF" stroke="#E2E8F0"/>
+    <rect x="1122" y="364" width="342" height="186" rx="28" fill="#FFFFFF" stroke="#E2E8F0"/>
+
+    <text x="1148" y="260" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="13" font-weight="700" letter-spacing="1.4">PROCESADAS</text>
+    <text x="1148" y="314" fill="#0F172A" font-family="Georgia, 'Times New Roman', serif" font-size="40" font-weight="700">1,482</text>
+    <text x="1148" y="334" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="14">volumen semanal</text>
+
+    <text x="1316" y="260" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="13" font-weight="700" letter-spacing="1.4">CLUSTER</text>
+    <text x="1316" y="314" fill="#0F172A" font-family="Georgia, 'Times New Roman', serif" font-size="40" font-weight="700">8 / 8</text>
+    <text x="1316" y="334" fill="#16A34A" font-family="Verdana, Arial, sans-serif" font-size="14" font-weight="700">nodos en linea</text>
+
+    <text x="1148" y="404" fill="#0F172A" font-family="Verdana, Arial, sans-serif" font-size="20" font-weight="700">Rendimiento</text>
+    <text x="1148" y="430" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="14">Volumen procesado frente a presion de cola</text>
+
+    <rect x="1148" y="482" width="24" height="42" rx="10" fill="#FACC15"/>
+    <rect x="1182" y="462" width="24" height="62" rx="10" fill="#0F172A"/>
+    <rect x="1216" y="440" width="24" height="84" rx="10" fill="#FACC15"/>
+    <rect x="1250" y="418" width="24" height="106" rx="10" fill="#0F172A"/>
+    <rect x="1284" y="448" width="24" height="76" rx="10" fill="#FACC15"/>
+    <rect x="1318" y="398" width="24" height="126" rx="10" fill="#0F172A"/>
+    <rect x="1352" y="430" width="24" height="94" rx="10" fill="#FACC15"/>
+    <rect x="1386" y="390" width="24" height="134" rx="10" fill="#0F172A"/>
+    <rect x="1420" y="440" width="24" height="84" rx="10" fill="#FACC15"/>
+    <path d="M1146 468H1440" stroke="#E2E8F0" stroke-width="2"/>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="1248" y="86" width="244" height="122" rx="26" fill="#FFFFFF"/>
+    <text x="1274" y="120" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="14" font-weight="700" letter-spacing="1.4">COLA VIVA</text>
+    <text x="1274" y="168" fill="#0F172A" font-family="Georgia, 'Times New Roman', serif" font-size="40" font-weight="700">64 / min</text>
+    <rect x="1270" y="184" width="88" height="10" rx="5" fill="#E2E8F0"/>
+    <rect x="1270" y="184" width="58" height="10" rx="5" fill="#16A34A"/>
+    <circle cx="1434" cy="120" r="20" fill="#FACC15"/>
   </g>
 </svg>

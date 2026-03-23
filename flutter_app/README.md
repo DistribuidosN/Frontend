@@ -1,18 +1,18 @@
 # ImageFlow Frontend App
 
-This folder contains the Flutter application for ImageFlow.
+Esta carpeta contiene la aplicacion Flutter de ImageFlow.
 
-For the full project overview, visuals and architecture notes, see the repository README in `../README.md`.
+Para la documentacion general del proyecto, el contexto visual y la arquitectura, revisa el README del repositorio en `../README.md`.
 
-## Quick Start
+## Inicio rapido
 
 ```bash
 flutter pub get
 flutter run
 ```
 
-## Notes
+## Notas
 
-- The current build is mock-driven.
-- No environment variables are required.
-- The app uses the feature modules under `lib/features/`.
+- La version actual funciona con datos mock.
+- No requiere variables de entorno.
+- La mayor parte de la app esta organizada por features dentro de `lib/features/`.

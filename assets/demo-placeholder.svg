@@ -1,6 +1,6 @@
 <svg width="1600" height="940" viewBox="0 0 1600 940" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="demoTitle demoDesc">
-  <title id="demoTitle">ImageFlow Frontend demo placeholder</title>
-  <desc id="demoDesc">Stylized placeholder screenshot for the ImageFlow Frontend dashboard with a note to replace it with a real capture.</desc>
+  <title id="demoTitle">Placeholder de demo para ImageFlow Frontend</title>
+  <desc id="demoDesc">Vista placeholder en espanol para reemplazar mas adelante con una captura real del producto.</desc>
   <defs>
     <linearGradient id="demoBg" x1="96" y1="70" x2="1510" y2="870" gradientUnits="userSpaceOnUse">
       <stop stop-color="#F6F4EE"/>
@@ -19,7 +19,7 @@
     <circle cx="156" cy="125" r="8" fill="#FCA5A5"/>
     <circle cx="184" cy="125" r="8" fill="#FCD34D"/>
     <circle cx="212" cy="125" r="8" fill="#86EFAC"/>
-    <text x="248" y="132" fill="#FFFFFF" font-family="Verdana, Arial, sans-serif" font-size="18" font-weight="700">ImageFlow Frontend preview</text>
+    <text x="248" y="132" fill="#FFFFFF" font-family="Verdana, Arial, sans-serif" font-size="18" font-weight="700">Vista previa ImageFlow Frontend</text>
 
     <rect x="136" y="186" width="268" height="636" rx="28" fill="#0F172A"/>
     <rect x="432" y="186" width="1032" height="90" rx="28" fill="#F8FAFC" stroke="#E2E8F0"/>
@@ -32,48 +32,48 @@
     <circle cx="209" cy="259" r="18" fill="#0F172A"/>
     <text x="164" y="338" fill="#FFFFFF" font-family="Verdana, Arial, sans-serif" font-size="16" font-weight="700">ImageFlow</text>
     <text x="164" y="370" fill="#94A3B8" font-family="Verdana, Arial, sans-serif" font-size="15">Dashboard</text>
-    <text x="164" y="402" fill="#94A3B8" font-family="Verdana, Arial, sans-serif" font-size="15">Upload</text>
-    <text x="164" y="434" fill="#94A3B8" font-family="Verdana, Arial, sans-serif" font-size="15">Task Builder</text>
-    <text x="164" y="466" fill="#94A3B8" font-family="Verdana, Arial, sans-serif" font-size="15">Progress</text>
-    <text x="164" y="498" fill="#94A3B8" font-family="Verdana, Arial, sans-serif" font-size="15">Results</text>
-    <text x="164" y="530" fill="#94A3B8" font-family="Verdana, Arial, sans-serif" font-size="15">History</text>
-    <text x="164" y="562" fill="#94A3B8" font-family="Verdana, Arial, sans-serif" font-size="15">Worker Nodes</text>
+    <text x="164" y="402" fill="#94A3B8" font-family="Verdana, Arial, sans-serif" font-size="15">Carga</text>
+    <text x="164" y="434" fill="#94A3B8" font-family="Verdana, Arial, sans-serif" font-size="15">Tareas</text>
+    <text x="164" y="466" fill="#94A3B8" font-family="Verdana, Arial, sans-serif" font-size="15">Progreso</text>
+    <text x="164" y="498" fill="#94A3B8" font-family="Verdana, Arial, sans-serif" font-size="15">Resultados</text>
+    <text x="164" y="530" fill="#94A3B8" font-family="Verdana, Arial, sans-serif" font-size="15">Historial</text>
+    <text x="164" y="562" fill="#94A3B8" font-family="Verdana, Arial, sans-serif" font-size="15">Nodos</text>
     <text x="164" y="594" fill="#94A3B8" font-family="Verdana, Arial, sans-serif" font-size="15">Logs</text>
-    <text x="164" y="626" fill="#94A3B8" font-family="Verdana, Arial, sans-serif" font-size="15">Settings</text>
+    <text x="164" y="626" fill="#94A3B8" font-family="Verdana, Arial, sans-serif" font-size="15">Ajustes</text>
 
     <rect x="164" y="674" width="212" height="112" rx="22" fill="#FFFFFF" opacity="0.08"/>
-    <text x="188" y="710" fill="#E2E8F0" font-family="Verdana, Arial, sans-serif" font-size="14" font-weight="700" letter-spacing="1.4">CLUSTER HEALTH</text>
-    <text x="188" y="748" fill="#FFFFFF" font-family="Verdana, Arial, sans-serif" font-size="24" font-weight="700">8 nodes healthy</text>
-    <text x="188" y="776" fill="#CBD5E1" font-family="Verdana, Arial, sans-serif" font-size="14">64 images per minute</text>
+    <text x="188" y="710" fill="#E2E8F0" font-family="Verdana, Arial, sans-serif" font-size="14" font-weight="700" letter-spacing="1.4">SALUD DEL CLUSTER</text>
+    <text x="188" y="748" fill="#FFFFFF" font-family="Verdana, Arial, sans-serif" font-size="24" font-weight="700">8 nodos activos</text>
+    <text x="188" y="776" fill="#CBD5E1" font-family="Verdana, Arial, sans-serif" font-size="14">64 imagenes por minuto</text>
 
     <rect x="432" y="304" width="236" height="156" rx="26" fill="#FFFFFF" stroke="#E2E8F0"/>
     <rect x="684" y="304" width="236" height="156" rx="26" fill="#FFFFFF" stroke="#E2E8F0"/>
     <rect x="936" y="304" width="236" height="156" rx="26" fill="#FFFFFF" stroke="#E2E8F0"/>
     <rect x="1188" y="304" width="276" height="156" rx="26" fill="#FFFFFF" stroke="#E2E8F0"/>
 
-    <text x="462" y="344" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="14" font-weight="700" letter-spacing="1.4">PROCESSED</text>
+    <text x="462" y="344" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="14" font-weight="700" letter-spacing="1.4">PROCESADAS</text>
     <text x="462" y="408" fill="#0F172A" font-family="Georgia, 'Times New Roman', serif" font-size="48" font-weight="700">1,482</text>
-    <text x="462" y="434" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="15">current weekly window</text>
+    <text x="462" y="434" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="15">volumen semanal</text>
 
-    <text x="714" y="344" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="14" font-weight="700" letter-spacing="1.4">SUCCESS RATE</text>
+    <text x="714" y="344" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="14" font-weight="700" letter-spacing="1.4">EXITO</text>
     <text x="714" y="408" fill="#16A34A" font-family="Georgia, 'Times New Roman', serif" font-size="48" font-weight="700">99.8%</text>
-    <text x="714" y="434" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="15">batch completion quality</text>
+    <text x="714" y="434" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="15">calidad del lote</text>
 
-    <text x="966" y="344" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="14" font-weight="700" letter-spacing="1.4">MEDIAN SLA</text>
+    <text x="966" y="344" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="14" font-weight="700" letter-spacing="1.4">SLA MEDIO</text>
     <text x="966" y="408" fill="#0F172A" font-family="Georgia, 'Times New Roman', serif" font-size="48" font-weight="700">3.8s</text>
-    <text x="966" y="434" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="15">queue remains within target</text>
+    <text x="966" y="434" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="15">cola dentro de objetivo</text>
 
-    <text x="1218" y="344" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="14" font-weight="700" letter-spacing="1.4">RECENT BATCH</text>
+    <text x="1218" y="344" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="14" font-weight="700" letter-spacing="1.4">LOTE RECIENTE</text>
     <text x="1218" y="390" fill="#0F172A" font-family="Verdana, Arial, sans-serif" font-size="28" font-weight="700">req-4522</text>
-    <text x="1218" y="420" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="15">24 images, 8 nodes, completed in 52s</text>
+    <text x="1218" y="420" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="15">24 imagenes en 52 segundos</text>
     <rect x="1218" y="436" width="116" height="10" rx="5" fill="#E2E8F0"/>
     <rect x="1218" y="436" width="116" height="10" rx="5" fill="#16A34A"/>
 
     <rect x="432" y="488" width="728" height="304" rx="30" fill="#FFFFFF" stroke="#E2E8F0"/>
     <rect x="1188" y="488" width="276" height="304" rx="30" fill="#FFFFFF" stroke="#E2E8F0"/>
 
-    <text x="466" y="530" fill="#0F172A" font-family="Verdana, Arial, sans-serif" font-size="24" font-weight="700">Throughput</text>
-    <text x="466" y="560" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="15">Processed volume against queued pressure</text>
+    <text x="466" y="530" fill="#0F172A" font-family="Verdana, Arial, sans-serif" font-size="24" font-weight="700">Rendimiento</text>
+    <text x="466" y="560" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="15">Procesadas frente a presion de cola</text>
 
     <path d="M470 732H1120" stroke="#E2E8F0" stroke-width="2"/>
     <rect x="500" y="650" width="28" height="82" rx="12" fill="#FACC15"/>
@@ -89,8 +89,8 @@
     <rect x="920" y="620" width="28" height="112" rx="12" fill="#FACC15"/>
     <rect x="962" y="572" width="28" height="160" rx="12" fill="#0F172A"/>
 
-    <text x="1218" y="530" fill="#0F172A" font-family="Verdana, Arial, sans-serif" font-size="24" font-weight="700">Worker nodes</text>
-    <text x="1218" y="560" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="15">Load and heartbeat overview</text>
+    <text x="1218" y="530" fill="#0F172A" font-family="Verdana, Arial, sans-serif" font-size="24" font-weight="700">Nodos</text>
+    <text x="1218" y="560" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="15">Carga y heartbeat</text>
 
     <rect x="1218" y="586" width="216" height="68" rx="20" fill="#F8FAFC" stroke="#E2E8F0"/>
     <rect x="1218" y="668" width="216" height="68" rx="20" fill="#F8FAFC" stroke="#E2E8F0"/>
@@ -99,14 +99,15 @@
     <circle cx="1248" cy="620" r="9" fill="#16A34A"/>
     <circle cx="1248" cy="702" r="9" fill="#F59E0B"/>
     <text x="1272" y="626" fill="#0F172A" font-family="Verdana, Arial, sans-serif" font-size="18" font-weight="700">node-eu-01</text>
-    <text x="1272" y="648" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="14">41 percent load</text>
+    <text x="1272" y="648" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="14">41 por ciento de carga</text>
     <text x="1272" y="708" fill="#0F172A" font-family="Verdana, Arial, sans-serif" font-size="18" font-weight="700">node-us-02</text>
-    <text x="1272" y="730" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="14">67 percent load</text>
+    <text x="1272" y="730" fill="#64748B" font-family="Verdana, Arial, sans-serif" font-size="14">67 por ciento de carga</text>
   </g>
 
   <g filter="url(#demoShadow)">
-    <rect x="978" y="120" width="462" height="92" rx="24" fill="#0F172A"/>
-    <text x="1012" y="158" fill="#FACC15" font-family="Verdana, Arial, sans-serif" font-size="16" font-weight="700" letter-spacing="1.8">README PLACEHOLDER</text>
-    <text x="1012" y="192" fill="#FFFFFF" font-family="Verdana, Arial, sans-serif" font-size="28" font-weight="700">Replace this SVG with a real screenshot or GIF</text>
+    <rect x="938" y="112" width="504" height="114" rx="24" fill="#0F172A"/>
+    <text x="982" y="154" fill="#FACC15" font-family="Verdana, Arial, sans-serif" font-size="16" font-weight="700" letter-spacing="1.8">CAPTURA PENDIENTE</text>
+    <text x="982" y="188" fill="#FFFFFF" font-family="Verdana, Arial, sans-serif" font-size="22" font-weight="700">Reemplaza este SVG por</text>
+    <text x="982" y="214" fill="#FFFFFF" font-family="Verdana, Arial, sans-serif" font-size="22" font-weight="700">una captura real del producto</text>
   </g>
 </svg>

@@ -1,6 +1,6 @@
 <svg width="1600" height="96" viewBox="0 0 1600 96" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="separatorTitle separatorDesc">
-  <title id="separatorTitle">Decorative separator</title>
-  <desc id="separatorDesc">Minimal divider with lines and highlighted nodes.</desc>
+  <title id="separatorTitle">Separador visual</title>
+  <desc id="separatorDesc">Divisor minimalista con lineas y nodos destacados.</desc>
   <rect width="1600" height="96" rx="24" fill="#F8FAFC"/>
   <path d="M96 48H694" stroke="#CBD5E1" stroke-width="2"/>
   <path d="M906 48H1504" stroke="#CBD5E1" stroke-width="2"/>

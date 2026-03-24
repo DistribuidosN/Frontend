@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'dart:ui' show PointerDeviceKind;
 
 import 'package:flutter/material.dart';
 import 'package:imageflow_flutter/core/theme/app_theme.dart';
@@ -56,6 +57,16 @@ class _ImageFlowAppState extends State<ImageFlowApp> {
       debugShowCheckedModeBanner: false,
       title: 'Luminous',
       theme: AppTheme.lightTheme(),
+      scrollBehavior: const MaterialScrollBehavior().copyWith(
+        dragDevices: <PointerDeviceKind>{
+          PointerDeviceKind.touch,
+          PointerDeviceKind.mouse,
+          PointerDeviceKind.trackpad,
+          PointerDeviceKind.stylus,
+          PointerDeviceKind.invertedStylus,
+          PointerDeviceKind.unknown,
+        },
+      ),
       home: AnimatedSwitcher(
         duration: const Duration(milliseconds: 220),
         switchInCurve: Curves.easeOut,
@@ -211,6 +222,7 @@ class _AppShell extends StatelessWidget {
                           ),
                           Expanded(
                             child: SingleChildScrollView(
+                              key: ValueKey<AppPage>(activePage),
                               padding: EdgeInsets.fromLTRB(
                                 compact ? 16 : 28,
                                 24,
@@ -293,7 +305,8 @@ class _ShellSidebar extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
-        final bool narrow = constraints.maxWidth < 255;
+        final bool narrow = constraints.maxWidth < 330;
+        final bool shortHeight = constraints.maxHeight < 760;
         final EdgeInsets shellPadding = EdgeInsets.all(narrow ? 16 : 18);
         final EdgeInsets cardPadding = EdgeInsets.all(narrow ? 14 : 16);
 
@@ -318,280 +331,60 @@ class _ShellSidebar extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                AppSurface(
-                  radius: narrow ? 26 : 30,
-                  padding: cardPadding,
-                  gradient: const LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: <Color>[Color(0xFFFFFEFB), Color(0xFFF3F8FF)],
-                  ),
-                  shadow: AppTheme.softShadow,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
+                Expanded(
+                  child: SingleChildScrollView(
+                    key: const PageStorageKey<String>('shell-sidebar-scroll'),
+                    physics: const BouncingScrollPhysics(),
+                    padding: EdgeInsets.only(right: narrow ? 2 : 4),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        _SidebarOverviewCard(
+                          narrow: narrow,
+                          cardPadding: cardPadding,
                         ),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.8),
-                          borderRadius: BorderRadius.circular(999),
-                          border: Border.all(color: AppTheme.borderSoft),
+                        SizedBox(height: shortHeight ? 12 : 14),
+                        _SidebarHealthCard(
+                          narrow: narrow,
+                          cardPadding: cardPadding,
                         ),
-                        child: Text(
-                          'OPERATOR CONSOLE',
+                        SizedBox(height: shortHeight ? 18 : 22),
+                        Text(
+                          'WORKSPACE',
                           style: Theme.of(context).textTheme.labelSmall
                               ?.copyWith(
+                                letterSpacing: narrow ? 2.0 : 2.4,
                                 color: AppTheme.slate,
-                                letterSpacing: 1.8,
                               ),
                         ),
-                      ),
-                      const SizedBox(height: 16),
-                      Row(
-                        children: <Widget>[
-                          Expanded(
-                            child: Align(
-                              alignment: Alignment.centerLeft,
-                              child: LuminousLogo(
-                                tone: LuminousBrandTone.onLight,
-                                width: narrow ? 152 : 176,
-                                height: narrow ? 36 : 42,
-                              ),
+                        const SizedBox(height: 10),
+                        for (int index = 0; index < shellPages.length; index++)
+                          Padding(
+                            padding: EdgeInsets.only(
+                              bottom: index == shellPages.length - 1 ? 0 : 6,
                             ),
-                          ),
-                          SizedBox(width: narrow ? 10 : 12),
-                          Container(
-                            width: narrow ? 44 : 50,
-                            height: narrow ? 44 : 50,
-                            decoration: BoxDecoration(
-                              color: AppTheme.canvasSoft,
-                              border: Border.all(color: AppTheme.border),
-                              borderRadius: BorderRadius.circular(
-                                narrow ? 16 : 18,
-                              ),
-                            ),
-                            child: const Padding(
-                              padding: EdgeInsets.all(9),
-                              child: LuminousLogo(
-                                tone: LuminousBrandTone.onLight,
-                                iconOnly: true,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'DISTRIBUTED IMAGE SYSTEM',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: AppTheme.slate,
-                          letterSpacing: narrow ? 2.0 : 2.4,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        'Control and monitor every workflow from one premium surface.',
-                        maxLines: 2,
-                        overflow: TextOverflow.fade,
-                        style: Theme.of(
-                          context,
-                        ).textTheme.bodySmall?.copyWith(color: AppTheme.slate),
-                      ),
-                      const SizedBox(height: 16),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: const <Widget>[
-                          _SidebarMetricPill(
-                            label: 'Nodes',
-                            value: '08',
-                            icon: Icons.dns_outlined,
-                          ),
-                          _SidebarMetricPill(
-                            label: 'Throughput',
-                            value: '64/min',
-                            icon: Icons.show_chart_rounded,
-                          ),
-                          _SidebarMetricPill(
-                            label: 'Median SLA',
-                            value: '3.8s',
-                            icon: Icons.bolt_rounded,
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 14),
-                AppSurface(
-                  radius: narrow ? 24 : 26,
-                  gradient: const LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: <Color>[Color(0xFFFDFEFE), Color(0xFFF6FBF8)],
-                  ),
-                  padding: cardPadding,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: <Widget>[
-                                Text(
-                                  'CLUSTER HEALTH',
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: Theme.of(context).textTheme.labelSmall
-                                      ?.copyWith(
-                                        letterSpacing: narrow ? 2.0 : 2.4,
-                                        color: AppTheme.slate,
-                                      ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  'Balanced and active',
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: Theme.of(
-                                    context,
-                                  ).textTheme.titleMedium,
-                                ),
-                              ],
-                            ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 6,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppTheme.successSoft,
-                              borderRadius: BorderRadius.circular(999),
-                              border: Border.all(
-                                color: AppTheme.success.withValues(alpha: 0.2),
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: <Widget>[
-                                Container(
-                                  width: 8,
-                                  height: 8,
-                                  decoration: const BoxDecoration(
-                                    color: AppTheme.success,
-                                    shape: BoxShape.circle,
-                                  ),
-                                ),
-                                const SizedBox(width: 6),
-                                Text(
-                                  'Live',
-                                  style: Theme.of(context).textTheme.labelMedium
-                                      ?.copyWith(color: AppTheme.success),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 14),
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 14,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(18),
-                          border: Border.all(color: AppTheme.borderSoft),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Row(
-                              children: <Widget>[
-                                const Icon(
-                                  Icons.dns_outlined,
-                                  size: 16,
-                                  color: AppTheme.ink,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  '8 nodes live',
-                                  style: Theme.of(context).textTheme.labelLarge,
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            ProgressLine(
-                              value: 0.72,
-                              color: AppTheme.success,
-                              background: AppTheme.success.withValues(
-                                alpha: 0.12,
-                              ),
-                            ),
-                            const SizedBox(height: 10),
-                            Row(
-                              children: <Widget>[
-                                const Icon(
-                                  Icons.show_chart_rounded,
-                                  size: 16,
-                                  color: AppTheme.slate,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  '64/min throughput',
-                                  style: Theme.of(context).textTheme.bodySmall
-                                      ?.copyWith(color: AppTheme.slate),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 22),
-                Text(
-                  'WORKSPACE',
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    letterSpacing: narrow ? 2.0 : 2.4,
-                    color: AppTheme.slate,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Expanded(
-                  child: ListView.separated(
-                    itemCount: shellPages.length,
-                    padding: EdgeInsets.zero,
-                    separatorBuilder: (_, __) => const SizedBox(height: 6),
-                    itemBuilder: (BuildContext context, int index) {
-                      final AppPage page = shellPages[index];
-                      final bool active =
-                          page == activePage ||
-                          (activePage == AppPage.requestDetail &&
-                              page == AppPage.history);
+                            child: Builder(
+                              builder: (BuildContext context) {
+                                final AppPage page = shellPages[index];
+                                final bool active =
+                                    page == activePage ||
+                                    (activePage == AppPage.requestDetail &&
+                                        page == AppPage.history);
 
-                      return _SidebarTile(
-                        label: page.label,
-                        icon: page.icon,
-                        active: active,
-                        onTap: () => onNavigate(page),
-                      );
-                    },
+                                return _SidebarTile(
+                                  label: page.label,
+                                  icon: page.icon,
+                                  active: active,
+                                  onTap: () => onNavigate(page),
+                                );
+                              },
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
                 ),
-                const SizedBox(height: 14),
+                SizedBox(height: shortHeight ? 12 : 14),
                 SizedBox(
                   width: double.infinity,
                   child: OutlinedButton.icon(
@@ -605,6 +398,275 @@ class _ShellSidebar extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+class _SidebarOverviewCard extends StatelessWidget {
+  const _SidebarOverviewCard({required this.narrow, required this.cardPadding});
+
+  final bool narrow;
+  final EdgeInsets cardPadding;
+
+  @override
+  Widget build(BuildContext context) {
+    return AppSurface(
+      radius: narrow ? 26 : 30,
+      padding: EdgeInsets.zero,
+      gradient: const LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: <Color>[Color(0xFFFFFEFB), Color(0xFFF4F8FF)],
+      ),
+      shadow: AppTheme.softShadow,
+      child: Stack(
+        children: <Widget>[
+          Positioned(
+            top: -28,
+            right: -24,
+            child: IgnorePointer(
+              child: Container(
+                width: narrow ? 92 : 116,
+                height: narrow ? 92 : 116,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(
+                    colors: <Color>[
+                      AppTheme.sapphire.withValues(alpha: 0.12),
+                      Colors.transparent,
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: cardPadding,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                if (narrow)
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[_SidebarConsoleTag()],
+                  )
+                else
+                  Row(children: <Widget>[const _SidebarConsoleTag()]),
+                const SizedBox(height: 16),
+                Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.all(narrow ? 14 : 16),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: <Color>[Colors.white, Color(0xFFF7FAFF)],
+                    ),
+                    borderRadius: BorderRadius.circular(narrow ? 22 : 24),
+                    border: Border.all(color: AppTheme.borderSoft),
+                  ),
+                  child: Row(
+                    children: <Widget>[
+                      Container(
+                        width: narrow ? 52 : 60,
+                        height: narrow ? 52 : 60,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: <Color>[
+                              AppTheme.ink.withValues(alpha: 0.04),
+                              AppTheme.sapphire.withValues(alpha: 0.12),
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(narrow ? 18 : 20),
+                          border: Border.all(color: AppTheme.borderSoft),
+                        ),
+                        child: Padding(
+                          padding: EdgeInsets.all(narrow ? 11 : 13),
+                          child: const LuminousLogo(
+                            tone: LuminousBrandTone.onLight,
+                            iconOnly: true,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Text(
+                              'Luminous',
+                              style: Theme.of(context).textTheme.titleMedium
+                                  ?.copyWith(
+                                    color: AppTheme.ink,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'DISTRIBUTED IMAGE SYSTEM',
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: Theme.of(context).textTheme.labelSmall
+                                  ?.copyWith(
+                                    color: AppTheme.slate,
+                                    letterSpacing: narrow ? 1.8 : 2,
+                                  ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 14),
+                Text(
+                  'Control and monitor every workflow from one premium surface.',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppTheme.slate,
+                    height: 1.55,
+                  ),
+                ),
+                const SizedBox(height: 14),
+                LayoutBuilder(
+                  builder:
+                      (BuildContext context, BoxConstraints metricConstraints) {
+                        final double halfWidth =
+                            (metricConstraints.maxWidth - 8) / 2;
+
+                        return Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: <Widget>[
+                            SizedBox(
+                              width: halfWidth,
+                              child: const _SidebarMetricPill(
+                                label: 'Nodes',
+                                value: '08',
+                                icon: Icons.dns_outlined,
+                              ),
+                            ),
+                            SizedBox(
+                              width: halfWidth,
+                              child: const _SidebarMetricPill(
+                                label: 'Throughput',
+                                value: '64/min',
+                                icon: Icons.show_chart_rounded,
+                              ),
+                            ),
+                            SizedBox(
+                              width: metricConstraints.maxWidth,
+                              child: const _SidebarMetricPill(
+                                label: 'Median SLA',
+                                value: '3.8s',
+                                icon: Icons.bolt_rounded,
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SidebarHealthCard extends StatelessWidget {
+  const _SidebarHealthCard({required this.narrow, required this.cardPadding});
+
+  final bool narrow;
+  final EdgeInsets cardPadding;
+
+  @override
+  Widget build(BuildContext context) {
+    return AppSurface(
+      radius: narrow ? 24 : 26,
+      gradient: const LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: <Color>[Color(0xFFFDFEFE), Color(0xFFF6FBF8)],
+      ),
+      padding: cardPadding,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          if (narrow)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                _SidebarHealthCopy(narrow: narrow),
+                const SizedBox(height: 12),
+                const _SidebarLivePill(),
+              ],
+            )
+          else
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Expanded(child: _SidebarHealthCopy(narrow: narrow)),
+                const SizedBox(width: 12),
+                const _SidebarLivePill(),
+              ],
+            ),
+          const SizedBox(height: 14),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: AppTheme.borderSoft),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Row(
+                  children: <Widget>[
+                    const Icon(
+                      Icons.dns_outlined,
+                      size: 16,
+                      color: AppTheme.ink,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      '8 nodes live',
+                      style: Theme.of(context).textTheme.labelLarge,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                ProgressLine(
+                  value: 0.72,
+                  color: AppTheme.success,
+                  background: AppTheme.success.withValues(alpha: 0.12),
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: <Widget>[
+                    const Icon(
+                      Icons.show_chart_rounded,
+                      size: 16,
+                      color: AppTheme.slate,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      '64/min throughput',
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodySmall?.copyWith(color: AppTheme.slate),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -953,6 +1015,96 @@ class _SidebarTile extends StatelessWidget {
   }
 }
 
+class _SidebarConsoleTag extends StatelessWidget {
+  const _SidebarConsoleTag();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.88),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: AppTheme.borderSoft),
+      ),
+      child: Text(
+        'OPERATOR CONSOLE',
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+          color: AppTheme.slate,
+          letterSpacing: 1.8,
+        ),
+      ),
+    );
+  }
+}
+
+class _SidebarHealthCopy extends StatelessWidget {
+  const _SidebarHealthCopy({required this.narrow});
+
+  final bool narrow;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Text(
+          'CLUSTER HEALTH',
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+            letterSpacing: narrow ? 2.0 : 2.4,
+            color: AppTheme.slate,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Balanced and active',
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+      ],
+    );
+  }
+}
+
+class _SidebarLivePill extends StatelessWidget {
+  const _SidebarLivePill();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: AppTheme.successSoft,
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: AppTheme.success.withValues(alpha: 0.2)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Container(
+            width: 8,
+            height: 8,
+            decoration: const BoxDecoration(
+              color: AppTheme.success,
+              shape: BoxShape.circle,
+            ),
+          ),
+          const SizedBox(width: 6),
+          Text(
+            'Live',
+            style: Theme.of(
+              context,
+            ).textTheme.labelMedium?.copyWith(color: AppTheme.success),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _SidebarMetricPill extends StatelessWidget {
   const _SidebarMetricPill({
     required this.label,
@@ -967,6 +1119,7 @@ class _SidebarMetricPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.88),
@@ -974,26 +1127,32 @@ class _SidebarMetricPill extends StatelessWidget {
         border: Border.all(color: AppTheme.borderSoft),
       ),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           Icon(icon, size: 16, color: AppTheme.sapphire),
           const SizedBox(width: 8),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text(
-                value,
-                style: Theme.of(
-                  context,
-                ).textTheme.labelMedium?.copyWith(color: AppTheme.ink),
-              ),
-              Text(
-                label,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodySmall?.copyWith(color: AppTheme.slate),
-              ),
-            ],
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Text(
+                  value,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.labelMedium?.copyWith(color: AppTheme.ink),
+                ),
+                Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: AppTheme.slate),
+                ),
+              ],
+            ),
           ),
         ],
       ),

@@ -778,152 +778,184 @@ class _AuthHeroPane extends StatelessWidget {
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(56, 52, 56, 52),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Row(
-                  children: <Widget>[
-                    const LuminousLogo(
-                      tone: LuminousBrandTone.onDark,
-                      width: 210,
-                      height: 56,
-                    ),
-                    const Spacer(),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 10,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.08),
-                        borderRadius: BorderRadius.circular(999),
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.14),
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          Container(
-                            width: 8,
-                            height: 8,
-                            decoration: const BoxDecoration(
-                              color: AppTheme.success,
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Luminous mesh online',
-                            style: Theme.of(context).textTheme.labelMedium
-                                ?.copyWith(color: Colors.white),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 22),
-                ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 560),
-                  child: Text(
-                    heroTitle,
-                    style: AppTheme.displayStyle(
-                      context,
-                      size: 52,
-                      color: Colors.white,
-                      height: 0.98,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 18),
-                ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 560),
-                  child: Text(
-                    heroDescription,
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: Colors.white.withValues(alpha: 0.82),
-                      height: 1.75,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 30),
-                Wrap(
-                  spacing: 16,
-                  runSpacing: 16,
-                  children: features.map((Map<String, Object> item) {
-                    return _AuthFeatureCard(
-                      icon: item['icon']! as IconData,
-                      label: item['label']! as String,
-                      description: item['desc']! as String,
-                    );
-                  }).toList(),
-                ),
-                const SizedBox(height: 18),
-                Wrap(
-                  spacing: 12,
-                  runSpacing: 12,
-                  children: const <Widget>[
-                    _HeroMetricPill(label: '8 nodes online'),
-                    _HeroMetricPill(label: '64 img/min'),
-                    _HeroMetricPill(label: '3.8s median SLA'),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                Container(
-                  constraints: const BoxConstraints(maxWidth: 520),
-                  padding: const EdgeInsets.all(18),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.06),
-                    borderRadius: BorderRadius.circular(24),
-                    border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.14),
-                    ),
-                  ),
-                  child: Row(
+          LayoutBuilder(
+            builder: (BuildContext context, BoxConstraints constraints) {
+              final bool compact = constraints.maxHeight < 760;
+              final bool ultraCompact = constraints.maxHeight < 660;
+              final bool useScroll = constraints.maxHeight < 620;
+              final double horizontalPadding = compact ? 40 : 56;
+              final double verticalPadding = ultraCompact
+                  ? 28
+                  : (compact ? 38 : 52);
+              final double titleSize = ultraCompact ? 40 : (compact ? 46 : 52);
+              final double titleGap = compact ? 16 : 22;
+              final double descriptionGap = compact ? 12 : 18;
+              final double featuresGap = compact ? 18 : 30;
+              final double metricsGap = compact ? 12 : 18;
+              final double promoGap = compact ? 12 : 20;
+              final double featureSpacing = compact ? 14 : 16;
+              final double maxTextWidth = compact ? 520 : 560;
+
+              final Widget content = Column(
+                mainAxisSize: compact ? MainAxisSize.min : MainAxisSize.max,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Row(
                     children: <Widget>[
-                      Container(
-                        width: 44,
-                        height: 44,
-                        decoration: BoxDecoration(
-                          color: AppTheme.gold.withValues(alpha: 0.14),
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        child: const Icon(
-                          Icons.auto_awesome_rounded,
-                          color: AppTheme.gold,
-                        ),
+                      const LuminousLogo(
+                        tone: LuminousBrandTone.onDark,
+                        width: 210,
+                        height: 56,
                       ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                      const Spacer(),
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: compact ? 12 : 14,
+                          vertical: compact ? 8 : 10,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(999),
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.14),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
                           children: <Widget>[
-                            Text(
-                              'Premium control surface',
-                              style: Theme.of(context).textTheme.labelLarge
-                                  ?.copyWith(color: Colors.white),
+                            Container(
+                              width: 8,
+                              height: 8,
+                              decoration: const BoxDecoration(
+                                color: AppTheme.success,
+                                shape: BoxShape.circle,
+                              ),
                             ),
-                            const SizedBox(height: 4),
+                            const SizedBox(width: 8),
                             Text(
-                              'Built to keep operators inside one calm workspace while workloads scale.',
-                              style: Theme.of(context).textTheme.bodySmall
-                                  ?.copyWith(
-                                    color: Colors.white.withValues(alpha: 0.74),
-                                    height: 1.5,
-                                  ),
+                              'Luminous mesh online',
+                              style: Theme.of(context).textTheme.labelMedium
+                                  ?.copyWith(color: Colors.white),
                             ),
                           ],
                         ),
                       ),
                     ],
                   ),
+                  SizedBox(height: titleGap),
+                  ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: maxTextWidth),
+                    child: Text(
+                      heroTitle,
+                      style: AppTheme.displayStyle(
+                        context,
+                        size: titleSize,
+                        color: Colors.white,
+                        height: 0.98,
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: descriptionGap),
+                  ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: maxTextWidth),
+                    child: Text(
+                      heroDescription,
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: Colors.white.withValues(alpha: 0.82),
+                        height: compact ? 1.65 : 1.75,
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: featuresGap),
+                  Wrap(
+                    spacing: featureSpacing,
+                    runSpacing: featureSpacing,
+                    children: features.map((Map<String, Object> item) {
+                      return _AuthFeatureCard(
+                        icon: item['icon']! as IconData,
+                        label: item['label']! as String,
+                        description: item['desc']! as String,
+                      );
+                    }).toList(),
+                  ),
+                  SizedBox(height: metricsGap),
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 12,
+                    children: const <Widget>[
+                      _HeroMetricPill(label: '8 nodes online'),
+                      _HeroMetricPill(label: '64 img/min'),
+                      _HeroMetricPill(label: '3.8s median SLA'),
+                    ],
+                  ),
+                  SizedBox(height: promoGap),
+                  Container(
+                    constraints: const BoxConstraints(maxWidth: 520),
+                    padding: EdgeInsets.all(compact ? 16 : 18),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.06),
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.14),
+                      ),
+                    ),
+                    child: Row(
+                      children: <Widget>[
+                        Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            color: AppTheme.gold.withValues(alpha: 0.14),
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: const Icon(
+                            Icons.auto_awesome_rounded,
+                            color: AppTheme.gold,
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Text(
+                                'Premium control surface',
+                                style: Theme.of(context).textTheme.labelLarge
+                                    ?.copyWith(color: Colors.white),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Built to keep operators inside one calm workspace while workloads scale.',
+                                style: Theme.of(context).textTheme.bodySmall
+                                    ?.copyWith(
+                                      color: Colors.white.withValues(
+                                        alpha: 0.74,
+                                      ),
+                                      height: 1.5,
+                                    ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (!compact) const Spacer(),
+                ],
+              );
+
+              return Padding(
+                padding: EdgeInsets.fromLTRB(
+                  horizontalPadding,
+                  verticalPadding,
+                  horizontalPadding,
+                  verticalPadding,
                 ),
-                const Spacer(),
-              ],
-            ),
+                child: useScroll
+                    ? SingleChildScrollView(child: content)
+                    : content,
+              );
+            },
           ),
         ],
       ),

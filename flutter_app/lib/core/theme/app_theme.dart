@@ -3,12 +3,19 @@ import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
   static const Color ink = Color(0xFF0F172A);
+  static const Color inkSoft = Color(0xFF17233B);
   static const Color slate = Color(0xFF64748B);
   static const Color muted = Color(0xFF94A3B8);
   static const Color border = Color(0xFFE2E8F0);
+  static const Color borderSoft = Color(0xFFE8EDF5);
+  static const Color borderStrong = Color(0xFFD3DCE8);
   static const Color canvas = Color(0xFFF6F4EE);
   static const Color canvasSoft = Color(0xFFF8FAFC);
+  static const Color canvasWarm = Color(0xFFFFFCF6);
+  static const Color surfaceMuted = Color(0xFFF4F7FB);
   static const Color surface = Colors.white;
+  static const Color sapphire = Color(0xFF3153C9);
+  static const Color sapphireSoft = Color(0xFFEEF3FF);
   static const Color gold = Color(0xFFFACC15);
   static const Color goldDeep = Color(0xFFEAB308);
   static const Color success = Color(0xFF16A34A);
@@ -114,62 +121,122 @@ class AppTheme {
 
     return ThemeData(
       useMaterial3: true,
-      scaffoldBackgroundColor: canvas,
+      scaffoldBackgroundColor: canvasSoft,
       splashFactory: NoSplash.splashFactory,
-      hoverColor: Colors.transparent,
+      hoverColor: surfaceMuted,
       highlightColor: Colors.transparent,
+      focusColor: sapphireSoft,
       colorScheme: const ColorScheme.light(
-        primary: ink,
+        primary: sapphire,
         secondary: gold,
         surface: surface,
         error: danger,
       ),
       textTheme: textTheme,
-      dividerColor: border,
+      dividerColor: borderSoft,
       cardColor: surface,
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: canvasSoft,
+        fillColor: surface,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 18,
           vertical: 16,
         ),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: border),
+          borderRadius: BorderRadius.circular(18),
+          borderSide: const BorderSide(color: borderSoft),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: border),
+          borderRadius: BorderRadius.circular(18),
+          borderSide: const BorderSide(color: borderSoft),
+        ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(18),
+          borderSide: const BorderSide(color: borderSoft),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: gold, width: 1.2),
+          borderRadius: BorderRadius.circular(18),
+          borderSide: const BorderSide(color: sapphire, width: 1.4),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(18),
+          borderSide: const BorderSide(color: danger, width: 1.2),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(18),
+          borderSide: const BorderSide(color: danger, width: 1.4),
         ),
         hintStyle: textTheme.bodyMedium?.copyWith(color: muted),
+        labelStyle: textTheme.bodyMedium?.copyWith(color: slate),
+        prefixIconColor: slate,
+        suffixIconColor: slate,
       ),
       filledButtonTheme: FilledButtonThemeData(
-        style: FilledButton.styleFrom(
-          backgroundColor: ink,
-          foregroundColor: surface,
-          elevation: 0,
-          shadowColor: const Color(0x240F172A),
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+        style: ButtonStyle(
+          backgroundColor: WidgetStateProperty.resolveWith<Color>((
+            Set<WidgetState> states,
+          ) {
+            if (states.contains(WidgetState.disabled)) {
+              return ink.withValues(alpha: 0.36);
+            }
+            if (states.contains(WidgetState.hovered)) {
+              return inkSoft;
+            }
+            return ink;
+          }),
+          foregroundColor: WidgetStateProperty.all<Color>(surface),
+          elevation: WidgetStateProperty.resolveWith<double>((
+            Set<WidgetState> states,
+          ) {
+            return states.contains(WidgetState.hovered) ? 1.5 : 0;
+          }),
+          shadowColor: WidgetStateProperty.all<Color>(const Color(0x260F172A)),
+          overlayColor: WidgetStateProperty.all<Color>(
+            Colors.white.withValues(alpha: 0.04),
           ),
-          textStyle: textTheme.labelLarge,
+          padding: WidgetStateProperty.all<EdgeInsetsGeometry>(
+            const EdgeInsets.symmetric(horizontal: 22, vertical: 18),
+          ),
+          shape: WidgetStateProperty.all<OutlinedBorder>(
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+          ),
+          textStyle: WidgetStateProperty.all<TextStyle?>(textTheme.labelLarge),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
-        style: OutlinedButton.styleFrom(
-          foregroundColor: ink,
-          side: const BorderSide(color: border),
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+        style: ButtonStyle(
+          foregroundColor: WidgetStateProperty.all<Color>(ink),
+          backgroundColor: WidgetStateProperty.resolveWith<Color>((
+            Set<WidgetState> states,
+          ) {
+            return states.contains(WidgetState.hovered)
+                ? canvasWarm
+                : Colors.white;
+          }),
+          side: WidgetStateProperty.resolveWith<BorderSide>((
+            Set<WidgetState> states,
+          ) {
+            if (states.contains(WidgetState.hovered)) {
+              return const BorderSide(color: borderStrong);
+            }
+            return const BorderSide(color: borderSoft);
+          }),
+          padding: WidgetStateProperty.all<EdgeInsetsGeometry>(
+            const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
           ),
-          textStyle: textTheme.labelLarge,
+          shape: WidgetStateProperty.all<OutlinedBorder>(
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+          ),
+          textStyle: WidgetStateProperty.all<TextStyle?>(textTheme.labelLarge),
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: ButtonStyle(
+          foregroundColor: WidgetStateProperty.all<Color>(sapphire),
+          overlayColor: WidgetStateProperty.all<Color>(
+            sapphire.withValues(alpha: 0.06),
+          ),
+          textStyle: WidgetStateProperty.all<TextStyle?>(textTheme.labelLarge),
         ),
       ),
       checkboxTheme: CheckboxThemeData(
@@ -179,24 +246,42 @@ class AppTheme {
           }
           return Colors.white;
         }),
-        side: const BorderSide(color: border),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+        side: const BorderSide(color: borderStrong),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
       ),
       sliderTheme: const SliderThemeData(
         activeTrackColor: ink,
-        inactiveTrackColor: border,
+        inactiveTrackColor: borderSoft,
         thumbColor: gold,
         overlayColor: Color(0x220F172A),
       ),
       chipTheme: ChipThemeData(
-        backgroundColor: surface,
+        backgroundColor: canvasWarm,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: border),
+          borderRadius: BorderRadius.circular(18),
+          side: const BorderSide(color: borderSoft),
         ),
         labelStyle: textTheme.labelMedium!,
         secondaryLabelStyle: textTheme.labelMedium!,
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      ),
+      iconButtonTheme: IconButtonThemeData(
+        style: ButtonStyle(
+          backgroundColor: WidgetStateProperty.resolveWith<Color>((
+            Set<WidgetState> states,
+          ) {
+            return states.contains(WidgetState.hovered)
+                ? canvasWarm
+                : Colors.white;
+          }),
+          foregroundColor: WidgetStateProperty.all<Color>(ink),
+          shape: WidgetStateProperty.all<OutlinedBorder>(
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+          ),
+          side: WidgetStateProperty.all<BorderSide>(
+            const BorderSide(color: borderSoft),
+          ),
+        ),
       ),
     );
   }
@@ -218,19 +303,25 @@ class AppTheme {
 
   static const List<BoxShadow> softShadow = [
     BoxShadow(
-      color: Color(0x120F172A),
-      blurRadius: 40,
-      offset: Offset(0, 24),
-      spreadRadius: -28,
+      color: Color(0x180F172A),
+      blurRadius: 48,
+      offset: Offset(0, 26),
+      spreadRadius: -30,
+    ),
+    BoxShadow(
+      color: Color(0x0A3153C9),
+      blurRadius: 30,
+      offset: Offset(0, 10),
+      spreadRadius: -24,
     ),
   ];
 
   static const List<BoxShadow> cardShadow = [
     BoxShadow(
-      color: Color(0x100F172A),
-      blurRadius: 18,
-      offset: Offset(0, 12),
-      spreadRadius: -14,
+      color: Color(0x120F172A),
+      blurRadius: 22,
+      offset: Offset(0, 14),
+      spreadRadius: -16,
     ),
   ];
 }

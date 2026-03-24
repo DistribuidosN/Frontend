@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Luminous Logo Refinement</title>
+  <style>
+    :root {
+      --paper: #f6f8fc;
+      --ink: #1f2937;
+      --muted: #5b677d;
+      --panel: rgba(255, 255, 255, 0.84);
+      --border: rgba(31, 41, 55, 0.08);
+      --shadow: 0 24px 70px rgba(27, 37, 64, 0.12);
+      --navy-bg: #0f1728;
+      --mono-bg: #eef2f8;
+      font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(70, 101, 255, 0.1), transparent 28%),
+        radial-gradient(circle at right center, rgba(245, 213, 123, 0.12), transparent 26%),
+        var(--paper);
+    }
+
+    main {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 44px 0 56px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2.5rem, 5vw, 4.1rem);
+      letter-spacing: -0.06em;
+    }
+
+    .intro {
+      margin-top: 12px;
+      max-width: 860px;
+      color: var(--muted);
+      font-size: 1.03rem;
+      line-height: 1.65;
+    }
+
+    .metrics {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 22px;
+    }
+
+    .metric {
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(34, 51, 93, 0.08);
+      background: rgba(255, 255, 255, 0.7);
+      color: #334155;
+      font-size: 0.84rem;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 22px;
+      margin-top: 34px;
+    }
+
+    .card {
+      border-radius: 28px;
+      border: 1px solid var(--border);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      padding: 24px;
+      overflow: hidden;
+      backdrop-filter: blur(16px);
+    }
+
+    .card.dark {
+      background:
+        radial-gradient(circle at top left, rgba(95, 127, 255, 0.13), transparent 30%),
+        rgba(15, 23, 40, 0.96);
+      border-color: rgba(220, 231, 255, 0.08);
+      box-shadow: 0 30px 80px rgba(2, 6, 23, 0.36);
+    }
+
+    .card.mono {
+      background: linear-gradient(180deg, #ffffff, var(--mono-bg));
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #64748b;
+    }
+
+    .card.dark .eyebrow {
+      color: #cbd5e1;
+    }
+
+    .swatch {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #24355d, #3458c8 60%, #f5d57b);
+    }
+
+    .card.dark .swatch {
+      background: linear-gradient(135deg, #4d69d9, #5f7fff 60%, #f5d67f);
+    }
+
+    img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    .mini-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 16px;
+    }
+
+    .mini-card {
+      border-radius: 20px;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.82);
+      border: 1px solid rgba(31, 41, 55, 0.06);
+    }
+
+    .card.dark .mini-card {
+      background: rgba(8, 15, 28, 0.66);
+      border-color: rgba(220, 231, 255, 0.08);
+    }
+
+    .label {
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.55;
+    }
+
+    .card.dark .label {
+      color: #a7b3c8;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Luminous</h1>
+    <p class="intro">
+      Refined from the existing connected-node concept into a cleaner, more premium system mark. The hub is now more dominant, connectors use one consistent stroke, spacing is normalized on a tighter grid, and the yellow accent is softened so the palette feels more modern without losing the original identity.
+    </p>
+
+    <div class="metrics">
+      <div class="metric">Stronger central hierarchy</div>
+      <div class="metric">Unified 10px connector stroke</div>
+      <div class="metric">Rounded geometry for smoother flow</div>
+      <div class="metric">Light, dark, and monochrome ready</div>
+    </div>
+
+    <section class="grid">
+      <article class="card">
+        <div class="eyebrow"><span class="swatch"></span>Horizontal Logo</div>
+        <img src="./luminous-logo-light.svg" alt="Luminous light logo">
+        <div class="label">Primary lockup for product pages, docs, dashboards, and general light UI surfaces.</div>
+      </article>
+
+      <article class="card dark">
+        <div class="eyebrow"><span class="swatch"></span>Dark Version</div>
+        <img src="./luminous-logo-dark.svg" alt="Luminous dark logo">
+        <div class="label">Dark-surface variant with brighter blue structure and preserved gold warmth for contrast.</div>
+      </article>
+
+      <article class="card">
+        <div class="eyebrow"><span class="swatch"></span>Icon Family</div>
+        <div class="mini-grid">
+          <div class="mini-card">
+            <img src="./luminous-icon-light.svg" alt="Luminous icon light">
+          </div>
+          <div class="mini-card" style="background:#0f1728;">
+            <img src="./luminous-icon-dark.svg" alt="Luminous icon dark">
+          </div>
+          <div class="mini-card">
+            <img src="./luminous-icon-mono.svg" alt="Luminous icon monochrome">
+          </div>
+        </div>
+        <div class="label">Icon-only treatment remains legible at small sizes and keeps the original distributed-network silhouette.</div>
+      </article>
+
+      <article class="card mono">
+        <div class="eyebrow"><span class="swatch"></span>Monochrome</div>
+        <img src="./luminous-logo-mono.svg" alt="Luminous monochrome logo">
+        <div class="label">Single-color fallback for embossing, print, favicons, or restricted brand environments.</div>
+      </article>
+    </section>
+  </main>
+</body>
+</html>

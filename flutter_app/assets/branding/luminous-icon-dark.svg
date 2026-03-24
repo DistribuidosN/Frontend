@@ -1,0 +1,38 @@
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="core" x1="34" y1="74" x2="86" y2="126" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#3153C9"/>
+      <stop offset="1" stop-color="#5F7FFF"/>
+    </linearGradient>
+    <linearGradient id="blueNode" x1="102" y1="18" x2="154" y2="156" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#304889"/>
+      <stop offset="1" stop-color="#4567D5"/>
+    </linearGradient>
+    <linearGradient id="goldNode" x1="30" y1="20" x2="162" y2="106" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F5D67F"/>
+      <stop offset="1" stop-color="#E9B955"/>
+    </linearGradient>
+    <radialGradient id="hubGlow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(62 100) rotate(90) scale(14)">
+      <stop offset="0" stop-color="#FFF9E5"/>
+      <stop offset="1" stop-color="#F2CF72"/>
+    </radialGradient>
+  </defs>
+
+  <g transform="translate(16 12)">
+    <g stroke="#4D69D9" stroke-width="10" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M54 52V78"/>
+      <path d="M86 84L112 58"/>
+      <path d="M90 95H128"/>
+      <path d="M82 126L104 140"/>
+    </g>
+
+    <rect x="34" y="78" width="56" height="56" rx="15" fill="url(#core)" stroke="#DCE7FF" stroke-opacity="0.12" stroke-width="1.5"/>
+    <rect x="38" y="20" width="32" height="32" rx="9" fill="url(#goldNode)" stroke="#FFF7D6" stroke-opacity="0.2" stroke-width="1.5"/>
+    <rect x="108" y="18" width="42" height="42" rx="12" fill="url(#blueNode)" stroke="#DCE7FF" stroke-opacity="0.14" stroke-width="1.5"/>
+    <rect x="128" y="76" width="38" height="38" rx="10" fill="url(#goldNode)" stroke="#FFF7D6" stroke-opacity="0.2" stroke-width="1.5"/>
+    <rect x="104" y="128" width="32" height="32" rx="9" fill="url(#blueNode)" stroke="#DCE7FF" stroke-opacity="0.14" stroke-width="1.5"/>
+
+    <circle cx="62" cy="106" r="13" fill="#9FB7FF" fill-opacity="0.18"/>
+    <circle cx="62" cy="106" r="8" fill="url(#hubGlow)"/>
+  </g>
+</svg>

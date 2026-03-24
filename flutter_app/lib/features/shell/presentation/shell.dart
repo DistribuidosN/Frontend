@@ -54,7 +54,7 @@ class _ImageFlowAppState extends State<ImageFlowApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'ImageFlow',
+      title: 'Luminous',
       theme: AppTheme.lightTheme(),
       home: AnimatedSwitcher(
         duration: const Duration(milliseconds: 220),
@@ -138,71 +138,106 @@ class _AppShell extends StatelessWidget {
                   ),
                 )
               : null,
-          body: Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: <Color>[
-                  Color(0xFFF6F4EE),
-                  Color(0xFFF8FAFC),
-                  Colors.white,
-                ],
-                stops: <double>[0, 0.18, 1],
+          body: Stack(
+            children: <Widget>[
+              const Positioned.fill(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: <Color>[
+                        Color(0xFFF5F3EC),
+                        Color(0xFFF7FAFF),
+                        Colors.white,
+                      ],
+                      stops: <double>[0, 0.22, 1],
+                    ),
+                  ),
+                ),
               ),
-            ),
-            child: SafeArea(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: <Widget>[
-                  if (!compact)
-                    SizedBox(
-                      width: 308,
-                      child: Padding(
-                        padding: const EdgeInsets.all(20),
-                        child: _ShellSidebar(
-                          activePage: activePage,
-                          onNavigate: onNavigate,
-                          onLogout: onLogout,
+              Positioned(
+                left: -140,
+                top: 90,
+                child: IgnorePointer(
+                  child: Container(
+                    width: 280,
+                    height: 280,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: AppTheme.gold.withValues(alpha: 0.08),
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                right: -120,
+                top: -40,
+                child: IgnorePointer(
+                  child: Container(
+                    width: 320,
+                    height: 320,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: AppTheme.sapphire.withValues(alpha: 0.07),
+                    ),
+                  ),
+                ),
+              ),
+              SafeArea(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    if (!compact)
+                      SizedBox(
+                        width: 316,
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(20, 20, 0, 20),
+                          child: _ShellSidebar(
+                            activePage: activePage,
+                            onNavigate: onNavigate,
+                            onLogout: onLogout,
+                          ),
                         ),
                       ),
-                    ),
-                  Expanded(
-                    child: Column(
-                      children: <Widget>[
-                        _ShellHeader(
-                          compact: compact,
-                          onMenuTap: () =>
-                              scaffoldKey.currentState?.openDrawer(),
-                        ),
-                        Expanded(
-                          child: SingleChildScrollView(
-                            padding: EdgeInsets.fromLTRB(
-                              compact ? 16 : 28,
-                              24,
-                              compact ? 16 : 28,
-                              28,
-                            ),
-                            child: Align(
-                              alignment: Alignment.topCenter,
-                              child: ConstrainedBox(
-                                constraints: const BoxConstraints(
-                                  maxWidth: 1380,
-                                ),
-                                child: _PageViewport(
-                                  activePage: activePage,
-                                  onNavigate: onNavigate,
+                    Expanded(
+                      child: Column(
+                        children: <Widget>[
+                          _ShellHeader(
+                            compact: compact,
+                            activePage: activePage,
+                            onMenuTap: () =>
+                                scaffoldKey.currentState?.openDrawer(),
+                          ),
+                          Expanded(
+                            child: SingleChildScrollView(
+                              padding: EdgeInsets.fromLTRB(
+                                compact ? 16 : 28,
+                                24,
+                                compact ? 16 : 28,
+                                28,
+                              ),
+                              child: Align(
+                                alignment: Alignment.topCenter,
+                                child: ConstrainedBox(
+                                  constraints: const BoxConstraints(
+                                    maxWidth: 1380,
+                                  ),
+                                  child: _PageViewport(
+                                    activePage: activePage,
+                                    onNavigate: onNavigate,
+                                  ),
                                 ),
                               ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
+            ],
           ),
         );
       },
@@ -264,14 +299,19 @@ class _ShellSidebar extends StatelessWidget {
 
         return DecoratedBox(
           decoration: BoxDecoration(
-            border: Border.all(color: AppTheme.border),
-            borderRadius: BorderRadius.circular(32),
+            border: Border.all(color: AppTheme.borderSoft),
+            borderRadius: BorderRadius.circular(36),
             gradient: const LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: <Color>[Color(0xFFFFFCF5), Colors.white, Colors.white],
-              stops: <double>[0, 0.32, 1],
+              colors: <Color>[
+                Color(0xFFFFFCF6),
+                Color(0xFFFFFFFF),
+                Color(0xFFF8FBFF),
+              ],
+              stops: <double>[0, 0.38, 1],
             ),
+            boxShadow: AppTheme.softShadow,
           ),
           child: Padding(
             padding: shellPadding,
@@ -279,59 +319,110 @@ class _ShellSidebar extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 AppSurface(
-                  radius: narrow ? 24 : 28,
+                  radius: narrow ? 26 : 30,
                   padding: cardPadding,
+                  gradient: const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: <Color>[Color(0xFFFFFEFB), Color(0xFFF3F8FF)],
+                  ),
                   shadow: AppTheme.softShadow,
-                  child: Row(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Container(
-                        width: narrow ? 44 : 50,
-                        height: narrow ? 44 : 50,
-                        decoration: BoxDecoration(
-                          color: AppTheme.ink,
-                          borderRadius: BorderRadius.circular(narrow ? 16 : 18),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
                         ),
-                        child: const Icon(
-                          Icons.image_outlined,
-                          color: AppTheme.gold,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.8),
+                          borderRadius: BorderRadius.circular(999),
+                          border: Border.all(color: AppTheme.borderSoft),
+                        ),
+                        child: Text(
+                          'OPERATOR CONSOLE',
+                          style: Theme.of(context).textTheme.labelSmall
+                              ?.copyWith(
+                                color: AppTheme.slate,
+                                letterSpacing: 1.8,
+                              ),
                         ),
                       ),
-                      SizedBox(width: narrow ? 12 : 14),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Text(
-                              'IMAGE PIPELINE',
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: Theme.of(context).textTheme.labelSmall
-                                  ?.copyWith(
-                                    color: AppTheme.slate,
-                                    letterSpacing: narrow ? 2.0 : 2.4,
-                                  ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'ImageFlow',
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: AppTheme.displayStyle(
-                                context,
-                                size: narrow ? 22 : 24,
-                                height: 1,
+                      const SizedBox(height: 16),
+                      Row(
+                        children: <Widget>[
+                          Expanded(
+                            child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: LuminousLogo(
+                                tone: LuminousBrandTone.onLight,
+                                width: narrow ? 152 : 176,
+                                height: narrow ? 36 : 42,
                               ),
                             ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Distributed processing',
-                              maxLines: 2,
-                              overflow: TextOverflow.fade,
-                              style: Theme.of(context).textTheme.bodySmall
-                                  ?.copyWith(color: AppTheme.slate),
+                          ),
+                          SizedBox(width: narrow ? 10 : 12),
+                          Container(
+                            width: narrow ? 44 : 50,
+                            height: narrow ? 44 : 50,
+                            decoration: BoxDecoration(
+                              color: AppTheme.canvasSoft,
+                              border: Border.all(color: AppTheme.border),
+                              borderRadius: BorderRadius.circular(
+                                narrow ? 16 : 18,
+                              ),
                             ),
-                          ],
+                            child: const Padding(
+                              padding: EdgeInsets.all(9),
+                              child: LuminousLogo(
+                                tone: LuminousBrandTone.onLight,
+                                iconOnly: true,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'DISTRIBUTED IMAGE SYSTEM',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: AppTheme.slate,
+                          letterSpacing: narrow ? 2.0 : 2.4,
                         ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        'Control and monitor every workflow from one premium surface.',
+                        maxLines: 2,
+                        overflow: TextOverflow.fade,
+                        style: Theme.of(
+                          context,
+                        ).textTheme.bodySmall?.copyWith(color: AppTheme.slate),
+                      ),
+                      const SizedBox(height: 16),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: const <Widget>[
+                          _SidebarMetricPill(
+                            label: 'Nodes',
+                            value: '08',
+                            icon: Icons.dns_outlined,
+                          ),
+                          _SidebarMetricPill(
+                            label: 'Throughput',
+                            value: '64/min',
+                            icon: Icons.show_chart_rounded,
+                          ),
+                          _SidebarMetricPill(
+                            label: 'Median SLA',
+                            value: '3.8s',
+                            icon: Icons.bolt_rounded,
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -339,7 +430,11 @@ class _ShellSidebar extends StatelessWidget {
                 const SizedBox(height: 14),
                 AppSurface(
                   radius: narrow ? 24 : 26,
-                  color: const Color(0xFFFCFCFD),
+                  gradient: const LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: <Color>[Color(0xFFFDFEFE), Color(0xFFF6FBF8)],
+                  ),
                   padding: cardPadding,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -417,7 +512,7 @@ class _ShellSidebar extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(18),
-                          border: Border.all(color: AppTheme.border),
+                          border: Border.all(color: AppTheme.borderSoft),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -437,6 +532,14 @@ class _ShellSidebar extends StatelessWidget {
                               ],
                             ),
                             const SizedBox(height: 8),
+                            ProgressLine(
+                              value: 0.72,
+                              color: AppTheme.success,
+                              background: AppTheme.success.withValues(
+                                alpha: 0.12,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
                             Row(
                               children: <Widget>[
                                 const Icon(
@@ -489,10 +592,13 @@ class _ShellSidebar extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 14),
-                OutlinedButton.icon(
-                  onPressed: onLogout,
-                  icon: const Icon(Icons.logout_rounded, size: 18),
-                  label: const Text('Sign out'),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: onLogout,
+                    icon: const Icon(Icons.logout_rounded, size: 18),
+                    label: const Text('Sign out'),
+                  ),
                 ),
               ],
             ),
@@ -504,9 +610,14 @@ class _ShellSidebar extends StatelessWidget {
 }
 
 class _ShellHeader extends StatelessWidget {
-  const _ShellHeader({required this.compact, required this.onMenuTap});
+  const _ShellHeader({
+    required this.compact,
+    required this.activePage,
+    required this.onMenuTap,
+  });
 
   final bool compact;
+  final AppPage activePage;
   final VoidCallback onMenuTap;
 
   @override
@@ -520,19 +631,50 @@ class _ShellHeader extends StatelessWidget {
         compact ? 16 : 28,
         20,
         compact ? 16 : 28,
-        18,
+        22,
       ),
       decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: Color(0xCCE2E8F0))),
-        color: Color(0xEBF8FAFC),
+        border: Border(bottom: BorderSide(color: AppTheme.borderSoft)),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: <Color>[Color(0xF9FFFFFF), Color(0xF3F7FCFF)],
+        ),
       ),
       child: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
-          final bool narrowActions = constraints.maxWidth < 860;
+          final bool stacked = constraints.maxWidth < 1060;
+
+          final Widget titleBlock = Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                activePage.label.toUpperCase(),
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: AppTheme.slate,
+                  letterSpacing: 2.4,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                _pageHeadline(activePage),
+                style: AppTheme.displayStyle(context, size: compact ? 28 : 34),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                _pageSummary(activePage),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: AppTheme.slate),
+              ),
+            ],
+          );
 
           return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   if (compact)
                     IconButton(
@@ -547,64 +689,49 @@ class _ShellHeader extends StatelessWidget {
                       icon: const Icon(Icons.menu_rounded),
                     ),
                   if (compact) const SizedBox(width: 12),
-                  Expanded(
-                    flex: compact ? 1 : 2,
-                    child: TextField(
-                      decoration: InputDecoration(
-                        hintText: 'Search images, requests, nodes...',
-                        prefixIcon: const Icon(
-                          Icons.search_rounded,
-                          color: AppTheme.slate,
-                        ),
-                        filled: true,
-                        fillColor: Colors.white,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  if (!narrowActions)
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: <Widget>[
-                        Text(
-                          weekday.toUpperCase(),
-                          style: Theme.of(context).textTheme.labelSmall
-                              ?.copyWith(
-                                color: AppTheme.slate,
-                                letterSpacing: 2.4,
-                              ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          today,
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                      ],
-                    ),
-                  if (!narrowActions) const SizedBox(width: 16),
-                  if (!narrowActions) const _HealthBadge(),
-                  const SizedBox(width: 12),
+                  Expanded(child: titleBlock),
+                  if (!stacked) ...<Widget>[
+                    const SizedBox(width: 20),
+                    _HeaderContextCard(weekday: weekday, today: today),
+                    const SizedBox(width: 12),
+                    const _HealthBadge(),
+                    const SizedBox(width: 12),
+                  ],
                   const _NotificationButton(),
                   const SizedBox(width: 12),
                   const _ProfilePill(),
                 ],
               ),
-              if (narrowActions) ...<Widget>[
-                const SizedBox(height: 14),
+              const SizedBox(height: 18),
+              if (stacked) ...<Widget>[
                 Row(
                   children: <Widget>[
                     Expanded(
-                      child: Text(
-                        '$weekday, $today',
-                        style: Theme.of(
-                          context,
-                        ).textTheme.bodySmall?.copyWith(color: AppTheme.slate),
-                      ),
+                      child: _HeaderContextCard(weekday: weekday, today: today),
                     ),
+                    const SizedBox(width: 12),
                     const _HealthBadge(compact: true),
                   ],
                 ),
+                const SizedBox(height: 14),
               ],
+              Row(
+                children: <Widget>[
+                  Expanded(
+                    child: TextField(
+                      decoration: const InputDecoration(
+                        hintText: 'Search queues, assets, requests, nodes...',
+                        prefixIcon: Icon(Icons.search_rounded),
+                        suffixIcon: Icon(Icons.tune_rounded),
+                      ),
+                    ),
+                  ),
+                  if (!stacked) ...<Widget>[
+                    const SizedBox(width: 14),
+                    const _HeaderPulsePill(),
+                  ],
+                ],
+              ),
             ],
           );
         },
@@ -626,8 +753,10 @@ class _HealthBadge extends StatelessWidget {
         vertical: compact ? 10 : 12,
       ),
       decoration: BoxDecoration(
-        color: const Color(0xFFF7FEE7),
-        border: Border.all(color: const Color(0xFFD9F99D)),
+        color: compact ? Colors.white : const Color(0xFFF7FEE7),
+        border: Border.all(
+          color: compact ? AppTheme.borderSoft : const Color(0xFFD9F99D),
+        ),
         borderRadius: BorderRadius.circular(compact ? 18 : 20),
       ),
       child: Row(
@@ -672,15 +801,7 @@ class _NotificationButton extends StatelessWidget {
       children: <Widget>[
         IconButton(
           onPressed: () {},
-          style: IconButton.styleFrom(
-            backgroundColor: Colors.white,
-            foregroundColor: AppTheme.slate,
-            fixedSize: const Size(48, 48),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(18),
-            ),
-            side: const BorderSide(color: AppTheme.border),
-          ),
+          style: IconButton.styleFrom(fixedSize: const Size(48, 48)),
           icon: const Icon(Icons.notifications_none_rounded),
         ),
         Positioned(
@@ -709,8 +830,8 @@ class _ProfilePill extends StatelessWidget {
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border.all(color: AppTheme.border),
-        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: AppTheme.borderSoft),
+        borderRadius: BorderRadius.circular(24),
         boxShadow: AppTheme.softShadow,
       ),
       child: Row(
@@ -725,7 +846,9 @@ class _ProfilePill extends StatelessWidget {
               ),
               Text(
                 'Operations lead',
-                style: Theme.of(context).textTheme.bodySmall,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: AppTheme.slate),
               ),
             ],
           ),
@@ -734,7 +857,11 @@ class _ProfilePill extends StatelessWidget {
             width: 42,
             height: 42,
             decoration: BoxDecoration(
-              color: AppTheme.ink,
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: <Color>[AppTheme.ink, AppTheme.sapphire],
+              ),
               borderRadius: BorderRadius.circular(18),
             ),
             child: const Icon(
@@ -770,29 +897,38 @@ class _SidebarTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 160),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           decoration: BoxDecoration(
-            color: active ? AppTheme.ink : Colors.white.withValues(alpha: 0.72),
-            borderRadius: BorderRadius.circular(20),
+            gradient: active
+                ? const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: <Color>[AppTheme.ink, AppTheme.inkSoft],
+                  )
+                : null,
+            color: active ? null : Colors.white.withValues(alpha: 0.76),
+            borderRadius: BorderRadius.circular(22),
             border: Border.all(
-              color: active ? AppTheme.ink : Colors.transparent,
+              color: active ? AppTheme.ink : AppTheme.borderSoft,
             ),
+            boxShadow: active ? AppTheme.cardShadow : const <BoxShadow>[],
           ),
           child: Row(
             children: <Widget>[
               Container(
-                width: 4,
-                height: 32,
+                width: 42,
+                height: 42,
                 decoration: BoxDecoration(
-                  color: active ? AppTheme.gold : Colors.transparent,
-                  borderRadius: BorderRadius.circular(100),
+                  color: active
+                      ? Colors.white.withValues(alpha: 0.1)
+                      : AppTheme.canvasWarm,
+                  borderRadius: BorderRadius.circular(14),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Icon(
-                icon,
-                size: 20,
-                color: active ? AppTheme.gold : AppTheme.slate,
+                child: Icon(
+                  icon,
+                  size: 20,
+                  color: active ? AppTheme.gold : AppTheme.slate,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -803,9 +939,125 @@ class _SidebarTile extends StatelessWidget {
                   ),
                 ),
               ),
+              if (active)
+                const Icon(
+                  Icons.arrow_outward_rounded,
+                  size: 16,
+                  color: Colors.white70,
+                ),
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _SidebarMetricPill extends StatelessWidget {
+  const _SidebarMetricPill({
+    required this.label,
+    required this.value,
+    required this.icon,
+  });
+
+  final String label;
+  final String value;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.88),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: AppTheme.borderSoft),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Icon(icon, size: 16, color: AppTheme.sapphire),
+          const SizedBox(width: 8),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                value,
+                style: Theme.of(
+                  context,
+                ).textTheme.labelMedium?.copyWith(color: AppTheme.ink),
+              ),
+              Text(
+                label,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: AppTheme.slate),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HeaderContextCard extends StatelessWidget {
+  const _HeaderContextCard({required this.weekday, required this.today});
+
+  final String weekday;
+  final String today;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppTheme.borderSoft),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(
+            weekday.toUpperCase(),
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: AppTheme.slate,
+              letterSpacing: 2.0,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(today, style: Theme.of(context).textTheme.labelLarge),
+        ],
+      ),
+    );
+  }
+}
+
+class _HeaderPulsePill extends StatelessWidget {
+  const _HeaderPulsePill();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: AppTheme.sapphireSoft,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: AppTheme.sapphire.withValues(alpha: 0.12)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          const Icon(Icons.bolt_rounded, size: 18, color: AppTheme.sapphire),
+          const SizedBox(width: 8),
+          Text(
+            'Live pulse synced',
+            style: Theme.of(
+              context,
+            ).textTheme.labelMedium?.copyWith(color: AppTheme.sapphire),
+          ),
+        ],
       ),
     );
   }
@@ -840,4 +1092,54 @@ String _monthName(int month) {
     'December',
   ];
   return months[month - 1];
+}
+
+String _pageHeadline(AppPage page) {
+  switch (page) {
+    case AppPage.dashboard:
+      return 'Operations at a glance';
+    case AppPage.upload:
+      return 'Bring new image batches in';
+    case AppPage.taskBuilder:
+      return 'Shape the processing flow';
+    case AppPage.progress:
+      return 'Track active workloads live';
+    case AppPage.results:
+      return 'Review delivered outputs';
+    case AppPage.history:
+      return 'Inspect past execution lanes';
+    case AppPage.requestDetail:
+      return 'Inspect request details';
+    case AppPage.nodes:
+      return 'Observe worker capacity';
+    case AppPage.logs:
+      return 'Read platform activity';
+    case AppPage.settings:
+      return 'Tune workspace behavior';
+  }
+}
+
+String _pageSummary(AppPage page) {
+  switch (page) {
+    case AppPage.dashboard:
+      return 'A premium operational view of throughput, queue pressure, and cluster calm.';
+    case AppPage.upload:
+      return 'Stage new workloads and validate assets before they hit the queue.';
+    case AppPage.taskBuilder:
+      return 'Compose presets, routing, and delivery rules with clean guardrails.';
+    case AppPage.progress:
+      return 'Keep an eye on active jobs, pacing, and workload health in one place.';
+    case AppPage.results:
+      return 'Review outcomes, exports, and surfaced exceptions without losing context.';
+    case AppPage.history:
+      return 'Audit prior requests and compare how the system behaved over time.';
+    case AppPage.requestDetail:
+      return 'Zoom into one request and inspect every important operational signal.';
+    case AppPage.nodes:
+      return 'See how each worker is carrying load, risk, and available recovery room.';
+    case AppPage.logs:
+      return 'Surface system events with enough clarity to spot patterns quickly.';
+    case AppPage.settings:
+      return 'Adjust workspace rules, defaults, and operator-facing behavior.';
+  }
 }

@@ -1,7 +1,50 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:imageflow_flutter/core/theme/app_theme.dart';
+
+enum LuminousBrandTone { onLight, onDark, mono }
+
+class LuminousLogo extends StatelessWidget {
+  const LuminousLogo({
+    super.key,
+    required this.tone,
+    this.iconOnly = false,
+    this.width,
+    this.height,
+    this.fit = BoxFit.contain,
+  });
+
+  final LuminousBrandTone tone;
+  final bool iconOnly;
+  final double? width;
+  final double? height;
+  final BoxFit fit;
+
+  String get _assetName {
+    final String family = iconOnly ? 'icon' : 'logo';
+    switch (tone) {
+      case LuminousBrandTone.onLight:
+        return 'assets/branding/luminous-$family-light.svg';
+      case LuminousBrandTone.onDark:
+        return 'assets/branding/luminous-$family-dark.svg';
+      case LuminousBrandTone.mono:
+        return 'assets/branding/luminous-$family-mono.svg';
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SvgPicture.asset(
+      _assetName,
+      width: width,
+      height: height,
+      fit: fit,
+      semanticsLabel: 'Luminous logo',
+    );
+  }
+}
 
 class AppSurface extends StatelessWidget {
   const AppSurface({
@@ -10,6 +53,8 @@ class AppSurface extends StatelessWidget {
     this.padding = const EdgeInsets.all(24),
     this.radius = 16,
     this.color = Colors.white,
+    this.gradient,
+    this.borderColor = AppTheme.borderSoft,
     this.shadow = AppTheme.cardShadow,
   });
 
@@ -17,6 +62,8 @@ class AppSurface extends StatelessWidget {
   final EdgeInsetsGeometry padding;
   final double radius;
   final Color color;
+  final Gradient? gradient;
+  final Color borderColor;
   final List<BoxShadow> shadow;
 
   @override
@@ -24,9 +71,10 @@ class AppSurface extends StatelessWidget {
     return Container(
       padding: padding,
       decoration: BoxDecoration(
-        color: color,
+        color: gradient == null ? color : null,
+        gradient: gradient,
         borderRadius: BorderRadius.circular(radius),
-        border: Border.all(color: AppTheme.border),
+        border: Border.all(color: borderColor),
         boxShadow: shadow,
       ),
       child: child,
@@ -51,6 +99,12 @@ class SectionPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppSurface(
+      radius: 28,
+      gradient: const LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: <Color>[AppTheme.canvasWarm, Colors.white],
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -63,7 +117,7 @@ class SectionPanel extends StatelessWidget {
                   children: <Widget>[
                     Text(title, style: Theme.of(context).textTheme.titleLarge),
                     if (description != null) ...<Widget>[
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 8),
                       Text(
                         description!,
                         style: Theme.of(
@@ -75,7 +129,7 @@ class SectionPanel extends StatelessWidget {
                 ),
               ),
               if (action != null) ...<Widget>[
-                const SizedBox(width: 12),
+                const SizedBox(width: 14),
                 action!,
               ],
             ],
@@ -104,35 +158,61 @@ class PageIntro extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppSurface(
-      padding: const EdgeInsets.all(28),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                _Kicker(text: kicker, icon: Icons.insights_outlined),
-                const SizedBox(height: 14),
-                Text(title, style: AppTheme.displayStyle(context, size: 30)),
-                const SizedBox(height: 12),
-                ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 720),
-                  child: Text(
-                    description,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppTheme.slate,
-                      height: 1.7,
-                    ),
-                  ),
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        final bool stacked = actions != null && constraints.maxWidth < 1080;
+
+        final Widget copy = Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            _Kicker(text: kicker, icon: Icons.insights_outlined),
+            const SizedBox(height: 16),
+            Text(title, style: AppTheme.displayStyle(context, size: 32)),
+            const SizedBox(height: 12),
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 760),
+              child: Text(
+                description,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: AppTheme.slate,
+                  height: 1.7,
                 ),
-              ],
+              ),
             ),
+          ],
+        );
+
+        return AppSurface(
+          radius: 30,
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: <Color>[Color(0xFFFFFEFB), Color(0xFFF8FBFF)],
           ),
-          if (actions != null) ...<Widget>[const SizedBox(width: 18), actions!],
-        ],
-      ),
+          padding: const EdgeInsets.all(30),
+          child: stacked
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    copy,
+                    if (actions != null) ...<Widget>[
+                      const SizedBox(height: 22),
+                      actions!,
+                    ],
+                  ],
+                )
+              : Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Expanded(child: copy),
+                    if (actions != null) ...<Widget>[
+                      const SizedBox(width: 20),
+                      actions!,
+                    ],
+                  ],
+                ),
+        );
+      },
     );
   }
 }
@@ -190,10 +270,10 @@ class StatusChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
       decoration: BoxDecoration(
         color: background,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(999),
         border: Border.all(color: color.withValues(alpha: 0.18)),
       ),
       child: Row(
@@ -207,7 +287,7 @@ class StatusChip extends StatelessWidget {
             label,
             style: Theme.of(
               context,
-            ).textTheme.labelMedium?.copyWith(color: color),
+            ).textTheme.labelMedium?.copyWith(color: color, letterSpacing: 0.2),
           ),
         ],
       ),
@@ -307,16 +387,17 @@ class TogglePill extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(18),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 160),
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
           decoration: BoxDecoration(
             color: selected ? AppTheme.ink : Colors.white,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(18),
             border: Border.all(
-              color: selected ? AppTheme.ink : AppTheme.border,
+              color: selected ? AppTheme.ink : AppTheme.borderSoft,
             ),
+            boxShadow: selected ? AppTheme.cardShadow : const <BoxShadow>[],
           ),
           child: Text(
             label,
@@ -506,9 +587,9 @@ class _Kicker extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(color: AppTheme.border),
-        borderRadius: BorderRadius.circular(16),
+        color: AppTheme.canvasWarm,
+        border: Border.all(color: AppTheme.borderSoft),
+        borderRadius: BorderRadius.circular(18),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

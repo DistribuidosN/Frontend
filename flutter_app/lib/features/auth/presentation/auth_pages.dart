@@ -43,22 +43,42 @@ class _LoginPageState extends State<LoginPage> {
         },
       ],
       panel: AppSurface(
-        radius: 28,
+        radius: 32,
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: <Color>[Color(0xFFFFFEFB), Colors.white],
+        ),
         padding: const EdgeInsets.all(38),
         shadow: AppTheme.softShadow,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
+            Row(
+              children: <Widget>[
+                const LuminousLogo(
+                  tone: LuminousBrandTone.onLight,
+                  width: 150,
+                  height: 36,
+                ),
+                const Spacer(),
+                _AuthFormMetaPill(
+                  icon: Icons.lock_outline_rounded,
+                  label: 'Secure workspace',
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
-                color: const Color(0xFFF8FAFC),
+                color: AppTheme.canvasWarm,
                 borderRadius: BorderRadius.circular(999),
-                border: Border.all(color: AppTheme.border),
+                border: Border.all(color: AppTheme.borderSoft),
               ),
               child: Text(
-                'CONTROL SURFACE ACCESS',
+                'LUMINOUS ACCESS',
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
                   color: AppTheme.slate,
                   letterSpacing: 2,
@@ -72,17 +92,32 @@ class _LoginPageState extends State<LoginPage> {
             ),
             const SizedBox(height: 10),
             Text(
-              'Sign in to your ImageFlow account',
+              'Sign in to your Luminous workspace',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: AppTheme.slate,
                 height: 1.6,
               ),
             ),
+            const SizedBox(height: 16),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: const <Widget>[
+                _AuthFormMetaPill(
+                  icon: Icons.verified_user_outlined,
+                  label: 'Role-based access',
+                ),
+                _AuthFormMetaPill(
+                  icon: Icons.flash_on_outlined,
+                  label: 'Fast operator entry',
+                ),
+              ],
+            ),
             const SizedBox(height: 28),
             const _AuthFieldLabel('Email address'),
             const SizedBox(height: 8),
             const TextField(
-              decoration: InputDecoration(hintText: 'alex@imageflow.io'),
+              decoration: InputDecoration(hintText: 'alex@luminous.io'),
             ),
             const SizedBox(height: 16),
             Row(
@@ -165,6 +200,8 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
             const SizedBox(height: 18),
+            Divider(color: AppTheme.borderSoft, height: 1),
+            const SizedBox(height: 18),
             Center(
               child: Text(
                 'Protected by enterprise-grade security',
@@ -218,22 +255,42 @@ class _RegisterPageState extends State<RegisterPage> {
         },
       ],
       panel: AppSurface(
-        radius: 28,
+        radius: 32,
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: <Color>[Color(0xFFFFFEFB), Colors.white],
+        ),
         padding: const EdgeInsets.all(34),
         shadow: AppTheme.softShadow,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
+            Row(
+              children: <Widget>[
+                const LuminousLogo(
+                  tone: LuminousBrandTone.onLight,
+                  width: 150,
+                  height: 36,
+                ),
+                const Spacer(),
+                _AuthFormMetaPill(
+                  icon: Icons.group_add_outlined,
+                  label: 'Team onboarding',
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
-                color: const Color(0xFFF8FAFC),
+                color: AppTheme.canvasWarm,
                 borderRadius: BorderRadius.circular(999),
-                border: Border.all(color: AppTheme.border),
+                border: Border.all(color: AppTheme.borderSoft),
               ),
               child: Text(
-                'CREATE WORKSPACE ACCESS',
+                'CREATE LUMINOUS ACCESS',
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
                   color: AppTheme.slate,
                   letterSpacing: 2,
@@ -247,11 +304,26 @@ class _RegisterPageState extends State<RegisterPage> {
             ),
             const SizedBox(height: 10),
             Text(
-              'Join ImageFlow and start processing images',
+              'Join Luminous and start processing images',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: AppTheme.slate,
                 height: 1.6,
               ),
+            ),
+            const SizedBox(height: 16),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: const <Widget>[
+                _AuthFormMetaPill(
+                  icon: Icons.dns_outlined,
+                  label: 'Distributed-ready',
+                ),
+                _AuthFormMetaPill(
+                  icon: Icons.shield_outlined,
+                  label: 'Governed access',
+                ),
+              ],
             ),
             const SizedBox(height: 28),
             _AuthResponsivePair(
@@ -276,7 +348,7 @@ class _RegisterPageState extends State<RegisterPage> {
             const _AuthFieldLabel('Email address'),
             const SizedBox(height: 8),
             const TextField(
-              decoration: InputDecoration(hintText: 'alex@imageflow.io'),
+              decoration: InputDecoration(hintText: 'alex@luminous.io'),
             ),
             const SizedBox(height: 16),
             const _AuthFieldLabel('Password'),
@@ -458,7 +530,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                             const TextField(
                               decoration: InputDecoration(
                                 labelText: 'Email address',
-                                hintText: 'alex@imageflow.io',
+                                hintText: 'alex@luminous.io',
                               ),
                             ),
                             const SizedBox(height: 18),
@@ -555,16 +627,20 @@ class _AuthLayout extends StatelessWidget {
           body: SafeArea(
             child: showHero
                 ? Padding(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(18),
                     child: DecoratedBox(
                       decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(30),
-                        border: Border.all(color: AppTheme.border),
+                        gradient: const LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: <Color>[Color(0xFFFFFEFB), Color(0xFFF8FBFF)],
+                        ),
+                        borderRadius: BorderRadius.circular(34),
+                        border: Border.all(color: AppTheme.borderSoft),
                         boxShadow: AppTheme.softShadow,
                       ),
                       child: ClipRRect(
-                        borderRadius: BorderRadius.circular(30),
+                        borderRadius: BorderRadius.circular(34),
                         child: Row(
                           children: <Widget>[
                             Expanded(
@@ -578,7 +654,21 @@ class _AuthLayout extends StatelessWidget {
                             Expanded(
                               flex: 8,
                               child: Container(
-                                color: const Color(0xFFF8FAFC),
+                                decoration: const BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                    colors: <Color>[
+                                      Color(0xFFF9FBFE),
+                                      Colors.white,
+                                    ],
+                                  ),
+                                  border: Border(
+                                    left: BorderSide(
+                                      color: AppTheme.borderSoft,
+                                    ),
+                                  ),
+                                ),
                                 child: Align(
                                   alignment: Alignment.center,
                                   child: SingleChildScrollView(
@@ -665,9 +755,9 @@ class _AuthHeroPane extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: <Color>[
-            Color(0xFF0F172A),
-            Color(0xFF16213C),
-            Color(0xFF1C2B4A),
+            Color(0xFF0D1528),
+            Color(0xFF152241),
+            Color(0xFF20356A),
           ],
         ),
       ),
@@ -694,74 +784,46 @@ class _AuthHeroPane extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Row(
-                  mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
-                    Container(
-                      width: 56,
+                    const LuminousLogo(
+                      tone: LuminousBrandTone.onDark,
+                      width: 210,
                       height: 56,
+                    ),
+                    const Spacer(),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 10,
+                      ),
                       decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: <Color>[AppTheme.gold, AppTheme.goldDeep],
+                        color: Colors.white.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(999),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.14),
                         ),
-                        borderRadius: BorderRadius.circular(18),
-                        boxShadow: const <BoxShadow>[
-                          BoxShadow(
-                            color: Color(0x22FACC15),
-                            blurRadius: 24,
-                            offset: Offset(0, 12),
-                            spreadRadius: -12,
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          Container(
+                            width: 8,
+                            height: 8,
+                            decoration: const BoxDecoration(
+                              color: AppTheme.success,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Luminous mesh online',
+                            style: Theme.of(context).textTheme.labelMedium
+                                ?.copyWith(color: Colors.white),
                           ),
                         ],
                       ),
-                      child: const Icon(
-                        Icons.image_outlined,
-                        color: AppTheme.ink,
-                      ),
-                    ),
-                    const SizedBox(width: 14),
-                    Text(
-                      'ImageFlow',
-                      style: AppTheme.displayStyle(
-                        context,
-                        size: 34,
-                        color: Colors.white,
-                      ),
                     ),
                   ],
-                ),
-                const Spacer(),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 10,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.08),
-                    borderRadius: BorderRadius.circular(999),
-                    border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.14),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      Container(
-                        width: 8,
-                        height: 8,
-                        decoration: const BoxDecoration(
-                          color: AppTheme.success,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Node mesh online',
-                        style: Theme.of(
-                          context,
-                        ).textTheme.labelMedium?.copyWith(color: Colors.white),
-                      ),
-                    ],
-                  ),
                 ),
                 const SizedBox(height: 22),
                 ConstrainedBox(
@@ -809,6 +871,56 @@ class _AuthHeroPane extends StatelessWidget {
                     _HeroMetricPill(label: '3.8s median SLA'),
                   ],
                 ),
+                const SizedBox(height: 20),
+                Container(
+                  constraints: const BoxConstraints(maxWidth: 520),
+                  padding: const EdgeInsets.all(18),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.06),
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.14),
+                    ),
+                  ),
+                  child: Row(
+                    children: <Widget>[
+                      Container(
+                        width: 44,
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: AppTheme.gold.withValues(alpha: 0.14),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: const Icon(
+                          Icons.auto_awesome_rounded,
+                          color: AppTheme.gold,
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Text(
+                              'Premium control surface',
+                              style: Theme.of(context).textTheme.labelLarge
+                                  ?.copyWith(color: Colors.white),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Built to keep operators inside one calm workspace while workloads scale.',
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(
+                                    color: Colors.white.withValues(alpha: 0.74),
+                                    height: 1.5,
+                                  ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
                 const Spacer(),
               ],
             ),
@@ -840,9 +952,9 @@ class _CompactAuthHero extends StatelessWidget {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: <Color>[
-                Color(0xFF0F172A),
-                Color(0xFF16213C),
-                Color(0xFF1C2B4A),
+                Color(0xFF0D1528),
+                Color(0xFF152241),
+                Color(0xFF20356A),
               ],
             ),
           ),
@@ -857,30 +969,15 @@ class _CompactAuthHero extends StatelessWidget {
                   children: <Widget>[
                     Row(
                       children: <Widget>[
-                        Container(
-                          width: 44,
-                          height: 44,
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: <Color>[AppTheme.gold, AppTheme.goldDeep],
-                            ),
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                          child: const Icon(
-                            Icons.image_outlined,
-                            color: AppTheme.ink,
-                            size: 22,
+                        const Flexible(
+                          child: LuminousLogo(
+                            tone: LuminousBrandTone.onDark,
+                            width: 184,
+                            height: 44,
                           ),
                         ),
-                        const SizedBox(width: 12),
-                        Text(
-                          'ImageFlow',
-                          style: AppTheme.displayStyle(
-                            context,
-                            size: 28,
-                            color: Colors.white,
-                          ),
-                        ),
+                        const Spacer(),
+                        const _HeroMetricPill(label: 'Live mesh'),
                       ],
                     ),
                     const SizedBox(height: 22),
@@ -929,14 +1026,29 @@ class _AuthFeatureCard extends StatelessWidget {
       width: 230,
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.14)),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: <Color>[
+            Colors.white.withValues(alpha: 0.1),
+            Colors.white.withValues(alpha: 0.05),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Icon(icon, color: AppTheme.gold, size: 26),
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Icon(icon, color: AppTheme.gold, size: 24),
+          ),
           const SizedBox(height: 14),
           Text(
             label,
@@ -968,7 +1080,7 @@ class _HeroMetricPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.06),
+        color: Colors.white.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(999),
         border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
       ),
@@ -1051,6 +1163,38 @@ class _InlineActionLink extends StatelessWidget {
   }
 }
 
+class _AuthFormMetaPill extends StatelessWidget {
+  const _AuthFormMetaPill({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: AppTheme.borderSoft),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Icon(icon, size: 16, color: AppTheme.sapphire),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: Theme.of(
+              context,
+            ).textTheme.labelMedium?.copyWith(color: AppTheme.inkSoft),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _AuthSceneBackground extends StatelessWidget {
   const _AuthSceneBackground({this.lightMode = false});
 
@@ -1072,6 +1216,36 @@ class _AuthSceneBackground extends StatelessWidget {
                     Color(0xFFF6F4EE),
                     Colors.white,
                   ],
+                ),
+              ),
+            ),
+          ),
+        if (lightMode)
+          Positioned(
+            right: -80,
+            top: -40,
+            child: IgnorePointer(
+              child: Container(
+                width: 220,
+                height: 220,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppTheme.sapphire.withValues(alpha: 0.06),
+                ),
+              ),
+            ),
+          ),
+        if (lightMode)
+          Positioned(
+            left: -60,
+            bottom: -80,
+            child: IgnorePointer(
+              child: Container(
+                width: 200,
+                height: 200,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppTheme.gold.withValues(alpha: 0.08),
                 ),
               ),
             ),

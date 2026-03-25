@@ -2,174 +2,192 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
-  static const Color ink = Color(0xFF0F172A);
-  static const Color inkSoft = Color(0xFF17233B);
-  static const Color slate = Color(0xFF64748B);
-  static const Color muted = Color(0xFF94A3B8);
-  static const Color border = Color(0xFFE2E8F0);
-  static const Color borderSoft = Color(0xFFE8EDF5);
-  static const Color borderStrong = Color(0xFFD3DCE8);
-  static const Color canvas = Color(0xFFF6F4EE);
-  static const Color canvasSoft = Color(0xFFF8FAFC);
-  static const Color canvasWarm = Color(0xFFFFFCF6);
-  static const Color surfaceMuted = Color(0xFFF4F7FB);
-  static const Color surface = Colors.white;
-  static const Color sapphire = Color(0xFF3153C9);
-  static const Color sapphireSoft = Color(0xFFEEF3FF);
-  static const Color gold = Color(0xFFFACC15);
-  static const Color goldDeep = Color(0xFFEAB308);
-  static const Color success = Color(0xFF16A34A);
-  static const Color successSoft = Color(0xFFF0FDF4);
-  static const Color info = Color(0xFF1D4ED8);
-  static const Color infoSoft = Color(0xFFEFF6FF);
-  static const Color danger = Color(0xFFDC2626);
-  static const Color dangerSoft = Color(0xFFFEF2F2);
-  static const Color warning = Color(0xFFF59E0B);
-  static const Color warningSoft = Color(0xFFFFF7ED);
-  static const Color midnight = Color(0xFF111827);
+  static const Color white = Color(0xFFFFFFFF);
+  static const Color navy = Color(0xFF003049);
+  static const Color red = Color(0xFFD62828);
+  static const Color orange = Color(0xFFF77F00);
+  static const Color gold = Color(0xFFFCBF49);
+  static const Color sand = Color(0xFFEAE2B7);
+  static const Color statusGreen = Color(0xFF2E7D32);
+
+  static const Color ink = navy;
+  static const Color inkSoft = navy;
+  static const Color slate = navy;
+  static const Color muted = Color(0x80003049);
+  static const Color border = Color(0x22003049);
+  static const Color borderSoft = Color(0x16003049);
+  static const Color borderStrong = Color(0x30003049);
+  static const Color canvas = white;
+  static const Color canvasSoft = sand;
+  static const Color canvasWarm = sand;
+  static const Color surfaceMuted = sand;
+  static const Color surface = white;
+  static const Color sapphire = navy;
+  static const Color sapphireSoft = sand;
+  static const Color goldDeep = orange;
+  static const Color success = orange;
+  static const Color successSoft = sand;
+  static const Color info = gold;
+  static const Color infoSoft = sand;
+  static const Color danger = red;
+  static const Color dangerSoft = sand;
+  static const Color warning = gold;
+  static const Color warningSoft = sand;
+  static const Color midnight = navy;
 
   static ThemeData lightTheme() {
-    final textTheme = GoogleFonts.manropeTextTheme().copyWith(
+    final TextTheme textTheme = GoogleFonts.manropeTextTheme().copyWith(
       displayLarge: GoogleFonts.fraunces(
         fontSize: 48,
         fontWeight: FontWeight.w700,
-        height: 1.04,
-        color: ink,
+        height: 1.02,
+        color: navy,
       ),
       displayMedium: GoogleFonts.fraunces(
         fontSize: 40,
         fontWeight: FontWeight.w700,
-        height: 1.06,
-        color: ink,
+        height: 1.04,
+        color: navy,
       ),
       displaySmall: GoogleFonts.fraunces(
         fontSize: 32,
         fontWeight: FontWeight.w700,
-        height: 1.08,
-        color: ink,
+        height: 1.06,
+        color: navy,
       ),
       headlineLarge: GoogleFonts.fraunces(
         fontSize: 28,
         fontWeight: FontWeight.w700,
-        height: 1.08,
-        color: ink,
+        height: 1.06,
+        color: navy,
       ),
       headlineMedium: GoogleFonts.fraunces(
         fontSize: 24,
         fontWeight: FontWeight.w700,
-        height: 1.1,
-        color: ink,
+        height: 1.08,
+        color: navy,
       ),
       headlineSmall: GoogleFonts.fraunces(
         fontSize: 20,
         fontWeight: FontWeight.w700,
         height: 1.1,
-        color: ink,
+        color: navy,
       ),
       titleLarge: GoogleFonts.manrope(
         fontSize: 18,
-        fontWeight: FontWeight.w700,
-        color: ink,
+        fontWeight: FontWeight.w800,
+        color: navy,
       ),
       titleMedium: GoogleFonts.manrope(
         fontSize: 16,
-        fontWeight: FontWeight.w700,
-        color: ink,
+        fontWeight: FontWeight.w800,
+        color: navy,
       ),
       titleSmall: GoogleFonts.manrope(
         fontSize: 14,
-        fontWeight: FontWeight.w700,
-        color: ink,
+        fontWeight: FontWeight.w800,
+        color: navy,
       ),
       bodyLarge: GoogleFonts.manrope(
         fontSize: 16,
         fontWeight: FontWeight.w500,
-        height: 1.55,
-        color: ink,
+        height: 1.58,
+        color: navy,
       ),
       bodyMedium: GoogleFonts.manrope(
         fontSize: 14,
         fontWeight: FontWeight.w500,
-        height: 1.55,
-        color: ink,
+        height: 1.58,
+        color: navy,
       ),
       bodySmall: GoogleFonts.manrope(
         fontSize: 12,
-        fontWeight: FontWeight.w500,
-        height: 1.5,
-        color: slate,
+        fontWeight: FontWeight.w600,
+        height: 1.52,
+        color: navy,
       ),
       labelLarge: GoogleFonts.manrope(
         fontSize: 14,
-        fontWeight: FontWeight.w700,
+        fontWeight: FontWeight.w800,
         letterSpacing: -0.1,
-        color: ink,
+        color: navy,
       ),
       labelMedium: GoogleFonts.manrope(
         fontSize: 12,
-        fontWeight: FontWeight.w700,
+        fontWeight: FontWeight.w800,
         letterSpacing: 0.2,
-        color: ink,
+        color: navy,
       ),
       labelSmall: GoogleFonts.manrope(
         fontSize: 11,
-        fontWeight: FontWeight.w700,
-        letterSpacing: 1.2,
-        color: slate,
+        fontWeight: FontWeight.w800,
+        letterSpacing: 1.4,
+        color: orange,
       ),
     );
 
     return ThemeData(
       useMaterial3: true,
-      scaffoldBackgroundColor: canvasSoft,
+      scaffoldBackgroundColor: white,
       splashFactory: NoSplash.splashFactory,
-      hoverColor: surfaceMuted,
-      highlightColor: Colors.transparent,
-      focusColor: sapphireSoft,
+      hoverColor: gold.withValues(alpha: 0.08),
+      highlightColor: white,
+      focusColor: orange.withValues(alpha: 0.12),
       colorScheme: const ColorScheme.light(
-        primary: sapphire,
-        secondary: gold,
-        surface: surface,
-        error: danger,
+        primary: red,
+        secondary: orange,
+        surface: white,
+        error: red,
+        onPrimary: white,
+        onSecondary: navy,
+        onSurface: navy,
+        onError: white,
       ),
       textTheme: textTheme,
-      dividerColor: borderSoft,
-      cardColor: surface,
+      dividerColor: border,
+      cardColor: white,
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: surface,
+        fillColor: sand.withValues(alpha: 0.38),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 18,
           vertical: 16,
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: const BorderSide(color: borderSoft),
+          borderSide: const BorderSide(color: borderStrong, width: 1.1),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: const BorderSide(color: borderSoft),
+          borderSide: const BorderSide(color: borderStrong, width: 1.1),
         ),
         disabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: const BorderSide(color: borderSoft),
+          borderSide: BorderSide(
+            color: navy.withValues(alpha: 0.14),
+            width: 1.1,
+          ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: const BorderSide(color: sapphire, width: 1.4),
+          borderSide: const BorderSide(color: orange, width: 1.4),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: const BorderSide(color: danger, width: 1.2),
+          borderSide: const BorderSide(color: red, width: 1.4),
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: const BorderSide(color: danger, width: 1.4),
+          borderSide: const BorderSide(color: red, width: 1.5),
         ),
-        hintStyle: textTheme.bodyMedium?.copyWith(color: muted),
-        labelStyle: textTheme.bodyMedium?.copyWith(color: slate),
-        prefixIconColor: slate,
-        suffixIconColor: slate,
+        hintStyle: textTheme.bodyMedium?.copyWith(
+          color: navy.withValues(alpha: 0.58),
+        ),
+        labelStyle: textTheme.bodyMedium?.copyWith(
+          color: navy.withValues(alpha: 0.88),
+        ),
+        prefixIconColor: navy,
+        suffixIconColor: navy,
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: ButtonStyle(
@@ -177,22 +195,31 @@ class AppTheme {
             Set<WidgetState> states,
           ) {
             if (states.contains(WidgetState.disabled)) {
-              return ink.withValues(alpha: 0.36);
+              return red.withValues(alpha: 0.56);
+            }
+            if (states.contains(WidgetState.pressed)) {
+              return orange;
             }
             if (states.contains(WidgetState.hovered)) {
-              return inkSoft;
+              return red;
             }
-            return ink;
+            return red;
           }),
-          foregroundColor: WidgetStateProperty.all<Color>(surface),
+          foregroundColor: WidgetStateProperty.resolveWith<Color>((
+            Set<WidgetState> states,
+          ) {
+            return sand;
+          }),
+          overlayColor: WidgetStateProperty.all<Color>(
+            navy.withValues(alpha: 0.08),
+          ),
           elevation: WidgetStateProperty.resolveWith<double>((
             Set<WidgetState> states,
           ) {
-            return states.contains(WidgetState.hovered) ? 1.5 : 0;
+            return states.contains(WidgetState.hovered) ? 2 : 0;
           }),
-          shadowColor: WidgetStateProperty.all<Color>(const Color(0x260F172A)),
-          overlayColor: WidgetStateProperty.all<Color>(
-            Colors.white.withValues(alpha: 0.04),
+          shadowColor: WidgetStateProperty.all<Color>(
+            navy.withValues(alpha: 0.24),
           ),
           padding: WidgetStateProperty.all<EdgeInsetsGeometry>(
             const EdgeInsets.symmetric(horizontal: 22, vertical: 18),
@@ -205,21 +232,31 @@ class AppTheme {
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: ButtonStyle(
-          foregroundColor: WidgetStateProperty.all<Color>(ink),
+          foregroundColor: WidgetStateProperty.resolveWith<Color>((
+            Set<WidgetState> states,
+          ) {
+            return navy;
+          }),
           backgroundColor: WidgetStateProperty.resolveWith<Color>((
             Set<WidgetState> states,
           ) {
-            return states.contains(WidgetState.hovered)
-                ? canvasWarm
-                : Colors.white;
+            if (states.contains(WidgetState.pressed)) {
+              return gold.withValues(alpha: 0.16);
+            }
+            if (states.contains(WidgetState.hovered)) {
+              return sand.withValues(alpha: 0.52);
+            }
+            return white;
           }),
           side: WidgetStateProperty.resolveWith<BorderSide>((
             Set<WidgetState> states,
           ) {
-            if (states.contains(WidgetState.hovered)) {
-              return const BorderSide(color: borderStrong);
-            }
-            return const BorderSide(color: borderSoft);
+            return BorderSide(
+              color: states.contains(WidgetState.hovered)
+                  ? gold.withValues(alpha: 0.7)
+                  : border,
+              width: 1.1,
+            );
           }),
           padding: WidgetStateProperty.all<EdgeInsetsGeometry>(
             const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
@@ -232,34 +269,39 @@ class AppTheme {
       ),
       textButtonTheme: TextButtonThemeData(
         style: ButtonStyle(
-          foregroundColor: WidgetStateProperty.all<Color>(sapphire),
+          foregroundColor: WidgetStateProperty.resolveWith<Color>((
+            Set<WidgetState> states,
+          ) {
+            return states.contains(WidgetState.hovered) ? red : navy;
+          }),
           overlayColor: WidgetStateProperty.all<Color>(
-            sapphire.withValues(alpha: 0.06),
+            gold.withValues(alpha: 0.1),
           ),
           textStyle: WidgetStateProperty.all<TextStyle?>(textTheme.labelLarge),
         ),
       ),
       checkboxTheme: CheckboxThemeData(
-        fillColor: WidgetStateProperty.resolveWith((states) {
+        fillColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
           if (states.contains(WidgetState.selected)) {
-            return ink;
+            return red;
           }
-          return Colors.white;
+          return sand;
         }),
-        side: const BorderSide(color: borderStrong),
+        checkColor: WidgetStateProperty.all<Color>(sand),
+        side: const BorderSide(color: gold, width: 1.2),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
       ),
-      sliderTheme: const SliderThemeData(
-        activeTrackColor: ink,
-        inactiveTrackColor: borderSoft,
-        thumbColor: gold,
-        overlayColor: Color(0x220F172A),
+      sliderTheme: SliderThemeData(
+        activeTrackColor: orange,
+        inactiveTrackColor: gold.withValues(alpha: 0.22),
+        thumbColor: red,
+        overlayColor: red.withValues(alpha: 0.12),
       ),
       chipTheme: ChipThemeData(
-        backgroundColor: canvasWarm,
+        backgroundColor: sand,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(18),
-          side: const BorderSide(color: borderSoft),
+          side: const BorderSide(color: gold, width: 1.1),
         ),
         labelStyle: textTheme.labelMedium!,
         secondaryLabelStyle: textTheme.labelMedium!,
@@ -270,16 +312,21 @@ class AppTheme {
           backgroundColor: WidgetStateProperty.resolveWith<Color>((
             Set<WidgetState> states,
           ) {
-            return states.contains(WidgetState.hovered)
-                ? canvasWarm
-                : Colors.white;
+            if (states.contains(WidgetState.hovered)) {
+              return sand.withValues(alpha: 0.52);
+            }
+            return white;
           }),
-          foregroundColor: WidgetStateProperty.all<Color>(ink),
+          foregroundColor: WidgetStateProperty.resolveWith<Color>((
+            Set<WidgetState> states,
+          ) {
+            return navy;
+          }),
           shape: WidgetStateProperty.all<OutlinedBorder>(
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
           ),
           side: WidgetStateProperty.all<BorderSide>(
-            const BorderSide(color: borderSoft),
+            const BorderSide(color: gold, width: 1.1),
           ),
         ),
       ),
@@ -297,31 +344,25 @@ class AppTheme {
       fontSize: size,
       fontWeight: weight,
       height: height,
-      color: color ?? ink,
+      color: color ?? navy,
     );
   }
 
-  static const List<BoxShadow> softShadow = [
+  static List<BoxShadow> get softShadow => <BoxShadow>[
     BoxShadow(
-      color: Color(0x180F172A),
-      blurRadius: 48,
-      offset: Offset(0, 26),
-      spreadRadius: -30,
-    ),
-    BoxShadow(
-      color: Color(0x0A3153C9),
-      blurRadius: 30,
-      offset: Offset(0, 10),
-      spreadRadius: -24,
+      color: navy.withValues(alpha: 0.08),
+      blurRadius: 34,
+      offset: const Offset(0, 18),
+      spreadRadius: -22,
     ),
   ];
 
-  static const List<BoxShadow> cardShadow = [
+  static List<BoxShadow> get cardShadow => <BoxShadow>[
     BoxShadow(
-      color: Color(0x120F172A),
+      color: navy.withValues(alpha: 0.07),
       blurRadius: 22,
-      offset: Offset(0, 14),
-      spreadRadius: -16,
+      offset: const Offset(0, 14),
+      spreadRadius: -18,
     ),
   ];
 }

@@ -153,18 +153,7 @@ class _AppShell extends StatelessWidget {
             children: <Widget>[
               const Positioned.fill(
                 child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: <Color>[
-                        Color(0xFFF5F3EC),
-                        Color(0xFFF7FAFF),
-                        Colors.white,
-                      ],
-                      stops: <double>[0, 0.22, 1],
-                    ),
-                  ),
+                  decoration: BoxDecoration(color: AppTheme.white),
                 ),
               ),
               Positioned(
@@ -176,7 +165,7 @@ class _AppShell extends StatelessWidget {
                     height: 280,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: AppTheme.gold.withValues(alpha: 0.08),
+                      color: AppTheme.sand.withValues(alpha: 0.46),
                     ),
                   ),
                 ),
@@ -190,7 +179,7 @@ class _AppShell extends StatelessWidget {
                     height: 320,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: AppTheme.sapphire.withValues(alpha: 0.07),
+                      color: AppTheme.gold.withValues(alpha: 0.18),
                     ),
                   ),
                 ),
@@ -312,15 +301,16 @@ class _ShellSidebar extends StatelessWidget {
 
         return DecoratedBox(
           decoration: BoxDecoration(
-            border: Border.all(color: AppTheme.borderSoft),
+            color: AppTheme.white,
+            border: Border.all(color: AppTheme.border),
             borderRadius: BorderRadius.circular(36),
-            gradient: const LinearGradient(
+            gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: <Color>[
-                Color(0xFFFFFCF6),
-                Color(0xFFFFFFFF),
-                Color(0xFFF8FBFF),
+                AppTheme.white,
+                AppTheme.white,
+                AppTheme.sand.withValues(alpha: 0.34),
               ],
               stops: <double>[0, 0.38, 1],
             ),
@@ -354,7 +344,7 @@ class _ShellSidebar extends StatelessWidget {
                           style: Theme.of(context).textTheme.labelSmall
                               ?.copyWith(
                                 letterSpacing: narrow ? 2.0 : 2.4,
-                                color: AppTheme.slate,
+                                color: AppTheme.navy.withValues(alpha: 0.62),
                               ),
                         ),
                         const SizedBox(height: 10),
@@ -413,11 +403,7 @@ class _SidebarOverviewCard extends StatelessWidget {
     return AppSurface(
       radius: narrow ? 26 : 30,
       padding: EdgeInsets.zero,
-      gradient: const LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: <Color>[Color(0xFFFFFEFB), Color(0xFFF4F8FF)],
-      ),
+      color: AppTheme.sand,
       shadow: AppTheme.softShadow,
       child: Stack(
         children: <Widget>[
@@ -432,8 +418,8 @@ class _SidebarOverviewCard extends StatelessWidget {
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
                     colors: <Color>[
-                      AppTheme.sapphire.withValues(alpha: 0.12),
-                      Colors.transparent,
+                      AppTheme.gold.withValues(alpha: 0.12),
+                      AppTheme.gold.withValues(alpha: 0),
                     ],
                   ),
                 ),
@@ -457,11 +443,7 @@ class _SidebarOverviewCard extends StatelessWidget {
                   width: double.infinity,
                   padding: EdgeInsets.all(narrow ? 14 : 16),
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: <Color>[Colors.white, Color(0xFFF7FAFF)],
-                    ),
+                    color: AppTheme.sand,
                     borderRadius: BorderRadius.circular(narrow ? 22 : 24),
                     border: Border.all(color: AppTheme.borderSoft),
                   ),
@@ -471,14 +453,7 @@ class _SidebarOverviewCard extends StatelessWidget {
                         width: narrow ? 52 : 60,
                         height: narrow ? 52 : 60,
                         decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: <Color>[
-                              AppTheme.ink.withValues(alpha: 0.04),
-                              AppTheme.sapphire.withValues(alpha: 0.12),
-                            ],
-                          ),
+                          color: AppTheme.navy,
                           borderRadius: BorderRadius.circular(narrow ? 18 : 20),
                           border: Border.all(color: AppTheme.borderSoft),
                         ),
@@ -524,7 +499,7 @@ class _SidebarOverviewCard extends StatelessWidget {
                 Text(
                   'Control and monitor every workflow from one premium surface.',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppTheme.slate,
+                    color: AppTheme.navy.withValues(alpha: 0.76),
                     height: 1.55,
                   ),
                 ),
@@ -586,11 +561,7 @@ class _SidebarHealthCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppSurface(
       radius: narrow ? 24 : 26,
-      gradient: const LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: <Color>[Color(0xFFFDFEFE), Color(0xFFF6FBF8)],
-      ),
+      color: AppTheme.sand,
       padding: cardPadding,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -618,7 +589,7 @@ class _SidebarHealthCard extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppTheme.sand,
               borderRadius: BorderRadius.circular(18),
               border: Border.all(color: AppTheme.borderSoft),
             ),
@@ -642,8 +613,8 @@ class _SidebarHealthCard extends StatelessWidget {
                 const SizedBox(height: 8),
                 ProgressLine(
                   value: 0.72,
-                  color: AppTheme.success,
-                  background: AppTheme.success.withValues(alpha: 0.12),
+                  color: AppTheme.orange,
+                  background: AppTheme.gold.withValues(alpha: 0.28),
                 ),
                 const SizedBox(height: 10),
                 Row(
@@ -696,12 +667,8 @@ class _ShellHeader extends StatelessWidget {
         22,
       ),
       decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: AppTheme.borderSoft)),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: <Color>[Color(0xF9FFFFFF), Color(0xF3F7FCFF)],
-        ),
+        color: AppTheme.white,
+        border: Border(bottom: BorderSide(color: AppTheme.border)),
       ),
       child: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
@@ -713,14 +680,18 @@ class _ShellHeader extends StatelessWidget {
               Text(
                 activePage.label.toUpperCase(),
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: AppTheme.slate,
+                  color: AppTheme.navy.withValues(alpha: 0.62),
                   letterSpacing: 2.4,
                 ),
               ),
               const SizedBox(height: 8),
               Text(
                 _pageHeadline(activePage),
-                style: AppTheme.displayStyle(context, size: compact ? 28 : 34),
+                style: AppTheme.displayStyle(
+                  context,
+                  size: compact ? 28 : 34,
+                  color: AppTheme.navy,
+                ),
               ),
               const SizedBox(height: 6),
               Text(
@@ -742,8 +713,8 @@ class _ShellHeader extends StatelessWidget {
                     IconButton(
                       onPressed: onMenuTap,
                       style: IconButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: AppTheme.ink,
+                        backgroundColor: AppTheme.sand,
+                        foregroundColor: AppTheme.navy,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(18),
                         ),
@@ -815,10 +786,8 @@ class _HealthBadge extends StatelessWidget {
         vertical: compact ? 10 : 12,
       ),
       decoration: BoxDecoration(
-        color: compact ? Colors.white : const Color(0xFFF7FEE7),
-        border: Border.all(
-          color: compact ? AppTheme.borderSoft : const Color(0xFFD9F99D),
-        ),
+        color: AppTheme.sand,
+        border: Border.all(color: AppTheme.borderSoft),
         borderRadius: BorderRadius.circular(compact ? 18 : 20),
       ),
       child: Row(
@@ -827,7 +796,7 @@ class _HealthBadge extends StatelessWidget {
           const Icon(
             Icons.monitor_heart_outlined,
             size: 18,
-            color: Color(0xFF166534),
+            color: AppTheme.gold,
           ),
           const SizedBox(width: 8),
           Column(
@@ -835,15 +804,15 @@ class _HealthBadge extends StatelessWidget {
             children: <Widget>[
               Text(
                 'System Healthy',
-                style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: const Color(0xFF166534),
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.labelMedium?.copyWith(color: AppTheme.navy),
               ),
               if (!compact)
                 Text(
-                  'Queue stable and under SLA',
+                  'Load balanced and ready',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: const Color(0xFF3F6212),
+                    color: AppTheme.navy.withValues(alpha: 0.72),
                   ),
                 ),
             ],
@@ -891,7 +860,7 @@ class _ProfilePill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppTheme.sand,
         border: Border.all(color: AppTheme.borderSoft),
         borderRadius: BorderRadius.circular(24),
         boxShadow: AppTheme.softShadow,
@@ -919,16 +888,12 @@ class _ProfilePill extends StatelessWidget {
             width: 42,
             height: 42,
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: <Color>[AppTheme.ink, AppTheme.sapphire],
-              ),
+              color: AppTheme.navy,
               borderRadius: BorderRadius.circular(18),
             ),
             child: const Icon(
               Icons.person_outline_rounded,
-              color: AppTheme.gold,
+              color: AppTheme.sand,
             ),
           ),
         ],
@@ -961,35 +926,36 @@ class _SidebarTile extends StatelessWidget {
           duration: const Duration(milliseconds: 160),
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           decoration: BoxDecoration(
-            gradient: active
-                ? const LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: <Color>[AppTheme.ink, AppTheme.inkSoft],
-                  )
-                : null,
-            color: active ? null : Colors.white.withValues(alpha: 0.76),
+            color: active ? AppTheme.navy : AppTheme.white,
             borderRadius: BorderRadius.circular(22),
-            border: Border.all(
-              color: active ? AppTheme.ink : AppTheme.borderSoft,
-            ),
+            border: Border.all(color: active ? AppTheme.navy : AppTheme.border),
             boxShadow: active ? AppTheme.cardShadow : const <BoxShadow>[],
           ),
           child: Row(
             children: <Widget>[
+              if (active)
+                Container(
+                  width: 4,
+                  height: 28,
+                  margin: const EdgeInsets.only(right: 12),
+                  decoration: BoxDecoration(
+                    color: AppTheme.orange,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                ),
               Container(
                 width: 42,
                 height: 42,
                 decoration: BoxDecoration(
                   color: active
-                      ? Colors.white.withValues(alpha: 0.1)
-                      : AppTheme.canvasWarm,
+                      ? AppTheme.sand.withValues(alpha: 0.16)
+                      : AppTheme.sand,
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: Icon(
                   icon,
                   size: 20,
-                  color: active ? AppTheme.gold : AppTheme.slate,
+                  color: active ? AppTheme.sand : AppTheme.navy,
                 ),
               ),
               const SizedBox(width: 12),
@@ -997,7 +963,9 @@ class _SidebarTile extends StatelessWidget {
                 child: Text(
                   label,
                   style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                    color: active ? Colors.white : AppTheme.slate,
+                    color: active
+                        ? AppTheme.white
+                        : AppTheme.navy.withValues(alpha: 0.9),
                   ),
                 ),
               ),
@@ -1005,7 +973,7 @@ class _SidebarTile extends StatelessWidget {
                 const Icon(
                   Icons.arrow_outward_rounded,
                   size: 16,
-                  color: Colors.white70,
+                  color: AppTheme.sand,
                 ),
             ],
           ),
@@ -1023,14 +991,14 @@ class _SidebarConsoleTag extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.88),
+        color: AppTheme.sand,
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: AppTheme.borderSoft),
+        border: Border.all(color: AppTheme.borderStrong),
       ),
       child: Text(
         'OPERATOR CONSOLE',
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-          color: AppTheme.slate,
+          color: AppTheme.navy,
           letterSpacing: 1.8,
         ),
       ),
@@ -1077,9 +1045,9 @@ class _SidebarLivePill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: AppTheme.successSoft,
+        color: AppTheme.sand,
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: AppTheme.success.withValues(alpha: 0.2)),
+        border: Border.all(color: AppTheme.borderSoft),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -1088,7 +1056,7 @@ class _SidebarLivePill extends StatelessWidget {
             width: 8,
             height: 8,
             decoration: const BoxDecoration(
-              color: AppTheme.success,
+              color: AppTheme.orange,
               shape: BoxShape.circle,
             ),
           ),
@@ -1097,7 +1065,7 @@ class _SidebarLivePill extends StatelessWidget {
             'Live',
             style: Theme.of(
               context,
-            ).textTheme.labelMedium?.copyWith(color: AppTheme.success),
+            ).textTheme.labelMedium?.copyWith(color: AppTheme.navy),
           ),
         ],
       ),
@@ -1122,7 +1090,7 @@ class _SidebarMetricPill extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.88),
+        color: AppTheme.sand,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: AppTheme.borderSoft),
       ),
@@ -1171,7 +1139,7 @@ class _HeaderContextCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppTheme.sand,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppTheme.borderSoft),
       ),
@@ -1201,20 +1169,20 @@ class _HeaderPulsePill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: AppTheme.sapphireSoft,
+        color: AppTheme.sand,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppTheme.sapphire.withValues(alpha: 0.12)),
+        border: Border.all(color: AppTheme.borderSoft),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          const Icon(Icons.bolt_rounded, size: 18, color: AppTheme.sapphire),
+          const Icon(Icons.bolt_rounded, size: 18, color: AppTheme.navy),
           const SizedBox(width: 8),
           Text(
             'Live pulse synced',
             style: Theme.of(
               context,
-            ).textTheme.labelMedium?.copyWith(color: AppTheme.sapphire),
+            ).textTheme.labelMedium?.copyWith(color: AppTheme.navy),
           ),
         ],
       ),

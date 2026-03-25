@@ -31,7 +31,7 @@ String logLevelLabel(LogLevel level) {
 Color logLevelColor(LogLevel level) {
   switch (level) {
     case LogLevel.success:
-      return AppTheme.success;
+      return AppTheme.statusGreen;
     case LogLevel.info:
       return AppTheme.info;
     case LogLevel.warning:
@@ -44,7 +44,7 @@ Color logLevelColor(LogLevel level) {
 Color logLevelBackground(LogLevel level) {
   switch (level) {
     case LogLevel.success:
-      return AppTheme.successSoft;
+      return AppTheme.sand;
     case LogLevel.info:
       return AppTheme.infoSoft;
     case LogLevel.warning:

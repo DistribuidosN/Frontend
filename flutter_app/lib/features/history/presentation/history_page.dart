@@ -56,10 +56,10 @@ class HistoryPage extends StatelessWidget {
                           ? 'completed'
                           : 'failed',
                       color: request.status == RequestStatus.completed
-                          ? AppTheme.success
+                          ? AppTheme.statusGreen
                           : AppTheme.danger,
                       background: request.status == RequestStatus.completed
-                          ? AppTheme.successSoft
+                          ? AppTheme.sand
                           : AppTheme.dangerSoft,
                     );
                     final Widget idColumn = Column(
@@ -94,7 +94,7 @@ class HistoryPage extends StatelessWidget {
                             (String transform) => StatusChip(
                               label: transform,
                               color: AppTheme.ink,
-                              background: Colors.white,
+                              background: AppTheme.sand,
                             ),
                           )
                           .toList(),

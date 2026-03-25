@@ -2,7 +2,160 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:imageflow_flutter/core/theme/app_theme.dart';
-import 'package:imageflow_flutter/shared/widgets/shared_widgets.dart';
+
+class _AuthPalette {
+  static const Color navy = Color(0xFF003049);
+  static const Color red = Color(0xFFD62828);
+  static const Color orange = Color(0xFFF77F00);
+  static const Color gold = Color(0xFFFCBF49);
+  static const Color sand = Color(0xFFEAE2B7);
+}
+
+ThemeData _authFormTheme(BuildContext context) {
+  final ThemeData base = Theme.of(context);
+
+  return base.copyWith(
+    inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      fillColor: _AuthPalette.sand,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(18),
+        borderSide: const BorderSide(color: _AuthPalette.gold, width: 1.2),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(18),
+        borderSide: const BorderSide(color: _AuthPalette.gold, width: 1.2),
+      ),
+      disabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(18),
+        borderSide: const BorderSide(color: _AuthPalette.gold, width: 1.2),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(18),
+        borderSide: const BorderSide(color: _AuthPalette.red, width: 1.6),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(18),
+        borderSide: const BorderSide(color: _AuthPalette.red, width: 1.4),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(18),
+        borderSide: const BorderSide(color: _AuthPalette.red, width: 1.6),
+      ),
+      hintStyle: base.textTheme.bodyMedium?.copyWith(
+        color: _AuthPalette.navy.withValues(alpha: 0.56),
+      ),
+      labelStyle: base.textTheme.bodyMedium?.copyWith(
+        color: _AuthPalette.navy.withValues(alpha: 0.88),
+      ),
+      prefixIconColor: _AuthPalette.navy,
+      suffixIconColor: _AuthPalette.navy,
+    ),
+    filledButtonTheme: FilledButtonThemeData(
+      style: FilledButton.styleFrom(
+        backgroundColor: _AuthPalette.red,
+        foregroundColor: _AuthPalette.sand,
+        disabledBackgroundColor: _AuthPalette.orange,
+        disabledForegroundColor: _AuthPalette.sand,
+        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 18),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+        textStyle: base.textTheme.labelLarge,
+        elevation: 0,
+      ),
+    ),
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: OutlinedButton.styleFrom(
+        foregroundColor: _AuthPalette.navy,
+        backgroundColor: _AuthPalette.sand,
+        side: const BorderSide(color: _AuthPalette.gold, width: 1.2),
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+        textStyle: base.textTheme.labelLarge,
+      ),
+    ),
+    checkboxTheme: CheckboxThemeData(
+      fillColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+        return states.contains(WidgetState.selected)
+            ? _AuthPalette.red
+            : _AuthPalette.sand;
+      }),
+      checkColor: WidgetStateProperty.all<Color>(_AuthPalette.sand),
+      side: const BorderSide(color: _AuthPalette.orange, width: 1.4),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
+    ),
+  );
+}
+
+class _AuthPanelTheme extends StatelessWidget {
+  const _AuthPanelTheme({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Theme(data: _authFormTheme(context), child: child);
+  }
+}
+
+class _AuthBrandMark extends StatelessWidget {
+  const _AuthBrandMark({required this.darkSurface});
+
+  final bool darkSurface;
+
+  @override
+  Widget build(BuildContext context) {
+    final Color panelColor = darkSurface
+        ? _AuthPalette.gold
+        : _AuthPalette.navy;
+    final Color iconColor = darkSurface ? _AuthPalette.navy : _AuthPalette.sand;
+    final Color titleColor = darkSurface
+        ? _AuthPalette.sand
+        : _AuthPalette.navy;
+    final Color subtitleColor = darkSurface
+        ? _AuthPalette.gold
+        : _AuthPalette.orange;
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        Container(
+          width: 50,
+          height: 50,
+          decoration: BoxDecoration(
+            color: panelColor,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: _AuthPalette.orange, width: 1.2),
+          ),
+          child: Icon(Icons.hub_rounded, color: iconColor, size: 26),
+        ),
+        const SizedBox(width: 14),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              'Luminous',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                color: titleColor,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.4,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              'IMAGE OPERATIONS',
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: subtitleColor,
+                letterSpacing: 2.2,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
 
 class LoginPage extends StatefulWidget {
   const LoginPage({
@@ -30,6 +183,9 @@ class _LoginPageState extends State<LoginPage> {
       heroTitle: 'Distributed image\nprocessing at scale',
       heroDescription:
           'Transform thousands of assets in parallel across worker nodes. Keep monitoring, QA and result delivery in one premium control surface.',
+      heroEyebrow: 'CONTROL SURFACE ACCESS',
+      heroStatusLabel: 'Secure cluster access',
+      lightweightHero: true,
       features: const <Map<String, Object>>[
         <String, Object>{
           'icon': Icons.memory_outlined,
@@ -42,175 +198,175 @@ class _LoginPageState extends State<LoginPage> {
           'desc': '1000+ images/min',
         },
       ],
-      panel: AppSurface(
-        radius: 32,
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: <Color>[Color(0xFFFFFEFB), Colors.white],
-        ),
-        padding: const EdgeInsets.all(38),
-        shadow: AppTheme.softShadow,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Row(
-              children: <Widget>[
-                const LuminousLogo(
-                  tone: LuminousBrandTone.onLight,
-                  width: 150,
-                  height: 36,
+      panel: _AuthPanelTheme(
+        child: Container(
+          padding: const EdgeInsets.all(38),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(32),
+            border: Border.all(
+              color: _AuthPalette.navy.withValues(alpha: 0.08),
+              width: 1.1,
+            ),
+            boxShadow: AppTheme.softShadow,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Row(children: <Widget>[const _AuthBrandMark(darkSurface: false)]),
+              const SizedBox(height: 24),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
                 ),
-                const Spacer(),
-                _AuthFormMetaPill(
-                  icon: Icons.lock_outline_rounded,
-                  label: 'Secure workspace',
+                decoration: BoxDecoration(
+                  color: _AuthPalette.sand,
+                  borderRadius: BorderRadius.circular(999),
+                  border: Border.all(
+                    color: _AuthPalette.gold.withValues(alpha: 0.72),
+                    width: 1.1,
+                  ),
                 ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: AppTheme.canvasWarm,
-                borderRadius: BorderRadius.circular(999),
-                border: Border.all(color: AppTheme.borderSoft),
-              ),
-              child: Text(
-                'LUMINOUS ACCESS',
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: AppTheme.slate,
-                  letterSpacing: 2,
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              'Welcome back',
-              style: AppTheme.displayStyle(context, size: 38, height: 1),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              'Sign in to your Luminous workspace',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppTheme.slate,
-                height: 1.6,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: const <Widget>[
-                _AuthFormMetaPill(
-                  icon: Icons.verified_user_outlined,
-                  label: 'Role-based access',
-                ),
-                _AuthFormMetaPill(
-                  icon: Icons.flash_on_outlined,
-                  label: 'Fast operator entry',
-                ),
-              ],
-            ),
-            const SizedBox(height: 28),
-            const _AuthFieldLabel('Email address'),
-            const SizedBox(height: 8),
-            const TextField(
-              decoration: InputDecoration(hintText: 'alex@luminous.io'),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: <Widget>[
-                const _AuthFieldLabel('Password'),
-                const Spacer(),
-                _InlineActionLink(
-                  label: 'Forgot password?',
-                  onTap: widget.onForgotPassword,
-                  dark: true,
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              obscureText: !_showPassword,
-              decoration: InputDecoration(
-                hintText: '********',
-                suffixIcon: IconButton(
-                  onPressed: () =>
-                      setState(() => _showPassword = !_showPassword),
-                  icon: Icon(
-                    _showPassword
-                        ? Icons.visibility_off_outlined
-                        : Icons.visibility_outlined,
+                child: Text(
+                  'CONTROL SURFACE ACCESS',
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: _AuthPalette.navy,
+                    letterSpacing: 2,
                   ),
                 ),
               ),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: <Widget>[
-                Expanded(
-                  child: InkWell(
-                    onTap: () => setState(() => _rememberMe = !_rememberMe),
-                    borderRadius: BorderRadius.circular(12),
-                    child: Row(
-                      children: <Widget>[
-                        Checkbox(
-                          value: _rememberMe,
-                          onChanged: (bool? value) =>
-                              setState(() => _rememberMe = value ?? false),
-                        ),
-                        const SizedBox(width: 6),
-                        Expanded(
-                          child: Text(
-                            'Remember me for 30 days',
-                            style: Theme.of(context).textTheme.bodyMedium
-                                ?.copyWith(color: AppTheme.ink),
-                          ),
-                        ),
-                      ],
+              const SizedBox(height: 22),
+              Text(
+                'Welcome back',
+                style: AppTheme.displayStyle(
+                  context,
+                  size: 38,
+                  height: 1,
+                  color: _AuthPalette.navy,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                'Sign in to your Luminous workspace',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: _AuthPalette.navy,
+                  height: 1.6,
+                ),
+              ),
+              const SizedBox(height: 28),
+              const _AuthFieldLabel('Email address'),
+              const SizedBox(height: 8),
+              const TextField(
+                style: TextStyle(color: _AuthPalette.navy),
+                decoration: InputDecoration(hintText: 'alex@luminous.io'),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: <Widget>[
+                  const _AuthFieldLabel('Password'),
+                  const Spacer(),
+                  _InlineActionLink(
+                    label: 'Forgot password?',
+                    onTap: widget.onForgotPassword,
+                    dark: true,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                style: const TextStyle(color: _AuthPalette.navy),
+                obscureText: !_showPassword,
+                decoration: InputDecoration(
+                  hintText: '********',
+                  suffixIcon: IconButton(
+                    onPressed: () =>
+                        setState(() => _showPassword = !_showPassword),
+                    icon: Icon(
+                      _showPassword
+                          ? Icons.visibility_off_outlined
+                          : Icons.visibility_outlined,
                     ),
                   ),
                 ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton(
-                onPressed: widget.onLogin,
-                child: const Text('Sign in'),
               ),
-            ),
-            const SizedBox(height: 18),
-            Center(
-              child: Wrap(
-                crossAxisAlignment: WrapCrossAlignment.center,
-                spacing: 6,
+              const SizedBox(height: 12),
+              Row(
                 children: <Widget>[
-                  Text(
-                    "Don't have an account?",
-                    style: Theme.of(
-                      context,
-                    ).textTheme.bodySmall?.copyWith(color: AppTheme.slate),
+                  Expanded(
+                    child: InkWell(
+                      onTap: () => setState(() => _rememberMe = !_rememberMe),
+                      borderRadius: BorderRadius.circular(12),
+                      child: Row(
+                        children: <Widget>[
+                          Checkbox(
+                            value: _rememberMe,
+                            onChanged: (bool? value) =>
+                                setState(() => _rememberMe = value ?? false),
+                          ),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              'Remember me for 30 days',
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(color: _AuthPalette.navy),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                  _InlineActionLink(label: 'Sign up', onTap: widget.onRegister),
                 ],
               ),
-            ),
-            const SizedBox(height: 18),
-            Divider(color: AppTheme.borderSoft, height: 1),
-            const SizedBox(height: 18),
-            Center(
-              child: Text(
-                'Protected by enterprise-grade security',
-                style: Theme.of(
-                  context,
-                ).textTheme.bodySmall?.copyWith(color: AppTheme.slate),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton(
+                  onPressed: widget.onLogin,
+                  child: const Text('Sign in'),
+                ),
               ),
-            ),
-          ],
+              const SizedBox(height: 16),
+              Row(
+                children: <Widget>[
+                  Icon(
+                    Icons.lock_outline_rounded,
+                    size: 16,
+                    color: _AuthPalette.navy.withValues(alpha: 0.58),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Protected by enterprise-grade security',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: _AuthPalette.navy.withValues(alpha: 0.68),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 18),
+              Center(
+                child: Wrap(
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 6,
+                  children: <Widget>[
+                    Text(
+                      "Don't have an account?",
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodySmall?.copyWith(color: _AuthPalette.navy),
+                    ),
+                    _InlineActionLink(
+                      label: 'Sign up',
+                      onTap: widget.onRegister,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -254,184 +410,202 @@ class _RegisterPageState extends State<RegisterPage> {
           'desc': 'Auto-distributed across nodes',
         },
       ],
-      panel: AppSurface(
-        radius: 32,
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: <Color>[Color(0xFFFFFEFB), Colors.white],
-        ),
-        padding: const EdgeInsets.all(34),
-        shadow: AppTheme.softShadow,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Row(
-              children: <Widget>[
-                const LuminousLogo(
-                  tone: LuminousBrandTone.onLight,
-                  width: 150,
-                  height: 36,
-                ),
-                const Spacer(),
-                _AuthFormMetaPill(
-                  icon: Icons.group_add_outlined,
-                  label: 'Team onboarding',
-                ),
-              ],
+      panel: _AuthPanelTheme(
+        child: Container(
+          padding: const EdgeInsets.all(34),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(32),
+            border: Border.all(
+              color: _AuthPalette.navy.withValues(alpha: 0.08),
+              width: 1.1,
             ),
-            const SizedBox(height: 20),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: AppTheme.canvasWarm,
-                borderRadius: BorderRadius.circular(999),
-                border: Border.all(color: AppTheme.borderSoft),
-              ),
-              child: Text(
-                'CREATE LUMINOUS ACCESS',
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: AppTheme.slate,
-                  letterSpacing: 2,
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              'Create account',
-              style: AppTheme.displayStyle(context, size: 34, height: 1),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              'Join Luminous and start processing images',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppTheme.slate,
-                height: 1.6,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: const <Widget>[
-                _AuthFormMetaPill(
-                  icon: Icons.dns_outlined,
-                  label: 'Distributed-ready',
-                ),
-                _AuthFormMetaPill(
-                  icon: Icons.shield_outlined,
-                  label: 'Governed access',
-                ),
-              ],
-            ),
-            const SizedBox(height: 28),
-            _AuthResponsivePair(
-              left: const Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+            boxShadow: AppTheme.softShadow,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Row(
                 children: <Widget>[
-                  _AuthFieldLabel('First name'),
-                  SizedBox(height: 8),
-                  TextField(decoration: InputDecoration(hintText: 'Alex')),
+                  const _AuthBrandMark(darkSurface: false),
+                  const Spacer(),
+                  const _AuthFormMetaPill(
+                    icon: Icons.group_add_outlined,
+                    label: 'Team onboarding',
+                  ),
                 ],
               ),
-              right: const Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  _AuthFieldLabel('Last name'),
-                  SizedBox(height: 8),
-                  TextField(decoration: InputDecoration(hintText: 'Morgan')),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-            const _AuthFieldLabel('Email address'),
-            const SizedBox(height: 8),
-            const TextField(
-              decoration: InputDecoration(hintText: 'alex@luminous.io'),
-            ),
-            const SizedBox(height: 16),
-            const _AuthFieldLabel('Password'),
-            const SizedBox(height: 8),
-            TextField(
-              obscureText: !_showPassword,
-              decoration: InputDecoration(
-                hintText: '********',
-                suffixIcon: IconButton(
-                  onPressed: () =>
-                      setState(() => _showPassword = !_showPassword),
-                  icon: Icon(
-                    _showPassword
-                        ? Icons.visibility_off_outlined
-                        : Icons.visibility_outlined,
+              const SizedBox(height: 20),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: _AuthPalette.gold,
+                  borderRadius: BorderRadius.circular(999),
+                  border: Border.all(color: _AuthPalette.orange, width: 1.1),
+                ),
+                child: Text(
+                  'CREATE LUMINOUS ACCESS',
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: _AuthPalette.navy,
+                    letterSpacing: 2,
                   ),
                 ),
               ),
-            ),
-            const SizedBox(height: 16),
-            const _AuthFieldLabel('Confirm password'),
-            const SizedBox(height: 8),
-            TextField(
-              obscureText: !_showConfirm,
-              decoration: InputDecoration(
-                hintText: '********',
-                suffixIcon: IconButton(
-                  onPressed: () => setState(() => _showConfirm = !_showConfirm),
-                  icon: Icon(
-                    _showConfirm
-                        ? Icons.visibility_off_outlined
-                        : Icons.visibility_outlined,
-                  ),
+              const SizedBox(height: 20),
+              Text(
+                'Create account',
+                style: AppTheme.displayStyle(
+                  context,
+                  size: 34,
+                  height: 1,
+                  color: _AuthPalette.navy,
                 ),
               ),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Checkbox(
-                  value: _agreeToTerms,
-                  onChanged: (bool? value) =>
-                      setState(() => _agreeToTerms = value ?? false),
+              const SizedBox(height: 10),
+              Text(
+                'Join Luminous and start processing images',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: _AuthPalette.navy,
+                  height: 1.6,
                 ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 12),
-                    child: Text(
-                      'I agree to the Terms of Service and Privacy Policy.',
-                      style: Theme.of(
-                        context,
-                      ).textTheme.bodySmall?.copyWith(color: AppTheme.slate),
+              ),
+              const SizedBox(height: 16),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: const <Widget>[
+                  _AuthFormMetaPill(
+                    icon: Icons.dns_outlined,
+                    label: 'Distributed-ready',
+                  ),
+                  _AuthFormMetaPill(
+                    icon: Icons.shield_outlined,
+                    label: 'Governed access',
+                  ),
+                ],
+              ),
+              const SizedBox(height: 28),
+              _AuthResponsivePair(
+                left: const Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    _AuthFieldLabel('First name'),
+                    SizedBox(height: 8),
+                    TextField(
+                      style: TextStyle(color: _AuthPalette.navy),
+                      decoration: InputDecoration(hintText: 'Alex'),
+                    ),
+                  ],
+                ),
+                right: const Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    _AuthFieldLabel('Last name'),
+                    SizedBox(height: 8),
+                    TextField(
+                      style: TextStyle(color: _AuthPalette.navy),
+                      decoration: InputDecoration(hintText: 'Morgan'),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              const _AuthFieldLabel('Email address'),
+              const SizedBox(height: 8),
+              const TextField(
+                style: TextStyle(color: _AuthPalette.navy),
+                decoration: InputDecoration(hintText: 'alex@luminous.io'),
+              ),
+              const SizedBox(height: 16),
+              const _AuthFieldLabel('Password'),
+              const SizedBox(height: 8),
+              TextField(
+                style: const TextStyle(color: _AuthPalette.navy),
+                obscureText: !_showPassword,
+                decoration: InputDecoration(
+                  hintText: '********',
+                  suffixIcon: IconButton(
+                    onPressed: () =>
+                        setState(() => _showPassword = !_showPassword),
+                    icon: Icon(
+                      _showPassword
+                          ? Icons.visibility_off_outlined
+                          : Icons.visibility_outlined,
                     ),
                   ),
                 ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton(
-                onPressed: _agreeToTerms ? widget.onRegister : null,
-                child: const Text('Create account'),
               ),
-            ),
-            const SizedBox(height: 18),
-            Center(
-              child: Wrap(
-                crossAxisAlignment: WrapCrossAlignment.center,
-                spacing: 6,
-                children: <Widget>[
-                  Text(
-                    'Already have an account?',
-                    style: Theme.of(
-                      context,
-                    ).textTheme.bodySmall?.copyWith(color: AppTheme.slate),
+              const SizedBox(height: 16),
+              const _AuthFieldLabel('Confirm password'),
+              const SizedBox(height: 8),
+              TextField(
+                style: const TextStyle(color: _AuthPalette.navy),
+                obscureText: !_showConfirm,
+                decoration: InputDecoration(
+                  hintText: '********',
+                  suffixIcon: IconButton(
+                    onPressed: () =>
+                        setState(() => _showConfirm = !_showConfirm),
+                    icon: Icon(
+                      _showConfirm
+                          ? Icons.visibility_off_outlined
+                          : Icons.visibility_outlined,
+                    ),
                   ),
-                  _InlineActionLink(label: 'Sign in', onTap: widget.onLogin),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Checkbox(
+                    value: _agreeToTerms,
+                    onChanged: (bool? value) =>
+                        setState(() => _agreeToTerms = value ?? false),
+                  ),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 12),
+                      child: Text(
+                        'I agree to the Terms of Service and Privacy Policy.',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: _AuthPalette.navy,
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
-            ),
-          ],
+              const SizedBox(height: 8),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton(
+                  onPressed: _agreeToTerms ? widget.onRegister : null,
+                  child: const Text('Create account'),
+                ),
+              ),
+              const SizedBox(height: 18),
+              Center(
+                child: Wrap(
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 6,
+                  children: <Widget>[
+                    Text(
+                      'Already have an account?',
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodySmall?.copyWith(color: _AuthPalette.navy),
+                    ),
+                    _InlineActionLink(label: 'Sign in', onTap: widget.onLogin),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -453,148 +627,231 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.canvasSoft,
+      backgroundColor: Colors.white,
       body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 520),
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: AppSurface(
-                padding: const EdgeInsets.all(28),
-                child: _step == 3
-                    ? Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          Container(
-                            width: 72,
-                            height: 72,
-                            decoration: const BoxDecoration(
-                              color: AppTheme.successSoft,
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.check_circle_outline,
-                              color: AppTheme.success,
-                              size: 34,
-                            ),
-                          ),
-                          const SizedBox(height: 18),
-                          Text(
-                            'Password Reset',
-                            style: AppTheme.displayStyle(context, size: 28),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Your password has been reset. You can now return to login.',
-                            textAlign: TextAlign.center,
-                            style: Theme.of(context).textTheme.bodyMedium
-                                ?.copyWith(color: AppTheme.slate),
-                          ),
-                          const SizedBox(height: 24),
-                          SizedBox(
-                            width: double.infinity,
-                            child: FilledButton(
-                              onPressed: widget.onBack,
-                              child: const Text('Return to Login'),
-                            ),
-                          ),
-                        ],
-                      )
-                    : Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          TextButton.icon(
-                            onPressed: widget.onBack,
-                            icon: const Icon(Icons.arrow_back_rounded),
-                            label: const Text('Back to login'),
-                          ),
-                          const SizedBox(height: 10),
-                          Text(
-                            'Reset your password',
-                            style: AppTheme.displayStyle(context, size: 28),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            _step == 0
-                                ? 'Enter your email address to receive a password reset code.'
-                                : _step == 1
-                                ? 'Enter the 6-digit code we sent to your email.'
-                                : 'Create a new password for your account.',
-                            style: Theme.of(context).textTheme.bodyMedium
-                                ?.copyWith(color: AppTheme.slate),
-                          ),
-                          const SizedBox(height: 24),
-                          if (_step == 0) ...<Widget>[
-                            const TextField(
-                              decoration: InputDecoration(
-                                labelText: 'Email address',
-                                hintText: 'alex@luminous.io',
-                              ),
-                            ),
-                            const SizedBox(height: 18),
-                            SizedBox(
-                              width: double.infinity,
-                              child: FilledButton(
-                                onPressed: () => setState(() => _step = 1),
-                                child: const Text('Send reset code'),
-                              ),
-                            ),
-                          ],
-                          if (_step == 1) ...<Widget>[
-                            const TextField(
-                              textAlign: TextAlign.center,
-                              decoration: InputDecoration(
-                                labelText: 'Verification code',
-                                hintText: '000000',
-                              ),
-                            ),
-                            const SizedBox(height: 10),
-                            Text(
-                              'Check your email for the code.',
-                              style: Theme.of(context).textTheme.bodySmall
-                                  ?.copyWith(color: AppTheme.slate),
-                            ),
-                            const SizedBox(height: 18),
-                            SizedBox(
-                              width: double.infinity,
-                              child: FilledButton(
-                                onPressed: () => setState(() => _step = 2),
-                                child: const Text('Verify code'),
-                              ),
-                            ),
-                          ],
-                          if (_step == 2) ...<Widget>[
-                            const TextField(
-                              obscureText: true,
-                              decoration: InputDecoration(
-                                labelText: 'New password',
-                                hintText: '********',
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            const TextField(
-                              obscureText: true,
-                              decoration: InputDecoration(
-                                labelText: 'Confirm password',
-                                hintText: '********',
-                              ),
-                            ),
-                            const SizedBox(height: 18),
-                            SizedBox(
-                              width: double.infinity,
-                              child: FilledButton(
-                                onPressed: () => setState(() => _step = 3),
-                                child: const Text('Reset password'),
-                              ),
-                            ),
-                          ],
-                        ],
+        child: Stack(
+          children: <Widget>[
+            const Positioned.fill(child: _AuthSceneBackground(lightMode: true)),
+            Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 560),
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: _AuthPanelTheme(
+                    child: Container(
+                      padding: const EdgeInsets.all(30),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(32),
+                        border: Border.all(
+                          color: _AuthPalette.navy.withValues(alpha: 0.08),
+                          width: 1.1,
+                        ),
+                        boxShadow: AppTheme.softShadow,
                       ),
+                      child: _step == 3
+                          ? Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: <Widget>[
+                                const _AuthBrandMark(darkSurface: false),
+                                const SizedBox(height: 26),
+                                Container(
+                                  width: 76,
+                                  height: 76,
+                                  decoration: BoxDecoration(
+                                    color: _AuthPalette.gold,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: _AuthPalette.orange,
+                                      width: 1.4,
+                                    ),
+                                  ),
+                                  child: const Icon(
+                                    Icons.check_circle_outline_rounded,
+                                    color: _AuthPalette.navy,
+                                    size: 36,
+                                  ),
+                                ),
+                                const SizedBox(height: 20),
+                                Text(
+                                  'Password reset',
+                                  style: AppTheme.displayStyle(
+                                    context,
+                                    size: 30,
+                                    color: _AuthPalette.navy,
+                                  ),
+                                ),
+                                const SizedBox(height: 10),
+                                Text(
+                                  'Your access has been updated. Return to login and continue into the control surface.',
+                                  textAlign: TextAlign.center,
+                                  style: Theme.of(context).textTheme.bodyMedium
+                                      ?.copyWith(
+                                        color: _AuthPalette.navy,
+                                        height: 1.65,
+                                      ),
+                                ),
+                                const SizedBox(height: 24),
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: FilledButton(
+                                    onPressed: widget.onBack,
+                                    child: const Text('Return to login'),
+                                  ),
+                                ),
+                              ],
+                            )
+                          : Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Row(
+                                  children: <Widget>[
+                                    const _AuthBrandMark(darkSurface: false),
+                                    const Spacer(),
+                                    TextButton.icon(
+                                      onPressed: widget.onBack,
+                                      style: TextButton.styleFrom(
+                                        foregroundColor: _AuthPalette.red,
+                                      ),
+                                      icon: const Icon(
+                                        Icons.arrow_back_rounded,
+                                      ),
+                                      label: const Text('Back to login'),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 22),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 8,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: _AuthPalette.gold,
+                                    borderRadius: BorderRadius.circular(999),
+                                    border: Border.all(
+                                      color: _AuthPalette.orange,
+                                      width: 1.1,
+                                    ),
+                                  ),
+                                  child: Text(
+                                    'ACCESS RECOVERY',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .labelSmall
+                                        ?.copyWith(
+                                          color: _AuthPalette.navy,
+                                          letterSpacing: 2,
+                                        ),
+                                  ),
+                                ),
+                                const SizedBox(height: 18),
+                                Text(
+                                  'Reset your password',
+                                  style: AppTheme.displayStyle(
+                                    context,
+                                    size: 32,
+                                    color: _AuthPalette.navy,
+                                  ),
+                                ),
+                                const SizedBox(height: 10),
+                                Text(
+                                  _step == 0
+                                      ? 'Enter the email address tied to your workspace and we will send a recovery code.'
+                                      : _step == 1
+                                      ? 'Enter the 6-digit code that just reached your inbox.'
+                                      : 'Create a new password for your Luminous account.',
+                                  style: Theme.of(context).textTheme.bodyMedium
+                                      ?.copyWith(
+                                        color: _AuthPalette.navy,
+                                        height: 1.65,
+                                      ),
+                                ),
+                                const SizedBox(height: 22),
+                                if (_step == 0) ...<Widget>[
+                                  const _AuthFieldLabel('Email address'),
+                                  const SizedBox(height: 8),
+                                  const TextField(
+                                    style: TextStyle(color: _AuthPalette.navy),
+                                    decoration: InputDecoration(
+                                      hintText: 'alex@luminous.io',
+                                    ),
+                                  ),
+                                  const SizedBox(height: 18),
+                                  SizedBox(
+                                    width: double.infinity,
+                                    child: FilledButton(
+                                      onPressed: () =>
+                                          setState(() => _step = 1),
+                                      child: const Text('Send reset code'),
+                                    ),
+                                  ),
+                                ],
+                                if (_step == 1) ...<Widget>[
+                                  const _AuthFieldLabel('Verification code'),
+                                  const SizedBox(height: 8),
+                                  const TextField(
+                                    style: TextStyle(color: _AuthPalette.navy),
+                                    textAlign: TextAlign.center,
+                                    decoration: InputDecoration(
+                                      hintText: '000000',
+                                    ),
+                                  ),
+                                  const SizedBox(height: 10),
+                                  Text(
+                                    'Check your email for the verification code.',
+                                    style: Theme.of(context).textTheme.bodySmall
+                                        ?.copyWith(color: _AuthPalette.navy),
+                                  ),
+                                  const SizedBox(height: 18),
+                                  SizedBox(
+                                    width: double.infinity,
+                                    child: FilledButton(
+                                      onPressed: () =>
+                                          setState(() => _step = 2),
+                                      child: const Text('Verify code'),
+                                    ),
+                                  ),
+                                ],
+                                if (_step == 2) ...<Widget>[
+                                  const _AuthFieldLabel('New password'),
+                                  const SizedBox(height: 8),
+                                  const TextField(
+                                    style: TextStyle(color: _AuthPalette.navy),
+                                    obscureText: true,
+                                    decoration: InputDecoration(
+                                      hintText: '********',
+                                    ),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  const _AuthFieldLabel('Confirm password'),
+                                  const SizedBox(height: 8),
+                                  const TextField(
+                                    style: TextStyle(color: _AuthPalette.navy),
+                                    obscureText: true,
+                                    decoration: InputDecoration(
+                                      hintText: '********',
+                                    ),
+                                  ),
+                                  const SizedBox(height: 18),
+                                  SizedBox(
+                                    width: double.infinity,
+                                    child: FilledButton(
+                                      onPressed: () =>
+                                          setState(() => _step = 3),
+                                      child: const Text('Reset password'),
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                    ),
+                  ),
+                ),
               ),
             ),
-          ),
+          ],
         ),
       ),
     );
@@ -607,12 +864,18 @@ class _AuthLayout extends StatelessWidget {
     required this.heroDescription,
     required this.features,
     required this.panel,
+    this.heroEyebrow = 'CONTROL SURFACE',
+    this.heroStatusLabel = 'Node mesh online',
+    this.lightweightHero = false,
   });
 
   final String heroTitle;
   final String heroDescription;
   final List<Map<String, Object>> features;
   final Widget panel;
+  final String heroEyebrow;
+  final String heroStatusLabel;
+  final bool lightweightHero;
 
   @override
   Widget build(BuildContext context) {
@@ -623,88 +886,87 @@ class _AuthLayout extends StatelessWidget {
         final double compactMaxWidth = mediumCanvas ? 700 : 560;
 
         return Scaffold(
-          backgroundColor: AppTheme.canvasSoft,
+          backgroundColor: Colors.white,
           body: SafeArea(
-            child: showHero
-                ? Padding(
-                    padding: const EdgeInsets.all(18),
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: <Color>[Color(0xFFFFFEFB), Color(0xFFF8FBFF)],
-                        ),
-                        borderRadius: BorderRadius.circular(34),
-                        border: Border.all(color: AppTheme.borderSoft),
-                        boxShadow: AppTheme.softShadow,
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(34),
-                        child: Row(
-                          children: <Widget>[
-                            Expanded(
-                              flex: 12,
-                              child: _AuthHeroPane(
-                                heroTitle: heroTitle,
-                                heroDescription: heroDescription,
-                                features: features,
-                              ),
+            child: Stack(
+              children: <Widget>[
+                const Positioned.fill(
+                  child: _AuthSceneBackground(lightMode: true),
+                ),
+                showHero
+                    ? Padding(
+                        padding: const EdgeInsets.all(18),
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(34),
+                            border: Border.all(
+                              color: _AuthPalette.navy.withValues(alpha: 0.08),
+                              width: 1.1,
                             ),
-                            Expanded(
-                              flex: 8,
-                              child: Container(
-                                decoration: const BoxDecoration(
-                                  gradient: LinearGradient(
-                                    begin: Alignment.topCenter,
-                                    end: Alignment.bottomCenter,
-                                    colors: <Color>[
-                                      Color(0xFFF9FBFE),
-                                      Colors.white,
-                                    ],
+                            boxShadow: AppTheme.softShadow,
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(34),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: <Widget>[
+                                Expanded(
+                                  flex: 11,
+                                  child: _AuthHeroPane(
+                                    heroTitle: heroTitle,
+                                    heroDescription: heroDescription,
+                                    features: features,
+                                    heroEyebrow: heroEyebrow,
+                                    heroStatusLabel: heroStatusLabel,
+                                    lightweightHero: lightweightHero,
                                   ),
-                                  border: Border(
-                                    left: BorderSide(
-                                      color: AppTheme.borderSoft,
+                                ),
+                                Expanded(
+                                  flex: 8,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      border: Border(
+                                        left: BorderSide(
+                                          color: _AuthPalette.navy.withValues(
+                                            alpha: 0.08,
+                                          ),
+                                          width: 1.1,
+                                        ),
+                                      ),
+                                    ),
+                                    child: Align(
+                                      alignment: Alignment.center,
+                                      child: SingleChildScrollView(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 36,
+                                          vertical: 32,
+                                        ),
+                                        child: ConstrainedBox(
+                                          constraints: const BoxConstraints(
+                                            maxWidth: 600,
+                                          ),
+                                          child: SizedBox(
+                                            width: double.infinity,
+                                            child: panel,
+                                          ),
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 ),
-                                child: Align(
-                                  alignment: Alignment.center,
-                                  child: SingleChildScrollView(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 36,
-                                      vertical: 32,
-                                    ),
-                                    child: ConstrainedBox(
-                                      constraints: const BoxConstraints(
-                                        maxWidth: 600,
-                                      ),
-                                      child: SizedBox(
-                                        width: double.infinity,
-                                        child: panel,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
+                              ],
                             ),
-                          ],
+                          ),
                         ),
-                      ),
-                    ),
-                  )
-                : Stack(
-                    children: <Widget>[
-                      const Positioned.fill(
-                        child: _AuthSceneBackground(lightMode: true),
-                      ),
-                      Align(
-                        alignment: Alignment.topCenter,
+                      )
+                    : Align(
+                        alignment: Alignment.center,
                         child: SingleChildScrollView(
                           padding: EdgeInsets.fromLTRB(
                             20,
-                            mediumCanvas ? 36 : 20,
+                            mediumCanvas ? 40 : 24,
                             20,
                             28,
                           ),
@@ -719,6 +981,9 @@ class _AuthLayout extends StatelessWidget {
                                 _CompactAuthHero(
                                   heroTitle: heroTitle,
                                   heroDescription: heroDescription,
+                                  heroEyebrow: heroEyebrow,
+                                  heroStatusLabel: heroStatusLabel,
+                                  lightweightHero: lightweightHero,
                                 ),
                                 const SizedBox(height: 18),
                                 SizedBox(width: double.infinity, child: panel),
@@ -727,8 +992,8 @@ class _AuthLayout extends StatelessWidget {
                           ),
                         ),
                       ),
-                    ],
-                  ),
+              ],
+            ),
           ),
         );
       },
@@ -741,38 +1006,64 @@ class _AuthHeroPane extends StatelessWidget {
     required this.heroTitle,
     required this.heroDescription,
     required this.features,
+    required this.heroEyebrow,
+    required this.heroStatusLabel,
+    required this.lightweightHero,
   });
 
   final String heroTitle;
   final String heroDescription;
   final List<Map<String, Object>> features;
+  final String heroEyebrow;
+  final String heroStatusLabel;
+  final bool lightweightHero;
 
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: <Color>[
-            Color(0xFF0D1528),
-            Color(0xFF152241),
-            Color(0xFF20356A),
-          ],
-        ),
-      ),
+      decoration: const BoxDecoration(color: Colors.white),
       child: Stack(
+        fit: StackFit.expand,
         children: <Widget>[
-          const Positioned.fill(child: _AuthSceneBackground()),
+          const Positioned.fill(child: _AuthSceneBackground(lightMode: true)),
+          Positioned(
+            left: -60,
+            bottom: -80,
+            child: IgnorePointer(
+              child: Container(
+                width: 260,
+                height: 260,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: _AuthPalette.sand.withValues(alpha: 0.36),
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            right: -80,
+            top: -30,
+            child: IgnorePointer(
+              child: Container(
+                width: 280,
+                height: 280,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: _AuthPalette.gold.withValues(alpha: 0.24),
+                ),
+              ),
+            ),
+          ),
           Positioned.fill(
             child: DecoratedBox(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                   colors: <Color>[
-                    AppTheme.ink.withValues(alpha: 0.34),
-                    Colors.transparent,
+                    Colors.white.withValues(alpha: 0.92),
+                    _AuthPalette.sand.withValues(alpha: 0.36),
+                    Colors.white.withValues(alpha: 0.9),
                   ],
                 ),
               ),
@@ -787,14 +1078,59 @@ class _AuthHeroPane extends StatelessWidget {
               final double verticalPadding = ultraCompact
                   ? 28
                   : (compact ? 38 : 52);
-              final double titleSize = ultraCompact ? 40 : (compact ? 46 : 52);
-              final double titleGap = compact ? 16 : 22;
+              final double titleSize = ultraCompact ? 40 : (compact ? 46 : 54);
+              final double titleGap = compact ? 18 : 24;
               final double descriptionGap = compact ? 12 : 18;
               final double featuresGap = compact ? 18 : 30;
               final double metricsGap = compact ? 12 : 18;
-              final double promoGap = compact ? 12 : 20;
+              final double promoGap = compact ? 14 : 22;
               final double featureSpacing = compact ? 14 : 16;
               final double maxTextWidth = compact ? 520 : 560;
+              final Widget highlightsShelf = Container(
+                constraints: const BoxConstraints(maxWidth: 560),
+                padding: EdgeInsets.all(compact ? 18 : 22),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.9),
+                  borderRadius: BorderRadius.circular(28),
+                  border: Border.all(
+                    color: _AuthPalette.navy.withValues(alpha: 0.08),
+                    width: 1.1,
+                  ),
+                  boxShadow: <BoxShadow>[
+                    BoxShadow(
+                      color: _AuthPalette.navy.withValues(alpha: 0.05),
+                      blurRadius: 24,
+                      offset: const Offset(0, 16),
+                      spreadRadius: -18,
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      'Operator highlights',
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                        color: _AuthPalette.navy.withValues(alpha: 0.68),
+                        letterSpacing: 0.3,
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    Wrap(
+                      spacing: featureSpacing,
+                      runSpacing: featureSpacing,
+                      children: features.map((Map<String, Object> item) {
+                        return _AuthFeatureCard(
+                          icon: item['icon']! as IconData,
+                          label: item['label']! as String,
+                          description: item['desc']! as String,
+                          lightMode: true,
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                ),
+              );
 
               final Widget content = Column(
                 mainAxisSize: compact ? MainAxisSize.min : MainAxisSize.max,
@@ -802,47 +1138,66 @@ class _AuthHeroPane extends StatelessWidget {
                 children: <Widget>[
                   Row(
                     children: <Widget>[
-                      const LuminousLogo(
-                        tone: LuminousBrandTone.onDark,
-                        width: 210,
-                        height: 56,
-                      ),
+                      const _AuthBrandMark(darkSurface: false),
                       const Spacer(),
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: compact ? 12 : 14,
-                          vertical: compact ? 8 : 10,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.08),
-                          borderRadius: BorderRadius.circular(999),
-                          border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.14),
+                      if (!lightweightHero)
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: compact ? 12 : 14,
+                            vertical: compact ? 8 : 10,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.82),
+                            borderRadius: BorderRadius.circular(999),
+                            border: Border.all(
+                              color: _AuthPalette.gold.withValues(alpha: 0.44),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: <Widget>[
+                              Container(
+                                width: 8,
+                                height: 8,
+                                decoration: const BoxDecoration(
+                                  color: _AuthPalette.gold,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                heroStatusLabel,
+                                style: Theme.of(context).textTheme.labelMedium
+                                    ?.copyWith(color: _AuthPalette.navy),
+                              ),
+                            ],
                           ),
                         ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: <Widget>[
-                            Container(
-                              width: 8,
-                              height: 8,
-                              decoration: const BoxDecoration(
-                                color: AppTheme.success,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              'Luminous mesh online',
-                              style: Theme.of(context).textTheme.labelMedium
-                                  ?.copyWith(color: Colors.white),
-                            ),
-                          ],
-                        ),
-                      ),
                     ],
                   ),
                   SizedBox(height: titleGap),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: _AuthPalette.sand,
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(
+                        color: _AuthPalette.gold.withValues(alpha: 0.7),
+                      ),
+                    ),
+                    child: Text(
+                      heroEyebrow,
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: _AuthPalette.navy,
+                        letterSpacing: 2.0,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: compact ? 16 : 18),
                   ConstrainedBox(
                     constraints: BoxConstraints(maxWidth: maxTextWidth),
                     child: Text(
@@ -850,8 +1205,8 @@ class _AuthHeroPane extends StatelessWidget {
                       style: AppTheme.displayStyle(
                         context,
                         size: titleSize,
-                        color: Colors.white,
-                        height: 0.98,
+                        color: _AuthPalette.navy,
+                        height: 0.96,
                       ),
                     ),
                   ),
@@ -861,85 +1216,100 @@ class _AuthHeroPane extends StatelessWidget {
                     child: Text(
                       heroDescription,
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: Colors.white.withValues(alpha: 0.82),
+                        color: _AuthPalette.navy.withValues(alpha: 0.76),
                         height: compact ? 1.65 : 1.75,
                       ),
                     ),
                   ),
-                  SizedBox(height: featuresGap),
-                  Wrap(
-                    spacing: featureSpacing,
-                    runSpacing: featureSpacing,
-                    children: features.map((Map<String, Object> item) {
-                      return _AuthFeatureCard(
-                        icon: item['icon']! as IconData,
-                        label: item['label']! as String,
-                        description: item['desc']! as String,
-                      );
-                    }).toList(),
-                  ),
-                  SizedBox(height: metricsGap),
-                  Wrap(
-                    spacing: 12,
-                    runSpacing: 12,
-                    children: const <Widget>[
-                      _HeroMetricPill(label: '8 nodes online'),
-                      _HeroMetricPill(label: '64 img/min'),
-                      _HeroMetricPill(label: '3.8s median SLA'),
-                    ],
-                  ),
-                  SizedBox(height: promoGap),
-                  Container(
-                    constraints: const BoxConstraints(maxWidth: 520),
-                    padding: EdgeInsets.all(compact ? 16 : 18),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.06),
-                      borderRadius: BorderRadius.circular(24),
-                      border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.14),
-                      ),
+                  if (lightweightHero) ...<Widget>[
+                    SizedBox(height: featuresGap),
+                    if (!compact) const Spacer(),
+                    highlightsShelf,
+                  ] else ...<Widget>[
+                    SizedBox(height: featuresGap),
+                    Wrap(
+                      spacing: featureSpacing,
+                      runSpacing: featureSpacing,
+                      children: features.map((Map<String, Object> item) {
+                        return _AuthFeatureCard(
+                          icon: item['icon']! as IconData,
+                          label: item['label']! as String,
+                          description: item['desc']! as String,
+                          lightMode: true,
+                        );
+                      }).toList(),
                     ),
-                    child: Row(
-                      children: <Widget>[
-                        Container(
-                          width: 44,
-                          height: 44,
-                          decoration: BoxDecoration(
-                            color: AppTheme.gold.withValues(alpha: 0.14),
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                          child: const Icon(
-                            Icons.auto_awesome_rounded,
-                            color: AppTheme.gold,
-                          ),
+                  ],
+                  if (!lightweightHero) ...<Widget>[
+                    SizedBox(height: metricsGap),
+                    Wrap(
+                      spacing: 12,
+                      runSpacing: 12,
+                      children: const <Widget>[
+                        _HeroMetricPill(
+                          label: '8 nodes online',
+                          lightMode: true,
                         ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              Text(
-                                'Premium control surface',
-                                style: Theme.of(context).textTheme.labelLarge
-                                    ?.copyWith(color: Colors.white),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Built to keep operators inside one calm workspace while workloads scale.',
-                                style: Theme.of(context).textTheme.bodySmall
-                                    ?.copyWith(
-                                      color: Colors.white.withValues(
-                                        alpha: 0.74,
-                                      ),
-                                      height: 1.5,
-                                    ),
-                              ),
-                            ],
-                          ),
+                        _HeroMetricPill(label: '64 img/min', lightMode: true),
+                        _HeroMetricPill(
+                          label: '3.8s median SLA',
+                          lightMode: true,
                         ),
                       ],
                     ),
-                  ),
+                    SizedBox(height: promoGap),
+                    Container(
+                      constraints: const BoxConstraints(maxWidth: 520),
+                      padding: EdgeInsets.all(compact ? 16 : 18),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.82),
+                        borderRadius: BorderRadius.circular(24),
+                        border: Border.all(
+                          color: _AuthPalette.navy.withValues(alpha: 0.08),
+                        ),
+                      ),
+                      child: Row(
+                        children: <Widget>[
+                          Container(
+                            width: 46,
+                            height: 46,
+                            decoration: BoxDecoration(
+                              color: _AuthPalette.sand,
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: const Icon(
+                              Icons.auto_awesome_rounded,
+                              color: _AuthPalette.red,
+                            ),
+                          ),
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Text(
+                                  'Premium orchestration',
+                                  style: Theme.of(context).textTheme.labelLarge
+                                      ?.copyWith(color: _AuthPalette.navy),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Built for teams that need speed, trust and creative control across every asset pipeline.',
+                                  style: Theme.of(context).textTheme.bodySmall
+                                      ?.copyWith(
+                                        color: _AuthPalette.navy.withValues(
+                                          alpha: 0.74,
+                                        ),
+                                        height: 1.5,
+                                      ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                   if (!compact) const Spacer(),
                 ],
               );
@@ -967,74 +1337,106 @@ class _CompactAuthHero extends StatelessWidget {
   const _CompactAuthHero({
     required this.heroTitle,
     required this.heroDescription,
+    required this.heroEyebrow,
+    required this.heroStatusLabel,
+    required this.lightweightHero,
   });
 
   final String heroTitle;
   final String heroDescription;
+  final String heroEyebrow;
+  final String heroStatusLabel;
+  final bool lightweightHero;
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(28),
-      child: SizedBox(
-        width: double.infinity,
-        child: DecoratedBox(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: <Color>[
-                Color(0xFF0D1528),
-                Color(0xFF152241),
-                Color(0xFF20356A),
-              ],
-            ),
-          ),
-          child: Stack(
-            children: <Widget>[
-              const Positioned.fill(child: _AuthSceneBackground()),
-              Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Row(
-                      children: <Widget>[
-                        const Flexible(
-                          child: LuminousLogo(
-                            tone: LuminousBrandTone.onDark,
-                            width: 184,
-                            height: 44,
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: _AuthPalette.navy.withValues(alpha: 0.08)),
+        boxShadow: AppTheme.softShadow,
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(28),
+        child: Stack(
+          children: <Widget>[
+            const Positioned.fill(child: _AuthSceneBackground(lightMode: true)),
+            Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Row(
+                    children: <Widget>[
+                      const Flexible(child: _AuthBrandMark(darkSurface: false)),
+                      const Spacer(),
+                      if (!lightweightHero)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: _AuthPalette.sand,
+                            borderRadius: BorderRadius.circular(999),
+                            border: Border.all(
+                              color: _AuthPalette.gold.withValues(alpha: 0.48),
+                            ),
+                          ),
+                          child: Text(
+                            heroStatusLabel,
+                            style: Theme.of(context).textTheme.labelMedium
+                                ?.copyWith(color: _AuthPalette.navy),
                           ),
                         ),
-                        const Spacer(),
-                        const _HeroMetricPill(label: 'Live mesh'),
-                      ],
+                    ],
+                  ),
+                  const SizedBox(height: 18),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
                     ),
-                    const SizedBox(height: 22),
-                    Text(
-                      heroTitle,
-                      style: AppTheme.displayStyle(
-                        context,
-                        size: 34,
-                        color: Colors.white,
-                        height: 1.02,
+                    decoration: BoxDecoration(
+                      color: _AuthPalette.sand,
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(
+                        color: _AuthPalette.gold.withValues(alpha: 0.52),
                       ),
                     ),
-                    const SizedBox(height: 12),
-                    Text(
-                      heroDescription,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.white.withValues(alpha: 0.78),
-                        height: 1.6,
+                    child: Text(
+                      heroEyebrow,
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: _AuthPalette.navy,
+                        letterSpacing: 2.0,
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    heroTitle,
+                    style: AppTheme.displayStyle(
+                      context,
+                      size: 34,
+                      color: _AuthPalette.navy,
+                      height: 1.02,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    heroDescription,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: _AuthPalette.navy.withValues(alpha: 0.74),
+                      height: 1.65,
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -1046,11 +1448,13 @@ class _AuthFeatureCard extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.description,
+    this.lightMode = false,
   });
 
   final IconData icon;
   final String label;
   final String description;
+  final bool lightMode;
 
   @override
   Widget build(BuildContext context) {
@@ -1062,12 +1466,21 @@ class _AuthFeatureCard extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: <Color>[
-            Colors.white.withValues(alpha: 0.1),
-            Colors.white.withValues(alpha: 0.05),
+            lightMode
+                ? Colors.white.withValues(alpha: 0.88)
+                : _AuthPalette.sand.withValues(alpha: 0.12),
+            lightMode
+                ? _AuthPalette.sand.withValues(alpha: 0.46)
+                : _AuthPalette.gold.withValues(alpha: 0.08),
           ],
         ),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+        border: Border.all(
+          color: lightMode
+              ? _AuthPalette.navy.withValues(alpha: 0.08)
+              : _AuthPalette.gold.withValues(alpha: 0.28),
+          width: 1.1,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1076,23 +1489,31 @@ class _AuthFeatureCard extends StatelessWidget {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.08),
+              color: lightMode
+                  ? _AuthPalette.sand
+                  : _AuthPalette.red.withValues(alpha: 0.26),
               borderRadius: BorderRadius.circular(14),
             ),
-            child: Icon(icon, color: AppTheme.gold, size: 24),
+            child: Icon(
+              icon,
+              color: lightMode ? _AuthPalette.red : _AuthPalette.gold,
+              size: 24,
+            ),
           ),
           const SizedBox(height: 14),
           Text(
             label,
-            style: Theme.of(
-              context,
-            ).textTheme.titleMedium?.copyWith(color: Colors.white),
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              color: lightMode ? _AuthPalette.navy : _AuthPalette.sand,
+            ),
           ),
           const SizedBox(height: 6),
           Text(
             description,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Colors.white.withValues(alpha: 0.74),
+              color: lightMode
+                  ? _AuthPalette.navy.withValues(alpha: 0.72)
+                  : _AuthPalette.sand.withValues(alpha: 0.74),
               height: 1.5,
             ),
           ),
@@ -1103,24 +1524,32 @@ class _AuthFeatureCard extends StatelessWidget {
 }
 
 class _HeroMetricPill extends StatelessWidget {
-  const _HeroMetricPill({required this.label});
+  const _HeroMetricPill({required this.label, this.lightMode = false});
 
   final String label;
+  final bool lightMode;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.08),
+        color: lightMode
+            ? Colors.white.withValues(alpha: 0.84)
+            : _AuthPalette.sand.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+        border: Border.all(
+          color: lightMode
+              ? _AuthPalette.navy.withValues(alpha: 0.08)
+              : _AuthPalette.gold.withValues(alpha: 0.28),
+          width: 1.1,
+        ),
       ),
       child: Text(
         label,
-        style: Theme.of(
-          context,
-        ).textTheme.labelMedium?.copyWith(color: Colors.white),
+        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+          color: lightMode ? _AuthPalette.navy : _AuthPalette.sand,
+        ),
       ),
     );
   }
@@ -1133,7 +1562,12 @@ class _AuthFieldLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(label, style: Theme.of(context).textTheme.labelLarge);
+    return Text(
+      label,
+      style: Theme.of(
+        context,
+      ).textTheme.labelLarge?.copyWith(color: _AuthPalette.navy),
+    );
   }
 }
 
@@ -1187,7 +1621,7 @@ class _InlineActionLink extends StatelessWidget {
         child: Text(
           label,
           style: Theme.of(context).textTheme.labelLarge?.copyWith(
-            color: dark ? AppTheme.ink : AppTheme.goldDeep,
+            color: dark ? _AuthPalette.red : _AuthPalette.orange,
           ),
         ),
       ),
@@ -1206,20 +1640,20 @@ class _AuthFormMetaPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: _AuthPalette.gold.withValues(alpha: 0.28),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: AppTheme.borderSoft),
+        border: Border.all(color: _AuthPalette.orange, width: 1.1),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          Icon(icon, size: 16, color: AppTheme.sapphire),
+          Icon(icon, size: 16, color: _AuthPalette.navy),
           const SizedBox(width: 8),
           Text(
             label,
             style: Theme.of(
               context,
-            ).textTheme.labelMedium?.copyWith(color: AppTheme.inkSoft),
+            ).textTheme.labelMedium?.copyWith(color: _AuthPalette.navy),
           ),
         ],
       ),
@@ -1239,13 +1673,13 @@ class _AuthSceneBackground extends StatelessWidget {
         if (lightMode)
           Positioned.fill(
             child: DecoratedBox(
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: <Color>[
-                    Color(0xFFF8FAFC),
-                    Color(0xFFF6F4EE),
+                    Colors.white,
+                    _AuthPalette.sand.withValues(alpha: 0.38),
                     Colors.white,
                   ],
                 ),
@@ -1262,7 +1696,7 @@ class _AuthSceneBackground extends StatelessWidget {
                 height: 220,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: AppTheme.sapphire.withValues(alpha: 0.06),
+                  color: _AuthPalette.gold.withValues(alpha: 0.12),
                 ),
               ),
             ),
@@ -1277,7 +1711,7 @@ class _AuthSceneBackground extends StatelessWidget {
                 height: 200,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: AppTheme.gold.withValues(alpha: 0.08),
+                  color: _AuthPalette.orange.withValues(alpha: 0.08),
                 ),
               ),
             ),
@@ -1408,24 +1842,25 @@ class _NodeFieldPainter extends CustomPainter {
     final Paint linePaint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = lightMode ? 1 : 1.2
-      ..color = (lightMode ? AppTheme.ink : Colors.white).withValues(
-        alpha: lightMode ? 0.07 : 0.14,
+      ..color = (lightMode ? _AuthPalette.navy : _AuthPalette.sand).withValues(
+        alpha: lightMode ? 0.14 : 0.16,
       );
 
     final Paint accentLinePaint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.4
-      ..color = AppTheme.gold.withValues(alpha: lightMode ? 0.12 : 0.22);
+      ..color = _AuthPalette.gold.withValues(alpha: lightMode ? 0.26 : 0.34);
 
     final Paint softNodePaint = Paint()
       ..style = PaintingStyle.fill
-      ..color = (lightMode ? AppTheme.ink : Colors.white).withValues(
-        alpha: lightMode ? 0.1 : 0.18,
+      ..color = (lightMode ? _AuthPalette.navy : _AuthPalette.sand).withValues(
+        alpha: lightMode ? 0.18 : 0.2,
       );
 
     final Paint brightNodePaint = Paint()
       ..style = PaintingStyle.fill
-      ..color = AppTheme.gold.withValues(alpha: lightMode ? 0.72 : 0.9);
+      ..color = (lightMode ? _AuthPalette.orange : _AuthPalette.gold)
+          .withValues(alpha: lightMode ? 0.82 : 0.92);
 
     final Paint glowPaint = Paint()
       ..style = PaintingStyle.fill
@@ -1446,16 +1881,15 @@ class _NodeFieldPainter extends CustomPainter {
       final bool accent = i % 4 == 0 || i == 7 || i == 13;
 
       if (accent) {
-        glowPaint.color = AppTheme.gold.withValues(
-          alpha: lightMode ? 0.12 : 0.2,
-        );
-        canvas.drawCircle(point, 12, glowPaint);
+        glowPaint.color = (lightMode ? _AuthPalette.orange : _AuthPalette.red)
+            .withValues(alpha: lightMode ? 0.14 : 0.22);
+        canvas.drawCircle(point, 14, glowPaint);
       }
 
-      canvas.drawCircle(point, accent ? 4.2 : 3.2, softNodePaint);
+      canvas.drawCircle(point, accent ? 4.8 : 3.6, softNodePaint);
       canvas.drawCircle(
         point,
-        accent ? 2.3 : 1.6,
+        accent ? 2.6 : 1.9,
         accent ? brightNodePaint : softNodePaint,
       );
     }
@@ -1473,11 +1907,10 @@ class _NodeFieldPainter extends CustomPainter {
       );
       canvas.drawCircle(
         point,
-        1.1,
+        1.3,
         Paint()
-          ..color = (lightMode ? AppTheme.slate : Colors.white).withValues(
-            alpha: lightMode ? 0.12 : 0.2,
-          ),
+          ..color = (lightMode ? _AuthPalette.orange : _AuthPalette.gold)
+              .withValues(alpha: lightMode ? 0.14 : 0.2),
       );
     }
   }

@@ -176,7 +176,7 @@ class _UploadPageState extends State<UploadPage> {
                                         ),
                                         child: const Icon(
                                           Icons.close_rounded,
-                                          color: Colors.white,
+                                          color: AppTheme.sand,
                                           size: 16,
                                         ),
                                       ),

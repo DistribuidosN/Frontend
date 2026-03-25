@@ -31,112 +31,14 @@ class _DashboardPageState extends State<DashboardPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        PageIntro(
-          kicker: 'Operational Overview',
-          title: 'Dashboard',
-          description: current.summary,
-          actions: Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: <Widget>[
-              StatusChip(
-                label: 'Live window ${_window.label}',
-                color: AppTheme.sapphire,
-                background: AppTheme.sapphireSoft,
-                icon: Icons.bolt_rounded,
-              ),
-              const SizedBox(height: 10),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: DashboardWindow.values.map((DashboardWindow window) {
-                  return TogglePill(
-                    label: window.label,
-                    selected: _window == window,
-                    onTap: () => setState(() => _window = window),
-                  );
-                }).toList(),
-              ),
-              const SizedBox(height: 12),
-              ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 340),
-                child: AppSurface(
-                  radius: 22,
-                  gradient: const LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: <Color>[Color(0xFFFFFEFB), Color(0xFFF3F7FF)],
-                  ),
-                  padding: const EdgeInsets.all(18),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Row(
-                        children: <Widget>[
-                          Container(
-                            width: 8,
-                            height: 8,
-                            decoration: const BoxDecoration(
-                              color: AppTheme.success,
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            '8 nodes healthy',
-                            style: Theme.of(context).textTheme.labelMedium,
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        current.focus,
-                        style: Theme.of(
-                          context,
-                        ).textTheme.bodySmall?.copyWith(color: AppTheme.slate),
-                      ),
-                      const SizedBox(height: 14),
-                      Row(
-                        children: <Widget>[
-                          Expanded(
-                            child: _SignalMiniStat(
-                              label: 'Utilization',
-                              value: current.support[1].value,
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: _SignalMiniStat(
-                              label: 'Recovery',
-                              value: current.support[2].value,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 20),
-        Wrap(
-          spacing: 10,
-          runSpacing: 10,
-          children: <Widget>[
-            _OperationalPulseChip(
-              icon: Icons.image_outlined,
-              label: '$totalProcessed processed in this window',
-            ),
-            _OperationalPulseChip(
-              icon: Icons.show_chart_rounded,
-              label: '${current.support[0].value} live throughput',
-            ),
-            _OperationalPulseChip(
-              icon: Icons.timelapse_outlined,
-              label: '${current.support[2].value} recovery buffer',
-            ),
-          ],
+        _DashboardHero(
+          current: current,
+          window: _window,
+          totalProcessed: totalProcessed,
+          queuePeak: queuePeak,
+          onWindowChanged: (DashboardWindow window) {
+            setState(() => _window = window);
+          },
         ),
         const SizedBox(height: 20),
         AdaptiveGrid(
@@ -153,7 +55,10 @@ class _DashboardPageState extends State<DashboardPage> {
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: <Color>[style.background, Colors.white],
+                colors: <Color>[
+                  style.background,
+                  AppTheme.sand.withValues(alpha: 0.92),
+                ],
               ),
               padding: const EdgeInsets.all(22),
               child: Column(
@@ -302,10 +207,13 @@ class _DashboardPageState extends State<DashboardPage> {
                     padding: const EdgeInsets.only(bottom: 12),
                     child: AppSurface(
                       padding: const EdgeInsets.all(18),
-                      gradient: const LinearGradient(
+                      gradient: LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
-                        colors: <Color>[Color(0xFFFFFEFB), Colors.white],
+                        colors: <Color>[
+                          AppTheme.sand,
+                          AppTheme.gold.withValues(alpha: 0.14),
+                        ],
                       ),
                       child: LayoutBuilder(
                         builder:
@@ -506,26 +414,26 @@ _OverviewCardStyle _overviewCardStyle(int index) {
   switch (index) {
     case 0:
       return const _OverviewCardStyle(
-        color: AppTheme.sapphire,
+        color: AppTheme.navy,
         textColor: AppTheme.ink,
-        background: Color(0xFFF1F5FF),
-        iconBackground: Color(0xFFE4EDFF),
+        background: AppTheme.sand,
+        iconBackground: AppTheme.gold,
         badge: 'volume',
       );
     case 1:
       return const _OverviewCardStyle(
-        color: AppTheme.success,
+        color: AppTheme.orange,
         textColor: AppTheme.ink,
-        background: Color(0xFFF2FBF5),
-        iconBackground: Color(0xFFDDF7E5),
+        background: AppTheme.sand,
+        iconBackground: AppTheme.sand,
         badge: 'speed',
       );
     default:
       return const _OverviewCardStyle(
-        color: AppTheme.warning,
+        color: AppTheme.red,
         textColor: AppTheme.ink,
-        background: Color(0xFFFFF8EE),
-        iconBackground: Color(0xFFFFE8C7),
+        background: AppTheme.sand,
+        iconBackground: AppTheme.sand,
         badge: 'attention',
       );
   }
@@ -536,22 +444,22 @@ _BatchVisual _batchVisual(BatchStatus status) {
     case BatchStatus.running:
       return const _BatchVisual(
         label: 'running',
-        color: AppTheme.warning,
-        background: Colors.white,
+        color: AppTheme.red,
+        background: AppTheme.sand,
         icon: Icons.autorenew_rounded,
       );
     case BatchStatus.completed:
       return const _BatchVisual(
         label: 'completed',
-        color: AppTheme.success,
-        background: AppTheme.successSoft,
+        color: AppTheme.statusGreen,
+        background: AppTheme.sand,
         icon: Icons.check_circle_outline,
       );
     case BatchStatus.review:
       return const _BatchVisual(
         label: 'review',
-        color: AppTheme.info,
-        background: AppTheme.infoSoft,
+        color: AppTheme.goldDeep,
+        background: AppTheme.sand,
         icon: Icons.warning_amber_outlined,
       );
   }
@@ -562,9 +470,410 @@ Color _toneColor(NodeTone tone) {
     case NodeTone.stable:
       return AppTheme.ink;
     case NodeTone.balancing:
-      return AppTheme.warning;
+      return AppTheme.goldDeep;
     case NodeTone.warm:
-      return AppTheme.danger;
+      return AppTheme.orange;
+  }
+}
+
+class _DashboardHero extends StatelessWidget {
+  const _DashboardHero({
+    required this.current,
+    required this.window,
+    required this.totalProcessed,
+    required this.queuePeak,
+    required this.onWindowChanged,
+  });
+
+  final DashboardView current;
+  final DashboardWindow window;
+  final int totalProcessed;
+  final int queuePeak;
+  final ValueChanged<DashboardWindow> onWindowChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return AppSurface(
+      radius: 34,
+      color: AppTheme.white,
+      padding: const EdgeInsets.all(30),
+      child: LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          final Widget overview = Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                'OPERATIONAL OVERVIEW',
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: AppTheme.slate,
+                  letterSpacing: 2.0,
+                ),
+              ),
+              const SizedBox(height: 18),
+              Text(
+                'Dashboard',
+                style: AppTheme.displayStyle(context, size: 30),
+              ),
+              const SizedBox(height: 12),
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 940),
+                child: Text(
+                  current.summary,
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    color: AppTheme.slate,
+                    height: 1.65,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 28),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(18),
+                decoration: BoxDecoration(
+                  color: AppTheme.sand.withValues(alpha: 0.58),
+                  borderRadius: BorderRadius.circular(26),
+                  border: Border.all(color: AppTheme.borderSoft),
+                ),
+                child: LayoutBuilder(
+                  builder:
+                      (BuildContext context, BoxConstraints statConstraints) {
+                        final bool compactStats =
+                            statConstraints.maxWidth < 640;
+                        final List<Widget> statTiles = <Widget>[
+                          _DashboardHeroStat(
+                            label: 'Processed',
+                            value: '$totalProcessed',
+                            note: 'in this window',
+                            icon: Icons.image_outlined,
+                          ),
+                          _DashboardHeroStat(
+                            label: 'Throughput',
+                            value: current.support[0].value,
+                            note: 'live pace',
+                            icon: Icons.show_chart_rounded,
+                          ),
+                          _DashboardHeroStat(
+                            label: 'Recovery',
+                            value: current.support[2].value,
+                            note: 'buffer',
+                            icon: Icons.timelapse_outlined,
+                          ),
+                        ];
+
+                        if (compactStats) {
+                          return Column(
+                            children: <Widget>[
+                              for (
+                                int index = 0;
+                                index < statTiles.length;
+                                index++
+                              )
+                                Padding(
+                                  padding: EdgeInsets.only(
+                                    bottom: index == statTiles.length - 1
+                                        ? 0
+                                        : 12,
+                                  ),
+                                  child: statTiles[index],
+                                ),
+                            ],
+                          );
+                        }
+
+                        return Row(
+                          children: <Widget>[
+                            Expanded(child: statTiles[0]),
+                            const _DashboardHeroDivider(),
+                            Expanded(child: statTiles[1]),
+                            const _DashboardHeroDivider(),
+                            Expanded(child: statTiles[2]),
+                          ],
+                        );
+                      },
+                ),
+              ),
+            ],
+          );
+
+          final Widget signalRow = AppSurface(
+            radius: 28,
+            color: AppTheme.white,
+            padding: const EdgeInsets.all(22),
+            child: LayoutBuilder(
+              builder: (BuildContext context, BoxConstraints rowConstraints) {
+                final bool stackedSections = rowConstraints.maxWidth < 920;
+
+                final Widget windowSection = Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      'WINDOW',
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: AppTheme.slate,
+                        letterSpacing: 1.8,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      window.label,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      'Switch the time window to compare load and recovery.',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppTheme.slate,
+                        height: 1.55,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: DashboardWindow.values.map((
+                        DashboardWindow item,
+                      ) {
+                        return TogglePill(
+                          label: item.label,
+                          selected: window == item,
+                          onTap: () => onWindowChanged(item),
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                );
+
+                final Widget queueSection = Container(
+                  alignment: Alignment.center,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 16,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppTheme.sand.withValues(alpha: 0.72),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: AppTheme.borderSoft),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      Text(
+                        'QUEUE PEAK',
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: AppTheme.orange,
+                          letterSpacing: 1.4,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        '$queuePeak',
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.headlineSmall
+                            ?.copyWith(color: AppTheme.ink),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'highest queued load',
+                        textAlign: TextAlign.center,
+                        style: Theme.of(
+                          context,
+                        ).textTheme.bodySmall?.copyWith(color: AppTheme.slate),
+                      ),
+                    ],
+                  ),
+                );
+
+                final Widget healthSection = Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Row(
+                      children: <Widget>[
+                        Container(
+                          width: 10,
+                          height: 10,
+                          decoration: const BoxDecoration(
+                            color: AppTheme.gold,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          '8 nodes healthy',
+                          style: Theme.of(context).textTheme.labelLarge,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      current.focus,
+                      maxLines: stackedSections ? null : 2,
+                      overflow: stackedSections ? null : TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AppTheme.inkSoft,
+                        height: 1.6,
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    LayoutBuilder(
+                      builder:
+                          (
+                            BuildContext context,
+                            BoxConstraints infoConstraints,
+                          ) {
+                            final bool compactInfo =
+                                infoConstraints.maxWidth < 320;
+
+                            if (compactInfo) {
+                              return Column(
+                                children: <Widget>[
+                                  _SignalMiniStat(
+                                    label: 'Utilization',
+                                    value: current.support[1].value,
+                                  ),
+                                  const SizedBox(height: 10),
+                                  _SignalMiniStat(
+                                    label: 'Recovery',
+                                    value: current.support[2].value,
+                                  ),
+                                ],
+                              );
+                            }
+
+                            return Row(
+                              children: <Widget>[
+                                Expanded(
+                                  child: _SignalMiniStat(
+                                    label: 'Utilization',
+                                    value: current.support[1].value,
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: _SignalMiniStat(
+                                    label: 'Recovery',
+                                    value: current.support[2].value,
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                    ),
+                  ],
+                );
+
+                if (stackedSections) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      windowSection,
+                      const SizedBox(height: 16),
+                      queueSection,
+                      const SizedBox(height: 16),
+                      healthSection,
+                    ],
+                  );
+                }
+
+                return Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Expanded(flex: 4, child: windowSection),
+                    const _DashboardHeroDivider(height: 118),
+                    SizedBox(width: 170, child: queueSection),
+                    const _DashboardHeroDivider(height: 118),
+                    Expanded(flex: 5, child: healthSection),
+                  ],
+                );
+              },
+            ),
+          );
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[overview, const SizedBox(height: 22), signalRow],
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _DashboardHeroStat extends StatelessWidget {
+  const _DashboardHeroStat({
+    required this.label,
+    required this.value,
+    required this.note,
+    required this.icon,
+  });
+
+  final String label;
+  final String value;
+  final String note;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: AppTheme.gold.withValues(alpha: 0.18),
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Icon(icon, size: 18, color: AppTheme.navy),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                label.toUpperCase(),
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: AppTheme.slate,
+                  letterSpacing: 1.4,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                value,
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(color: AppTheme.ink),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                note,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: AppTheme.slate),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _DashboardHeroDivider extends StatelessWidget {
+  const _DashboardHeroDivider({this.height = 54});
+
+  final double height;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 1,
+      height: height,
+      margin: const EdgeInsets.symmetric(horizontal: 18),
+      color: AppTheme.borderSoft,
+    );
   }
 }
 
@@ -588,7 +897,7 @@ class _ClusterStatusPanel extends StatelessWidget {
                 end: Alignment.bottomRight,
                 colors: <Color>[
                   toneColor.withValues(alpha: 0.08),
-                  Colors.white,
+                  AppTheme.sand,
                 ],
               ),
               child: Column(
@@ -682,11 +991,7 @@ class _SupportMetricCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppSurface(
       padding: const EdgeInsets.all(16),
-      gradient: const LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: <Color>[Color(0xFFFFFEFB), Colors.white],
-      ),
+      color: AppTheme.sand,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -860,7 +1165,7 @@ class _SignalMiniStat extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppTheme.sand,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: AppTheme.borderSoft),
       ),
@@ -876,38 +1181,6 @@ class _SignalMiniStat extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(value, style: Theme.of(context).textTheme.labelLarge),
-        ],
-      ),
-    );
-  }
-}
-
-class _OperationalPulseChip extends StatelessWidget {
-  const _OperationalPulseChip({required this.icon, required this.label});
-
-  final IconData icon;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.88),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppTheme.borderSoft),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          Icon(icon, size: 18, color: AppTheme.sapphire),
-          const SizedBox(width: 8),
-          Text(
-            label,
-            style: Theme.of(
-              context,
-            ).textTheme.labelMedium?.copyWith(color: AppTheme.inkSoft),
-          ),
         ],
       ),
     );

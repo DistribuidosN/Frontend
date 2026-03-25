@@ -1,7 +1,6 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:imageflow_flutter/core/theme/app_theme.dart';
 
 enum LuminousBrandTone { onLight, onDark, mono }
@@ -22,26 +21,87 @@ class LuminousLogo extends StatelessWidget {
   final double? height;
   final BoxFit fit;
 
-  String get _assetName {
-    final String family = iconOnly ? 'icon' : 'logo';
-    switch (tone) {
-      case LuminousBrandTone.onLight:
-        return 'assets/branding/luminous-$family-light.svg';
-      case LuminousBrandTone.onDark:
-        return 'assets/branding/luminous-$family-dark.svg';
-      case LuminousBrandTone.mono:
-        return 'assets/branding/luminous-$family-mono.svg';
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    return SvgPicture.asset(
-      _assetName,
-      width: width,
-      height: height,
-      fit: fit,
-      semanticsLabel: 'Luminous logo',
+    final bool darkSurface = tone == LuminousBrandTone.onDark;
+    final Color panelColor = tone == LuminousBrandTone.mono
+        ? AppTheme.navy
+        : (darkSurface ? AppTheme.sand : AppTheme.navy);
+    final Color iconColor = darkSurface ? AppTheme.navy : AppTheme.sand;
+    final Color titleColor = darkSurface ? AppTheme.sand : AppTheme.navy;
+    final Color subtitleColor = tone == LuminousBrandTone.mono
+        ? AppTheme.gold
+        : (darkSurface ? AppTheme.gold : AppTheme.orange);
+    final double resolvedHeight = height ?? (iconOnly ? 40 : 46);
+    final double resolvedWidth = width ?? (iconOnly ? resolvedHeight : 192);
+    final double iconPanelSize = iconOnly
+        ? resolvedHeight
+        : resolvedHeight * 0.92;
+
+    final Widget brandIcon = Container(
+      width: iconPanelSize,
+      height: iconPanelSize,
+      decoration: BoxDecoration(
+        color: panelColor,
+        borderRadius: BorderRadius.circular(iconOnly ? 14 : 16),
+        border: Border.all(
+          color: darkSurface ? AppTheme.gold : AppTheme.borderStrong,
+          width: 1.1,
+        ),
+      ),
+      child: Icon(
+        Icons.hub_rounded,
+        color: iconColor,
+        size: iconOnly ? 22 : 24,
+      ),
+    );
+
+    if (iconOnly) {
+      return SizedBox(
+        width: resolvedWidth,
+        height: resolvedHeight,
+        child: brandIcon,
+      );
+    }
+
+    return SizedBox(
+      width: resolvedWidth,
+      height: resolvedHeight,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          brandIcon,
+          const SizedBox(width: 12),
+          Expanded(
+            child: FittedBox(
+              fit: fit,
+              alignment: Alignment.centerLeft,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    'Luminous',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      color: titleColor,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.4,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'IMAGE OPS',
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: subtitleColor,
+                      letterSpacing: 2.2,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -52,10 +112,10 @@ class AppSurface extends StatelessWidget {
     required this.child,
     this.padding = const EdgeInsets.all(24),
     this.radius = 16,
-    this.color = Colors.white,
+    this.color = AppTheme.white,
     this.gradient,
-    this.borderColor = AppTheme.borderSoft,
-    this.shadow = AppTheme.cardShadow,
+    this.borderColor = AppTheme.border,
+    this.shadow,
   });
 
   final Widget child;
@@ -64,7 +124,7 @@ class AppSurface extends StatelessWidget {
   final Color color;
   final Gradient? gradient;
   final Color borderColor;
-  final List<BoxShadow> shadow;
+  final List<BoxShadow>? shadow;
 
   @override
   Widget build(BuildContext context) {
@@ -74,8 +134,8 @@ class AppSurface extends StatelessWidget {
         color: gradient == null ? color : null,
         gradient: gradient,
         borderRadius: BorderRadius.circular(radius),
-        border: Border.all(color: borderColor),
-        boxShadow: shadow,
+        border: Border.all(color: borderColor, width: 1.1),
+        boxShadow: shadow ?? AppTheme.cardShadow,
       ),
       child: child,
     );
@@ -100,11 +160,7 @@ class SectionPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppSurface(
       radius: 28,
-      gradient: const LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: <Color>[AppTheme.canvasWarm, Colors.white],
-      ),
+      color: AppTheme.white,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -184,11 +240,7 @@ class PageIntro extends StatelessWidget {
 
         return AppSurface(
           radius: 30,
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: <Color>[Color(0xFFFFFEFB), Color(0xFFF8FBFF)],
-          ),
+          color: AppTheme.white,
           padding: const EdgeInsets.all(30),
           child: stacked
               ? Column(
@@ -384,7 +436,7 @@ class TogglePill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.transparent,
+      color: AppTheme.navy.withValues(alpha: 0),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(18),
@@ -392,17 +444,17 @@ class TogglePill extends StatelessWidget {
           duration: const Duration(milliseconds: 160),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
           decoration: BoxDecoration(
-            color: selected ? AppTheme.ink : Colors.white,
+            color: selected ? AppTheme.navy : AppTheme.white,
             borderRadius: BorderRadius.circular(18),
             border: Border.all(
-              color: selected ? AppTheme.ink : AppTheme.borderSoft,
+              color: selected ? AppTheme.gold : AppTheme.border,
             ),
             boxShadow: selected ? AppTheme.cardShadow : const <BoxShadow>[],
           ),
           child: Text(
             label,
             style: Theme.of(context).textTheme.labelMedium?.copyWith(
-              color: selected ? Colors.white : AppTheme.slate,
+              color: selected ? AppTheme.sand : AppTheme.navy,
             ),
           ),
         ),
@@ -566,7 +618,7 @@ class SmallIconButton extends StatelessWidget {
         width: 34,
         height: 34,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppTheme.sand,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: AppTheme.border),
         ),
@@ -587,7 +639,7 @@ class _Kicker extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: AppTheme.canvasWarm,
+        color: AppTheme.sand,
         border: Border.all(color: AppTheme.borderSoft),
         borderRadius: BorderRadius.circular(18),
       ),

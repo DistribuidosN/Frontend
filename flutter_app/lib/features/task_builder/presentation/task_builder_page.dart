@@ -126,14 +126,14 @@ class _TaskBuilderPageState extends State<TaskBuilderPage> {
                     decoration: BoxDecoration(
                       color: Color.lerp(
                         AppTheme.canvasSoft,
-                        Colors.white,
+                        AppTheme.sand,
                         (_brightness / 200).clamp(0, 1),
                       )!,
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(color: AppTheme.border),
                       boxShadow: <BoxShadow>[
                         BoxShadow(
-                          color: Colors.black.withValues(
+                          color: AppTheme.navy.withValues(
                             alpha: (_blur / 100).clamp(0, 0.1),
                           ),
                           blurRadius: 20 + _blur,
@@ -467,7 +467,7 @@ class _SwitchTile extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppTheme.sand,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: AppTheme.border),
       ),

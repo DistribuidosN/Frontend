@@ -43,6 +43,7 @@ class LogsPage extends StatelessWidget {
         const SizedBox(height: 20),
         AppSurface(
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Wrap(
                 spacing: 12,
@@ -94,7 +95,7 @@ class LogsPage extends StatelessWidget {
                 margin: const EdgeInsets.only(bottom: 12),
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: AppTheme.sand,
                   borderRadius: BorderRadius.circular(18),
                   border: Border.all(color: AppTheme.border),
                 ),
@@ -135,7 +136,7 @@ class LogsPage extends StatelessWidget {
                                 StatusChip(
                                   label: log.job,
                                   color: AppTheme.ink,
-                                  background: Colors.white,
+                                  background: AppTheme.sand,
                                 ),
                             ],
                           ),

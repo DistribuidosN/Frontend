@@ -131,7 +131,7 @@ class ResultsPage extends StatelessWidget {
                       (String transform) => StatusChip(
                         label: transform,
                         color: AppTheme.ink,
-                        background: Colors.white,
+                        background: AppTheme.sand,
                       ),
                     )
                     .toList(),

@@ -116,8 +116,8 @@ class RequestDetailPage extends StatelessWidget {
                             ),
                             StatusChip(
                               label: image.status,
-                              color: AppTheme.success,
-                              background: AppTheme.successSoft,
+                              color: AppTheme.statusGreen,
+                              background: AppTheme.sand,
                             ),
                           ],
                         ),

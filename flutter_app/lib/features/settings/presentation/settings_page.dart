@@ -42,7 +42,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 _SettingsSection(
                   icon: Icons.person_outline_rounded,
                   iconColor: AppTheme.ink,
-                  iconBackground: Colors.white,
+                  iconBackground: AppTheme.sand,
                   title: 'Profile Information',
                   child: Column(
                     children: <Widget>[
@@ -113,7 +113,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 const SizedBox(height: 18),
                 _SettingsSection(
                   icon: Icons.image_outlined,
-                  iconColor: const Color(0xFF1E3A8A),
+                  iconColor: AppTheme.orange,
                   iconBackground: AppTheme.infoSoft,
                   title: 'Default Processing Settings',
                   child: Column(
@@ -175,8 +175,8 @@ class _SettingsPageState extends State<SettingsPage> {
               children: <Widget>[
                 _SettingsSection(
                   icon: Icons.notifications_none_rounded,
-                  iconColor: const Color(0xFF7C3AED),
-                  iconBackground: const Color(0xFFF3E8FF),
+                  iconColor: AppTheme.red,
+                  iconBackground: AppTheme.gold,
                   title: 'Notifications',
                   child: Column(
                     children: <Widget>[
@@ -331,10 +331,13 @@ class _SettingsPageState extends State<SettingsPage> {
                   width: double.infinity,
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
+                    gradient: LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
-                      colors: <Color>[Colors.white, AppTheme.canvasSoft],
+                      colors: <Color>[
+                        AppTheme.sand,
+                        AppTheme.gold.withValues(alpha: 0.14),
+                      ],
                     ),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(

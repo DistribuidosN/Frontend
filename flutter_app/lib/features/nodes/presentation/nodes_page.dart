@@ -107,20 +107,20 @@ class _NodesPageState extends State<NodesPage> {
             _NodesSummaryCard(
               icon: Icons.monitor_heart_outlined,
               iconColor: AppTheme.ink,
-              iconBackground: Colors.white,
+              iconBackground: AppTheme.sand,
               label: 'Average Load',
               value: '$avgLoad%',
             ),
             _NodesSummaryCard(
               icon: Icons.dns_outlined,
-              iconColor: const Color(0xFF7C3AED),
-              iconBackground: const Color(0xFFF3E8FF),
+              iconColor: AppTheme.orange,
+              iconBackground: AppTheme.gold,
               label: 'Active Jobs',
               value: '$totalJobs',
             ),
             _NodesSummaryCard(
               icon: Icons.schedule_outlined,
-              iconColor: const Color(0xFF1E3A8A),
+              iconColor: AppTheme.red,
               iconBackground: AppTheme.infoSoft,
               label: 'Total Processed',
               value: '24.5K',
@@ -160,9 +160,9 @@ class _NodesPageState extends State<NodesPage> {
                 ? AppTheme.warning
                 : AppTheme.gold;
             final Color loadEnd = node.load >= 80
-                ? const Color(0xFFB91C1C)
+                ? AppTheme.red
                 : node.load >= 60
-                ? const Color(0xFFD97706)
+                ? AppTheme.orange
                 : AppTheme.goldDeep;
 
             return AppSurface(
@@ -410,7 +410,7 @@ class _NodeFilterButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.transparent,
+      color: AppTheme.navy.withValues(alpha: 0),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
@@ -424,10 +424,12 @@ class _NodeFilterButton extends StatelessWidget {
                     colors: <Color>[AppTheme.gold, AppTheme.goldDeep],
                   )
                 : null,
-            color: selected ? null : Colors.white,
+            color: selected ? null : AppTheme.sand,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: selected ? Colors.transparent : AppTheme.border,
+              color: selected
+                  ? AppTheme.navy.withValues(alpha: 0)
+                  : AppTheme.border,
             ),
           ),
           child: Text(
@@ -459,7 +461,7 @@ class _GradientProgressLine extends StatelessWidget {
       borderRadius: BorderRadius.circular(999),
       child: Container(
         height: 8,
-        color: const Color(0xFFF1F5F9),
+        color: AppTheme.sand,
         child: Align(
           alignment: Alignment.centerLeft,
           child: FractionallySizedBox(

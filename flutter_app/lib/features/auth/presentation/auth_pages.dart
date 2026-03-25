@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:imageflow_flutter/core/theme/app_theme.dart';
+import 'package:imageflow_flutter/shared/widgets/shared_widgets.dart';
 
 class _AuthPalette {
   static const Color navy = Color(0xFF003049);
@@ -105,54 +106,15 @@ class _AuthBrandMark extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color panelColor = darkSurface
-        ? _AuthPalette.gold
-        : _AuthPalette.navy;
-    final Color iconColor = darkSurface ? _AuthPalette.navy : _AuthPalette.sand;
-    final Color titleColor = darkSurface
-        ? _AuthPalette.sand
-        : _AuthPalette.navy;
-    final Color subtitleColor = darkSurface
-        ? _AuthPalette.gold
-        : _AuthPalette.orange;
-
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        Container(
-          width: 50,
-          height: 50,
-          decoration: BoxDecoration(
-            color: panelColor,
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: _AuthPalette.orange, width: 1.2),
-          ),
-          child: Icon(Icons.hub_rounded, color: iconColor, size: 26),
-        ),
-        const SizedBox(width: 14),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Text(
-              'Luminous',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: titleColor,
-                fontWeight: FontWeight.w800,
-                letterSpacing: -0.4,
-              ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              'IMAGE OPERATIONS',
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: subtitleColor,
-                letterSpacing: 2.2,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ],
-        ),
-      ],
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: LuminousLogo(
+        tone: darkSurface
+            ? LuminousBrandTone.onDark
+            : LuminousBrandTone.onLight,
+        height: 62,
+        fit: BoxFit.contain,
+      ),
     );
   }
 }
@@ -249,7 +211,7 @@ class _LoginPageState extends State<LoginPage> {
               ),
               const SizedBox(height: 10),
               Text(
-                'Sign in to your Luminous workspace',
+                'Sign in to your Enfok workspace',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: _AuthPalette.navy,
                   height: 1.6,
@@ -467,7 +429,7 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
               const SizedBox(height: 10),
               Text(
-                'Join Luminous and start processing images',
+                'Join Enfok and start processing images',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: _AuthPalette.navy,
                   height: 1.6,
@@ -761,7 +723,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                                       ? 'Enter the email address tied to your workspace and we will send a recovery code.'
                                       : _step == 1
                                       ? 'Enter the 6-digit code that just reached your inbox.'
-                                      : 'Create a new password for your Luminous account.',
+                                      : 'Create a new password for your Enfok account.',
                                   style: Theme.of(context).textTheme.bodyMedium
                                       ?.copyWith(
                                         color: _AuthPalette.navy,

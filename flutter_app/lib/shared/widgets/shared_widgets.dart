@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:imageflow_flutter/core/theme/app_theme.dart';
 
 enum LuminousBrandTone { onLight, onDark, mono }
@@ -21,86 +22,26 @@ class LuminousLogo extends StatelessWidget {
   final double? height;
   final BoxFit fit;
 
+  static const String _assetPath = 'assets/branding/enfok_logo_lossless.svg';
+
   @override
   Widget build(BuildContext context) {
-    final bool darkSurface = tone == LuminousBrandTone.onDark;
-    final Color panelColor = tone == LuminousBrandTone.mono
-        ? AppTheme.navy
-        : (darkSurface ? AppTheme.sand : AppTheme.navy);
-    final Color iconColor = darkSurface ? AppTheme.navy : AppTheme.sand;
-    final Color titleColor = darkSurface ? AppTheme.sand : AppTheme.navy;
-    final Color subtitleColor = tone == LuminousBrandTone.mono
-        ? AppTheme.gold
-        : (darkSurface ? AppTheme.gold : AppTheme.orange);
-    final double resolvedHeight = height ?? (iconOnly ? 40 : 46);
-    final double resolvedWidth = width ?? (iconOnly ? resolvedHeight : 192);
-    final double iconPanelSize = iconOnly
-        ? resolvedHeight
-        : resolvedHeight * 0.92;
-
-    final Widget brandIcon = Container(
-      width: iconPanelSize,
-      height: iconPanelSize,
-      decoration: BoxDecoration(
-        color: panelColor,
-        borderRadius: BorderRadius.circular(iconOnly ? 14 : 16),
-        border: Border.all(
-          color: darkSurface ? AppTheme.gold : AppTheme.borderStrong,
-          width: 1.1,
-        ),
-      ),
-      child: Icon(
-        Icons.hub_rounded,
-        color: iconColor,
-        size: iconOnly ? 22 : 24,
-      ),
-    );
-
-    if (iconOnly) {
-      return SizedBox(
-        width: resolvedWidth,
-        height: resolvedHeight,
-        child: brandIcon,
-      );
-    }
-
+    final double resolvedHeight = height ?? (iconOnly ? 44 : 58);
+    final double resolvedWidth =
+        width ??
+        (iconOnly ? resolvedHeight * 1.36 : resolvedHeight * (449 / 162));
     return SizedBox(
       width: resolvedWidth,
       height: resolvedHeight,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          brandIcon,
-          const SizedBox(width: 12),
-          Expanded(
-            child: FittedBox(
-              fit: fit,
-              alignment: Alignment.centerLeft,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(
-                    'Luminous',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: titleColor,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -0.4,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'IMAGE OPS',
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: subtitleColor,
-                      letterSpacing: 2.2,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
+      child: Semantics(
+        label: 'Enfok',
+        image: true,
+        child: SvgPicture.asset(
+          _assetPath,
+          width: resolvedWidth,
+          height: resolvedHeight,
+          fit: fit,
+        ),
       ),
     );
   }

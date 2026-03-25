@@ -55,7 +55,7 @@ class _ImageFlowAppState extends State<ImageFlowApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Luminous',
+      title: 'Enfok',
       theme: AppTheme.lightTheme(),
       scrollBehavior: const MaterialScrollBehavior().copyWith(
         dragDevices: <PointerDeviceKind>{
@@ -441,55 +441,27 @@ class _SidebarOverviewCard extends StatelessWidget {
                 const SizedBox(height: 16),
                 Container(
                   width: double.infinity,
-                  padding: EdgeInsets.all(narrow ? 14 : 16),
+                  padding: EdgeInsets.all(narrow ? 16 : 18),
                   decoration: BoxDecoration(
                     color: AppTheme.sand,
                     borderRadius: BorderRadius.circular(narrow ? 22 : 24),
                     border: Border.all(color: AppTheme.borderSoft),
                   ),
-                  child: Row(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      Container(
-                        width: narrow ? 52 : 60,
-                        height: narrow ? 52 : 60,
-                        decoration: BoxDecoration(
-                          color: AppTheme.navy,
-                          borderRadius: BorderRadius.circular(narrow ? 18 : 20),
-                          border: Border.all(color: AppTheme.borderSoft),
-                        ),
-                        child: Padding(
-                          padding: EdgeInsets.all(narrow ? 11 : 13),
-                          child: const LuminousLogo(
-                            tone: LuminousBrandTone.onLight,
-                            iconOnly: true,
-                          ),
+                      SizedBox(
+                        height: narrow ? 54 : 60,
+                        child: const LuminousLogo(
+                          tone: LuminousBrandTone.onLight,
                         ),
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Text(
-                              'Luminous',
-                              style: Theme.of(context).textTheme.titleMedium
-                                  ?.copyWith(
-                                    color: AppTheme.ink,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'DISTRIBUTED IMAGE SYSTEM',
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: Theme.of(context).textTheme.labelSmall
-                                  ?.copyWith(
-                                    color: AppTheme.slate,
-                                    letterSpacing: narrow ? 1.8 : 2,
-                                  ),
-                            ),
-                          ],
+                      const SizedBox(height: 12),
+                      Text(
+                        'Distributed image operations',
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: AppTheme.slate,
+                          letterSpacing: narrow ? 1.8 : 2,
                         ),
                       ),
                     ],
@@ -497,7 +469,7 @@ class _SidebarOverviewCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 14),
                 Text(
-                  'Control and monitor every workflow from one premium surface.',
+                  'Monitor queues, nodes and delivery workflows from one control surface.',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: AppTheme.navy.withValues(alpha: 0.76),
                     height: 1.55,

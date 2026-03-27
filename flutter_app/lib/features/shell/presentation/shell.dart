@@ -151,9 +151,20 @@ class _AppShell extends StatelessWidget {
               : null,
           body: Stack(
             children: <Widget>[
-              const Positioned.fill(
+              Positioned.fill(
                 child: DecoratedBox(
-                  decoration: BoxDecoration(color: AppTheme.white),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: <Color>[
+                        AppTheme.white,
+                        AppTheme.sand.withValues(alpha: 0.22),
+                        AppTheme.white,
+                      ],
+                      stops: const <double>[0, 0.55, 1],
+                    ),
+                  ),
                 ),
               ),
               Positioned(
@@ -638,9 +649,19 @@ class _ShellHeader extends StatelessWidget {
         compact ? 16 : 28,
         22,
       ),
-      decoration: const BoxDecoration(
-        color: AppTheme.white,
-        border: Border(bottom: BorderSide(color: AppTheme.border)),
+      decoration: BoxDecoration(
+        color: AppTheme.navy,
+        border: Border(
+          bottom: BorderSide(color: AppTheme.gold.withValues(alpha: 0.38)),
+        ),
+        boxShadow: <BoxShadow>[
+          BoxShadow(
+            color: AppTheme.navy.withValues(alpha: 0.34),
+            blurRadius: 24,
+            offset: const Offset(0, 12),
+            spreadRadius: -16,
+          ),
+        ],
       ),
       child: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
@@ -652,7 +673,7 @@ class _ShellHeader extends StatelessWidget {
               Text(
                 activePage.label.toUpperCase(),
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: AppTheme.navy.withValues(alpha: 0.62),
+                  color: AppTheme.gold.withValues(alpha: 0.92),
                   letterSpacing: 2.4,
                 ),
               ),
@@ -662,15 +683,15 @@ class _ShellHeader extends StatelessWidget {
                 style: AppTheme.displayStyle(
                   context,
                   size: compact ? 28 : 34,
-                  color: AppTheme.navy,
+                  color: AppTheme.sand,
                 ),
               ),
               const SizedBox(height: 6),
               Text(
                 _pageSummary(activePage),
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.copyWith(color: AppTheme.slate),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: AppTheme.sand.withValues(alpha: 0.84),
+                ),
               ),
             ],
           );
@@ -687,6 +708,9 @@ class _ShellHeader extends StatelessWidget {
                       style: IconButton.styleFrom(
                         backgroundColor: AppTheme.sand,
                         foregroundColor: AppTheme.navy,
+                        side: BorderSide(
+                          color: AppTheme.gold.withValues(alpha: 0.65),
+                        ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(18),
                         ),
@@ -724,10 +748,38 @@ class _ShellHeader extends StatelessWidget {
                 children: <Widget>[
                   Expanded(
                     child: TextField(
-                      decoration: const InputDecoration(
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodyMedium?.copyWith(color: AppTheme.navy),
+                      decoration: InputDecoration(
                         hintText: 'Search queues, assets, requests, nodes...',
-                        prefixIcon: Icon(Icons.search_rounded),
-                        suffixIcon: Icon(Icons.tune_rounded),
+                        filled: true,
+                        fillColor: AppTheme.sand.withValues(alpha: 0.94),
+                        prefixIcon: const Icon(
+                          Icons.search_rounded,
+                          color: AppTheme.navy,
+                        ),
+                        suffixIcon: const Icon(
+                          Icons.tune_rounded,
+                          color: AppTheme.navy,
+                        ),
+                        hintStyle: Theme.of(context).textTheme.bodyMedium
+                            ?.copyWith(
+                              color: AppTheme.navy.withValues(alpha: 0.54),
+                            ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(18),
+                          borderSide: BorderSide(
+                            color: AppTheme.gold.withValues(alpha: 0.62),
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(18),
+                          borderSide: const BorderSide(
+                            color: AppTheme.orange,
+                            width: 1.4,
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -759,7 +811,7 @@ class _HealthBadge extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         color: AppTheme.sand,
-        border: Border.all(color: AppTheme.borderSoft),
+        border: Border.all(color: AppTheme.gold.withValues(alpha: 0.55)),
         borderRadius: BorderRadius.circular(compact ? 18 : 20),
       ),
       child: Row(
@@ -768,7 +820,7 @@ class _HealthBadge extends StatelessWidget {
           const Icon(
             Icons.monitor_heart_outlined,
             size: 18,
-            color: AppTheme.gold,
+            color: AppTheme.orange,
           ),
           const SizedBox(width: 8),
           Column(
@@ -804,7 +856,12 @@ class _NotificationButton extends StatelessWidget {
       children: <Widget>[
         IconButton(
           onPressed: () {},
-          style: IconButton.styleFrom(fixedSize: const Size(48, 48)),
+          style: IconButton.styleFrom(
+            fixedSize: const Size(48, 48),
+            backgroundColor: AppTheme.sand,
+            foregroundColor: AppTheme.navy,
+            side: BorderSide(color: AppTheme.gold.withValues(alpha: 0.65)),
+          ),
           icon: const Icon(Icons.notifications_none_rounded),
         ),
         Positioned(
@@ -833,7 +890,7 @@ class _ProfilePill extends StatelessWidget {
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         color: AppTheme.sand,
-        border: Border.all(color: AppTheme.borderSoft),
+        border: Border.all(color: AppTheme.gold.withValues(alpha: 0.55)),
         borderRadius: BorderRadius.circular(24),
         boxShadow: AppTheme.softShadow,
       ),
@@ -1115,7 +1172,7 @@ class _HeaderContextCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppTheme.sand,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppTheme.borderSoft),
+        border: Border.all(color: AppTheme.gold.withValues(alpha: 0.55)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1145,7 +1202,7 @@ class _HeaderPulsePill extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppTheme.sand,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppTheme.borderSoft),
+        border: Border.all(color: AppTheme.gold.withValues(alpha: 0.55)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

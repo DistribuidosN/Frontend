@@ -1035,11 +1035,15 @@ class _AuthHeroPane extends StatelessWidget {
             builder: (BuildContext context, BoxConstraints constraints) {
               final bool compact = constraints.maxHeight < 760;
               final bool ultraCompact = constraints.maxHeight < 660;
-              final bool useScroll = constraints.maxHeight < 620;
               final double horizontalPadding = compact ? 40 : 56;
               final double verticalPadding = ultraCompact
                   ? 28
                   : (compact ? 38 : 52);
+              final double availableHeight =
+                  constraints.maxHeight - (verticalPadding * 2);
+              final bool useScroll =
+                  availableHeight < (lightweightHero ? 620 : 680);
+              final bool allowSpacer = !compact && !useScroll;
               final double titleSize = ultraCompact ? 40 : (compact ? 46 : 54);
               final double titleGap = compact ? 18 : 24;
               final double descriptionGap = compact ? 12 : 18;
@@ -1185,7 +1189,7 @@ class _AuthHeroPane extends StatelessWidget {
                   ),
                   if (lightweightHero) ...<Widget>[
                     SizedBox(height: featuresGap),
-                    if (!compact) const Spacer(),
+                    if (allowSpacer) const Spacer(),
                     highlightsShelf,
                   ] else ...<Widget>[
                     SizedBox(height: featuresGap),
@@ -1275,7 +1279,7 @@ class _AuthHeroPane extends StatelessWidget {
                       ),
                     ),
                   ],
-                  if (!compact) const Spacer(),
+                  if (allowSpacer) const Spacer(),
                 ],
               );
 

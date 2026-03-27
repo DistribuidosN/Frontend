@@ -53,6 +53,7 @@ class _DashboardPageState extends State<DashboardPage> {
             return AppSurface(
               radius: 26,
               color: style.background,
+              borderColor: AppTheme.borderStrong,
               padding: const EdgeInsets.all(22),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -483,6 +484,7 @@ class _DashboardHero extends StatelessWidget {
     return AppSurface(
       radius: 34,
       color: AppTheme.white,
+      borderColor: AppTheme.borderStrong,
       padding: const EdgeInsets.all(30),
       child: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
@@ -585,6 +587,7 @@ class _DashboardHero extends StatelessWidget {
           final Widget signalRow = AppSurface(
             radius: 28,
             color: AppTheme.white,
+            borderColor: AppTheme.borderStrong,
             padding: const EdgeInsets.all(22),
             child: LayoutBuilder(
               builder: (BuildContext context, BoxConstraints rowConstraints) {
@@ -637,7 +640,7 @@ class _DashboardHero extends StatelessWidget {
                     vertical: 16,
                   ),
                   decoration: BoxDecoration(
-                    color: AppTheme.sand.withValues(alpha: 0.72),
+                    color: AppTheme.sand.withValues(alpha: 0.42),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(color: AppTheme.borderSoft),
                   ),

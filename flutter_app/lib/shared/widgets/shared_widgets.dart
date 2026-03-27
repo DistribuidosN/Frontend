@@ -23,13 +23,14 @@ class LuminousLogo extends StatelessWidget {
   final BoxFit fit;
 
   static const String _assetPath = 'assets/branding/enfok_logo_lossless.svg';
+  static const double _assetAspectRatio = 415 / 162;
 
   @override
   Widget build(BuildContext context) {
     final double resolvedHeight = height ?? (iconOnly ? 44 : 58);
     final double resolvedWidth =
         width ??
-        (iconOnly ? resolvedHeight * 1.36 : resolvedHeight * (449 / 162));
+        (iconOnly ? resolvedHeight * 1.36 : resolvedHeight * _assetAspectRatio);
     return SizedBox(
       width: resolvedWidth,
       height: resolvedHeight,
@@ -267,7 +268,7 @@ class StatusChip extends StatelessWidget {
       decoration: BoxDecoration(
         color: background,
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: color.withValues(alpha: 0.18)),
+        border: Border.all(color: color.withValues(alpha: 0.12)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -385,18 +386,22 @@ class TogglePill extends StatelessWidget {
           duration: const Duration(milliseconds: 160),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
           decoration: BoxDecoration(
-            color: selected ? AppTheme.navy : AppTheme.white,
+            color: selected
+                ? AppTheme.sand.withValues(alpha: 0.72)
+                : AppTheme.white,
             borderRadius: BorderRadius.circular(18),
             border: Border.all(
-              color: selected ? AppTheme.gold : AppTheme.border,
+              color: selected
+                  ? AppTheme.gold.withValues(alpha: 0.82)
+                  : AppTheme.border,
             ),
-            boxShadow: selected ? AppTheme.cardShadow : const <BoxShadow>[],
+            boxShadow: selected ? AppTheme.softShadow : const <BoxShadow>[],
           ),
           child: Text(
             label,
-            style: Theme.of(context).textTheme.labelMedium?.copyWith(
-              color: selected ? AppTheme.sand : AppTheme.navy,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.labelMedium?.copyWith(color: AppTheme.navy),
           ),
         ),
       ),

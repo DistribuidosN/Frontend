@@ -5,9 +5,9 @@ const Map<DashboardWindow, DashboardView>
 dashboardViews = <DashboardWindow, DashboardView>{
   DashboardWindow.day: DashboardView(
     summary:
-        'Editorial bursts are landing cleanly. Queue pressure is light, median latency is below SLA, and only two assets need manual review.',
+        'Editorial work is moving cleanly. Review stays light, delivery timing stays under target, and only two assets need attention.',
     focus:
-        'A short resize burst is being absorbed early, before saturation turns into backlog.',
+        'The morning burst settled early, so the rest of the day stayed easy to read.',
     cards: <OverviewMetric>[
       OverviewMetric(
         label: 'Images processed',
@@ -32,17 +32,17 @@ dashboardViews = <DashboardWindow, DashboardView>{
       SupportMetric(
         label: 'Live throughput',
         value: '82 img/min',
-        note: 'north cluster carries 38%',
+        note: 'strong pace through the morning window',
       ),
       SupportMetric(
         label: 'Node utilization',
         value: '72%',
-        note: 'healthy margin before caps',
+        note: 'comfortable room before pressure builds',
       ),
       SupportMetric(
         label: 'Recovery buffer',
         value: '14 min',
-        note: 'safe for a rolling drain',
+        note: 'enough room for a smooth handoff',
       ),
     ],
     chart: <ThroughputPoint>[
@@ -57,9 +57,9 @@ dashboardViews = <DashboardWindow, DashboardView>{
   ),
   DashboardWindow.week: DashboardView(
     summary:
-        'The cluster is moving with more calm than the volume suggests. Balancing is working, review load is down, and Thursday was the only real pressure point.',
+        'The week stayed calmer than the volume suggests. Review load is down, handoff stayed smooth, and Thursday was the only real pressure point.',
     focus:
-        'Warm nodes were rebalanced before they hardened into a queue problem.',
+        'The busiest stretch was absorbed early before it turned into visible backlog.',
     cards: <OverviewMetric>[
       OverviewMetric(
         label: 'Images processed',
@@ -84,17 +84,17 @@ dashboardViews = <DashboardWindow, DashboardView>{
       SupportMetric(
         label: 'Live throughput',
         value: '64 img/min',
-        note: 'queue peak landed on Thursday',
+        note: 'Thursday carried the heaviest pace',
       ),
       SupportMetric(
         label: 'Node utilization',
         value: '68%',
-        note: 'no node is carrying the whole week',
+        note: 'work stayed balanced across the week',
       ),
       SupportMetric(
         label: 'Recovery buffer',
         value: '12 min',
-        note: 'two node drains remain safe',
+        note: 'still enough room for a calm recovery',
       ),
     ],
     chart: <ThroughputPoint>[
@@ -109,8 +109,8 @@ dashboardViews = <DashboardWindow, DashboardView>{
   ),
   DashboardWindow.month: DashboardView(
     summary:
-        'Volume is up, exceptions are rarer, and the current node mix can absorb another commercial lane before expansion becomes urgent.',
-    focus: 'Only month-end delivery windows meaningfully tighten the queue.',
+        'Volume is up, exceptions are rarer, and the current setup can absorb another commercial lane before expansion becomes urgent.',
+    focus: 'Only month-end delivery windows meaningfully tighten the flow.',
     cards: <OverviewMetric>[
       OverviewMetric(
         label: 'Images processed',
@@ -135,7 +135,7 @@ dashboardViews = <DashboardWindow, DashboardView>{
       SupportMetric(
         label: 'Live throughput',
         value: '58 img/min',
-        note: 'commercial presets dominate',
+        note: 'commercial presets lead the month',
       ),
       SupportMetric(
         label: 'Node utilization',
@@ -145,7 +145,7 @@ dashboardViews = <DashboardWindow, DashboardView>{
       SupportMetric(
         label: 'Recovery buffer',
         value: '09 min',
-        note: 'watch month-end exports',
+        note: 'watch month-end delivery windows',
       ),
     ],
     chart: <ThroughputPoint>[
@@ -159,29 +159,29 @@ dashboardViews = <DashboardWindow, DashboardView>{
 
 const List<NodeHealth> clusterNodes = <NodeHealth>[
   NodeHealth(
-    id: 'node-01',
-    zone: 'Bogota',
+    id: 'lane-01',
+    zone: 'Editorial',
     load: 84,
     throughput: '312 img/h',
     tone: NodeTone.balancing,
   ),
   NodeHealth(
-    id: 'node-02',
-    zone: 'Quito',
+    id: 'lane-02',
+    zone: 'Catalog',
     load: 68,
     throughput: '284 img/h',
     tone: NodeTone.stable,
   ),
   NodeHealth(
-    id: 'node-03',
-    zone: 'Lima',
+    id: 'lane-03',
+    zone: 'Campaigns',
     load: 57,
     throughput: '246 img/h',
     tone: NodeTone.stable,
   ),
   NodeHealth(
-    id: 'node-04',
-    zone: 'Santiago',
+    id: 'lane-04',
+    zone: 'Exports',
     load: 79,
     throughput: '298 img/h',
     tone: NodeTone.balancing,

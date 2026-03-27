@@ -165,7 +165,7 @@ class _AppShell extends StatelessWidget {
                     height: 280,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: AppTheme.sand.withValues(alpha: 0.46),
+                      color: AppTheme.sand.withValues(alpha: 0.22),
                     ),
                   ),
                 ),
@@ -179,7 +179,7 @@ class _AppShell extends StatelessWidget {
                     height: 320,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: AppTheme.gold.withValues(alpha: 0.18),
+                      color: AppTheme.gold.withValues(alpha: 0.08),
                     ),
                   ),
                 ),
@@ -403,7 +403,7 @@ class _SidebarOverviewCard extends StatelessWidget {
     return AppSurface(
       radius: narrow ? 26 : 30,
       padding: EdgeInsets.zero,
-      color: AppTheme.sand,
+      color: AppTheme.white,
       shadow: AppTheme.softShadow,
       child: Stack(
         children: <Widget>[
@@ -418,7 +418,7 @@ class _SidebarOverviewCard extends StatelessWidget {
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
                     colors: <Color>[
-                      AppTheme.gold.withValues(alpha: 0.12),
+                      AppTheme.gold.withValues(alpha: 0.06),
                       AppTheme.gold.withValues(alpha: 0),
                     ],
                   ),
@@ -443,9 +443,9 @@ class _SidebarOverviewCard extends StatelessWidget {
                   width: double.infinity,
                   padding: EdgeInsets.all(narrow ? 16 : 18),
                   decoration: BoxDecoration(
-                    color: AppTheme.sand,
+                    color: AppTheme.white,
                     borderRadius: BorderRadius.circular(narrow ? 22 : 24),
-                    border: Border.all(color: AppTheme.borderSoft),
+                    border: Border.all(color: AppTheme.border),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -458,7 +458,7 @@ class _SidebarOverviewCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        'Distributed image operations',
+                        'Creative operations workspace',
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
                           color: AppTheme.slate,
                           letterSpacing: narrow ? 1.8 : 2,
@@ -469,7 +469,7 @@ class _SidebarOverviewCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 14),
                 Text(
-                  'Monitor queues, nodes and delivery workflows from one control surface.',
+                  'Keep uploads, reviews and delivery moving inside one calm, easy-to-read workspace.',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: AppTheme.navy.withValues(alpha: 0.76),
                     height: 1.55,
@@ -533,7 +533,7 @@ class _SidebarHealthCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppSurface(
       radius: narrow ? 24 : 26,
-      color: AppTheme.sand,
+      color: AppTheme.white,
       padding: cardPadding,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -561,9 +561,9 @@ class _SidebarHealthCard extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
             decoration: BoxDecoration(
-              color: AppTheme.sand,
+              color: AppTheme.white,
               borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: AppTheme.borderSoft),
+              border: Border.all(color: AppTheme.border),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -586,7 +586,7 @@ class _SidebarHealthCard extends StatelessWidget {
                 ProgressLine(
                   value: 0.72,
                   color: AppTheme.orange,
-                  background: AppTheme.gold.withValues(alpha: 0.28),
+                  background: AppTheme.sand.withValues(alpha: 0.34),
                 ),
                 const SizedBox(height: 10),
                 Row(
@@ -775,14 +775,14 @@ class _HealthBadge extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Text(
-                'System Healthy',
+                'Workspace ready',
                 style: Theme.of(
                   context,
                 ).textTheme.labelMedium?.copyWith(color: AppTheme.navy),
               ),
               if (!compact)
                 Text(
-                  'Load balanced and ready',
+                  'Stable, calm and synced',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: AppTheme.navy.withValues(alpha: 0.72),
                   ),
@@ -898,9 +898,15 @@ class _SidebarTile extends StatelessWidget {
           duration: const Duration(milliseconds: 160),
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           decoration: BoxDecoration(
-            color: active ? AppTheme.navy : AppTheme.white,
+            color: active
+                ? AppTheme.sand.withValues(alpha: 0.74)
+                : AppTheme.white,
             borderRadius: BorderRadius.circular(22),
-            border: Border.all(color: active ? AppTheme.navy : AppTheme.border),
+            border: Border.all(
+              color: active
+                  ? AppTheme.gold.withValues(alpha: 0.8)
+                  : AppTheme.border,
+            ),
             boxShadow: active ? AppTheme.cardShadow : const <BoxShadow>[],
           ),
           child: Row(
@@ -919,9 +925,7 @@ class _SidebarTile extends StatelessWidget {
                 width: 42,
                 height: 42,
                 decoration: BoxDecoration(
-                  color: active
-                      ? AppTheme.sand.withValues(alpha: 0.16)
-                      : AppTheme.sand,
+                  color: active ? AppTheme.navy : AppTheme.sand,
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: Icon(
@@ -935,9 +939,7 @@ class _SidebarTile extends StatelessWidget {
                 child: Text(
                   label,
                   style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                    color: active
-                        ? AppTheme.white
-                        : AppTheme.navy.withValues(alpha: 0.9),
+                    color: AppTheme.navy.withValues(alpha: 0.92),
                   ),
                 ),
               ),
@@ -945,7 +947,7 @@ class _SidebarTile extends StatelessWidget {
                 const Icon(
                   Icons.arrow_outward_rounded,
                   size: 16,
-                  color: AppTheme.sand,
+                  color: AppTheme.navy,
                 ),
             ],
           ),
@@ -963,12 +965,12 @@ class _SidebarConsoleTag extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: AppTheme.sand,
+        color: AppTheme.white,
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: AppTheme.borderStrong),
+        border: Border.all(color: AppTheme.border),
       ),
       child: Text(
-        'OPERATOR CONSOLE',
+        'WORKSPACE OVERVIEW',
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
           color: AppTheme.navy,
           letterSpacing: 1.8,
@@ -989,7 +991,7 @@ class _SidebarHealthCopy extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Text(
-          'CLUSTER HEALTH',
+          'WORKFLOW HEALTH',
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: Theme.of(context).textTheme.labelSmall?.copyWith(
@@ -999,7 +1001,7 @@ class _SidebarHealthCopy extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Text(
-          'Balanced and active',
+          'Clear and on track',
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
           style: Theme.of(context).textTheme.titleMedium,
@@ -1017,9 +1019,9 @@ class _SidebarLivePill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: AppTheme.sand,
+        color: AppTheme.white,
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: AppTheme.borderSoft),
+        border: Border.all(color: AppTheme.border),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -1062,9 +1064,9 @@ class _SidebarMetricPill extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: AppTheme.sand,
+        color: AppTheme.sand.withValues(alpha: 0.18),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppTheme.borderSoft),
+        border: Border.all(color: AppTheme.border),
       ),
       child: Row(
         children: <Widget>[
@@ -1151,7 +1153,7 @@ class _HeaderPulsePill extends StatelessWidget {
           const Icon(Icons.bolt_rounded, size: 18, color: AppTheme.navy),
           const SizedBox(width: 8),
           Text(
-            'Live pulse synced',
+            'Updates synced',
             style: Theme.of(
               context,
             ).textTheme.labelMedium?.copyWith(color: AppTheme.navy),
@@ -1196,48 +1198,48 @@ String _monthName(int month) {
 String _pageHeadline(AppPage page) {
   switch (page) {
     case AppPage.dashboard:
-      return 'Operations at a glance';
+      return 'Workspace at a glance';
     case AppPage.upload:
-      return 'Bring new image batches in';
+      return 'Bring new work in';
     case AppPage.taskBuilder:
-      return 'Shape the processing flow';
+      return 'Build a cleaner flow';
     case AppPage.progress:
-      return 'Track active workloads live';
+      return 'Follow active work';
     case AppPage.results:
-      return 'Review delivered outputs';
+      return 'Review finished outputs';
     case AppPage.history:
-      return 'Inspect past execution lanes';
+      return 'Look back on past work';
     case AppPage.requestDetail:
       return 'Inspect request details';
     case AppPage.nodes:
-      return 'Observe worker capacity';
+      return 'Watch workspace capacity';
     case AppPage.logs:
-      return 'Read platform activity';
+      return 'Read workspace activity';
     case AppPage.settings:
-      return 'Tune workspace behavior';
+      return 'Adjust workspace behavior';
   }
 }
 
 String _pageSummary(AppPage page) {
   switch (page) {
     case AppPage.dashboard:
-      return 'A premium operational view of throughput, queue pressure, and cluster calm.';
+      return 'A clear overview of pace, pending work and overall workspace rhythm.';
     case AppPage.upload:
-      return 'Stage new workloads and validate assets before they hit the queue.';
+      return 'Stage new assets and validate them before they move into review.';
     case AppPage.taskBuilder:
-      return 'Compose presets, routing, and delivery rules with clean guardrails.';
+      return 'Set rules, presets and handoff steps without adding visual clutter.';
     case AppPage.progress:
-      return 'Keep an eye on active jobs, pacing, and workload health in one place.';
+      return 'Track active work, timing and blockers in one calm place.';
     case AppPage.results:
-      return 'Review outcomes, exports, and surfaced exceptions without losing context.';
+      return 'Review outcomes, exports and exceptions without losing context.';
     case AppPage.history:
-      return 'Audit prior requests and compare how the system behaved over time.';
+      return 'Look back at prior requests and compare how work moved over time.';
     case AppPage.requestDetail:
-      return 'Zoom into one request and inspect every important operational signal.';
+      return 'Zoom into one request and inspect the details that matter.';
     case AppPage.nodes:
-      return 'See how each worker is carrying load, risk, and available recovery room.';
+      return 'See where capacity is carrying more weight and where more room is available.';
     case AppPage.logs:
-      return 'Surface system events with enough clarity to spot patterns quickly.';
+      return 'Surface important events with enough clarity to spot patterns quickly.';
     case AppPage.settings:
       return 'Adjust workspace rules, defaults, and operator-facing behavior.';
   }

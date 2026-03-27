@@ -142,22 +142,22 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return _AuthLayout(
-      heroTitle: 'Distributed image\nprocessing at scale',
+      heroTitle: 'Image workflows,\nbeautifully organized',
       heroDescription:
-          'Transform thousands of assets in parallel across worker nodes. Keep monitoring, QA and result delivery in one premium control surface.',
-      heroEyebrow: 'CONTROL SURFACE ACCESS',
-      heroStatusLabel: 'Secure cluster access',
+          'Keep uploads, approvals and delivery review inside one calm workspace built around your team and your brand.',
+      heroEyebrow: 'ENFOK WORKSPACE',
+      heroStatusLabel: 'Secure workspace',
       lightweightHero: true,
       features: const <Map<String, Object>>[
         <String, Object>{
-          'icon': Icons.memory_outlined,
-          'label': 'Parallel Processing',
-          'desc': '8 active nodes',
+          'icon': Icons.dashboard_customize_outlined,
+          'label': 'Clear workspace',
+          'desc': 'One place for uploads, presets and review',
         },
         <String, Object>{
-          'icon': Icons.image_outlined,
-          'label': 'Batch Operations',
-          'desc': '1000+ images/min',
+          'icon': Icons.auto_awesome_outlined,
+          'label': 'Thoughtful automation',
+          'desc': 'Useful defaults without visual noise',
         },
       ],
       panel: _AuthPanelTheme(
@@ -192,7 +192,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
                 child: Text(
-                  'CONTROL SURFACE ACCESS',
+                  'WORKSPACE ACCESS',
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
                     color: _AuthPalette.navy,
                     letterSpacing: 2,
@@ -222,7 +222,7 @@ class _LoginPageState extends State<LoginPage> {
               const SizedBox(height: 8),
               const TextField(
                 style: TextStyle(color: _AuthPalette.navy),
-                decoration: InputDecoration(hintText: 'alex@luminous.io'),
+                decoration: InputDecoration(hintText: 'alex@enfok.co'),
               ),
               const SizedBox(height: 16),
               Row(
@@ -357,19 +357,19 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     return _AuthLayout(
-      heroTitle: 'Start processing\nimages at scale',
+      heroTitle: 'Build a workspace\nthat feels clear',
       heroDescription:
-          'Join teams shipping catalog, editorial and campaign work faster with distributed image transformations and premium operational visibility.',
+          'Create a clean Enfok workspace for uploads, reviews and delivery with a calmer, more polished experience from day one.',
       features: const <Map<String, Object>>[
         <String, Object>{
-          'icon': Icons.auto_awesome_outlined,
-          'label': 'Unlimited Scale',
-          'desc': 'Process millions instantly',
+          'icon': Icons.people_alt_outlined,
+          'label': 'Team-ready',
+          'desc': 'Shared access with a cleaner daily flow',
         },
         <String, Object>{
-          'icon': Icons.flash_on_outlined,
-          'label': 'Fast Processing',
-          'desc': 'Auto-distributed across nodes',
+          'icon': Icons.tune_outlined,
+          'label': 'Flexible presets',
+          'desc': 'Shape image rules without friction',
         },
       ],
       panel: _AuthPanelTheme(
@@ -394,7 +394,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   const Spacer(),
                   const _AuthFormMetaPill(
                     icon: Icons.group_add_outlined,
-                    label: 'Team onboarding',
+                    label: 'Quick setup',
                   ),
                 ],
               ),
@@ -410,7 +410,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   border: Border.all(color: _AuthPalette.orange, width: 1.1),
                 ),
                 child: Text(
-                  'CREATE LUMINOUS ACCESS',
+                  'CREATE ENFOK ACCESS',
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
                     color: _AuthPalette.navy,
                     letterSpacing: 2,
@@ -429,7 +429,7 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
               const SizedBox(height: 10),
               Text(
-                'Join Enfok and start processing images',
+                'Create your Enfok workspace and invite your team',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: _AuthPalette.navy,
                   height: 1.6,
@@ -441,12 +441,12 @@ class _RegisterPageState extends State<RegisterPage> {
                 runSpacing: 8,
                 children: const <Widget>[
                   _AuthFormMetaPill(
-                    icon: Icons.dns_outlined,
-                    label: 'Distributed-ready',
+                    icon: Icons.dashboard_customize_outlined,
+                    label: 'Clean workflow',
                   ),
                   _AuthFormMetaPill(
                     icon: Icons.shield_outlined,
-                    label: 'Governed access',
+                    label: 'Private access',
                   ),
                 ],
               ),
@@ -480,7 +480,7 @@ class _RegisterPageState extends State<RegisterPage> {
               const SizedBox(height: 8),
               const TextField(
                 style: TextStyle(color: _AuthPalette.navy),
-                decoration: InputDecoration(hintText: 'alex@luminous.io'),
+                decoration: InputDecoration(hintText: 'alex@enfok.co'),
               ),
               const SizedBox(height: 16),
               const _AuthFieldLabel('Password'),
@@ -737,7 +737,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                                   const TextField(
                                     style: TextStyle(color: _AuthPalette.navy),
                                     decoration: InputDecoration(
-                                      hintText: 'alex@luminous.io',
+                                      hintText: 'alex@enfok.co',
                                     ),
                                   ),
                                   const SizedBox(height: 18),
@@ -826,8 +826,8 @@ class _AuthLayout extends StatelessWidget {
     required this.heroDescription,
     required this.features,
     required this.panel,
-    this.heroEyebrow = 'CONTROL SURFACE',
-    this.heroStatusLabel = 'Node mesh online',
+    this.heroEyebrow = 'ENFOK WORKSPACE',
+    this.heroStatusLabel = 'Visual mesh active',
     this.lightweightHero = false,
   });
 
@@ -1209,12 +1209,15 @@ class _AuthHeroPane extends StatelessWidget {
                       runSpacing: 12,
                       children: const <Widget>[
                         _HeroMetricPill(
-                          label: '8 nodes online',
+                          label: 'Private workspace',
                           lightMode: true,
                         ),
-                        _HeroMetricPill(label: '64 img/min', lightMode: true),
                         _HeroMetricPill(
-                          label: '3.8s median SLA',
+                          label: 'Clean review flow',
+                          lightMode: true,
+                        ),
+                        _HeroMetricPill(
+                          label: 'Brand-ready delivery',
                           lightMode: true,
                         ),
                       ],
@@ -1250,13 +1253,13 @@ class _AuthHeroPane extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: <Widget>[
                                 Text(
-                                  'Premium orchestration',
+                                  'Designed for calm control',
                                   style: Theme.of(context).textTheme.labelLarge
                                       ?.copyWith(color: _AuthPalette.navy),
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  'Built for teams that need speed, trust and creative control across every asset pipeline.',
+                                  'Built for teams that want a cleaner workspace, better handoff, and a stronger sense of polish.',
                                   style: Theme.of(context).textTheme.bodySmall
                                       ?.copyWith(
                                         color: _AuthPalette.navy.withValues(
@@ -1429,17 +1432,17 @@ class _AuthFeatureCard extends StatelessWidget {
           end: Alignment.bottomRight,
           colors: <Color>[
             lightMode
-                ? Colors.white.withValues(alpha: 0.88)
+                ? Colors.white.withValues(alpha: 0.94)
                 : _AuthPalette.sand.withValues(alpha: 0.12),
             lightMode
-                ? _AuthPalette.sand.withValues(alpha: 0.46)
+                ? _AuthPalette.sand.withValues(alpha: 0.22)
                 : _AuthPalette.gold.withValues(alpha: 0.08),
           ],
         ),
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
           color: lightMode
-              ? _AuthPalette.navy.withValues(alpha: 0.08)
+              ? _AuthPalette.navy.withValues(alpha: 0.06)
               : _AuthPalette.gold.withValues(alpha: 0.28),
           width: 1.1,
         ),
@@ -1452,13 +1455,13 @@ class _AuthFeatureCard extends StatelessWidget {
             height: 44,
             decoration: BoxDecoration(
               color: lightMode
-                  ? _AuthPalette.sand
+                  ? _AuthPalette.sand.withValues(alpha: 0.78)
                   : _AuthPalette.red.withValues(alpha: 0.26),
               borderRadius: BorderRadius.circular(14),
             ),
             child: Icon(
               icon,
-              color: lightMode ? _AuthPalette.red : _AuthPalette.gold,
+              color: lightMode ? _AuthPalette.navy : _AuthPalette.gold,
               size: 24,
             ),
           ),
@@ -1497,12 +1500,12 @@ class _HeroMetricPill extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
         color: lightMode
-            ? Colors.white.withValues(alpha: 0.84)
+            ? Colors.white.withValues(alpha: 0.9)
             : _AuthPalette.sand.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(999),
         border: Border.all(
           color: lightMode
-              ? _AuthPalette.navy.withValues(alpha: 0.08)
+              ? _AuthPalette.gold.withValues(alpha: 0.26)
               : _AuthPalette.gold.withValues(alpha: 0.28),
           width: 1.1,
         ),
@@ -1602,9 +1605,12 @@ class _AuthFormMetaPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
       decoration: BoxDecoration(
-        color: _AuthPalette.gold.withValues(alpha: 0.28),
+        color: _AuthPalette.sand.withValues(alpha: 0.7),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: _AuthPalette.orange, width: 1.1),
+        border: Border.all(
+          color: _AuthPalette.gold.withValues(alpha: 0.56),
+          width: 1.1,
+        ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -1641,7 +1647,7 @@ class _AuthSceneBackground extends StatelessWidget {
                   end: Alignment.bottomCenter,
                   colors: <Color>[
                     Colors.white,
-                    _AuthPalette.sand.withValues(alpha: 0.38),
+                    _AuthPalette.sand.withValues(alpha: 0.26),
                     Colors.white,
                   ],
                 ),
@@ -1658,7 +1664,7 @@ class _AuthSceneBackground extends StatelessWidget {
                 height: 220,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: _AuthPalette.gold.withValues(alpha: 0.12),
+                  color: _AuthPalette.gold.withValues(alpha: 0.08),
                 ),
               ),
             ),
@@ -1673,7 +1679,7 @@ class _AuthSceneBackground extends StatelessWidget {
                 height: 200,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: _AuthPalette.orange.withValues(alpha: 0.08),
+                  color: _AuthPalette.orange.withValues(alpha: 0.05),
                 ),
               ),
             ),

@@ -52,14 +52,7 @@ class _DashboardPageState extends State<DashboardPage> {
 
             return AppSurface(
               radius: 26,
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: <Color>[
-                  style.background,
-                  AppTheme.sand.withValues(alpha: 0.92),
-                ],
-              ),
+              color: style.background,
               padding: const EdgeInsets.all(22),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -117,10 +110,10 @@ class _DashboardPageState extends State<DashboardPage> {
             final bool stacked = constraints.maxWidth < 1120;
             const double desktopTopPanelMinHeight = 820;
             final Widget throughputPanel = SectionPanel(
-              title: 'Throughput',
-              description: 'Processed volume against queued pressure.',
+              title: 'Activity overview',
+              description: 'A clear read on completed work and pending demand.',
               action: StatusChip(
-                label: 'Queue peak $queuePeak',
+                label: 'Peak $queuePeak',
                 color: AppTheme.sapphire,
                 background: AppTheme.sapphireSoft,
               ),
@@ -187,17 +180,18 @@ class _DashboardPageState extends State<DashboardPage> {
             );
 
             final Widget clusterPanel = SectionPanel(
-              title: 'Cluster Status',
-              description: 'Node pressure and recovery room.',
+              title: 'Capacity pulse',
+              description:
+                  'A quick read on available room and current pressure.',
               child: _ClusterStatusPanel(current: current),
             );
 
             final Widget recentBatchesPanel = SectionPanel(
-              title: 'Recent Batches',
-              description: 'The active worklist.',
+              title: 'Recent work',
+              description: 'What the team is moving through right now.',
               action: OutlinedButton(
                 onPressed: () {},
-                child: const Text('Export activity'),
+                child: const Text('Export summary'),
               ),
               child: Column(
                 children: recentBatches.map((BatchActivity batch) {
@@ -207,14 +201,7 @@ class _DashboardPageState extends State<DashboardPage> {
                     padding: const EdgeInsets.only(bottom: 12),
                     child: AppSurface(
                       padding: const EdgeInsets.all(18),
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: <Color>[
-                          AppTheme.sand,
-                          AppTheme.gold.withValues(alpha: 0.14),
-                        ],
-                      ),
+                      color: AppTheme.white,
                       child: LayoutBuilder(
                         builder:
                             (BuildContext context, BoxConstraints constraints) {
@@ -416,7 +403,7 @@ _OverviewCardStyle _overviewCardStyle(int index) {
       return const _OverviewCardStyle(
         color: AppTheme.navy,
         textColor: AppTheme.ink,
-        background: AppTheme.sand,
+        background: AppTheme.white,
         iconBackground: AppTheme.gold,
         badge: 'volume',
       );
@@ -424,17 +411,17 @@ _OverviewCardStyle _overviewCardStyle(int index) {
       return const _OverviewCardStyle(
         color: AppTheme.orange,
         textColor: AppTheme.ink,
-        background: AppTheme.sand,
+        background: AppTheme.white,
         iconBackground: AppTheme.sand,
-        badge: 'speed',
+        badge: 'pace',
       );
     default:
       return const _OverviewCardStyle(
         color: AppTheme.red,
         textColor: AppTheme.ink,
-        background: AppTheme.sand,
+        background: AppTheme.white,
         iconBackground: AppTheme.sand,
-        badge: 'attention',
+        badge: 'review',
       );
   }
 }
@@ -620,7 +607,7 @@ class _DashboardHero extends StatelessWidget {
                     ),
                     const SizedBox(height: 10),
                     Text(
-                      'Switch the time window to compare load and recovery.',
+                      'Switch the time window to compare pace and recovery.',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: AppTheme.slate,
                         height: 1.55,
@@ -659,7 +646,7 @@ class _DashboardHero extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
                       Text(
-                        'QUEUE PEAK',
+                        'BUSIEST MOMENT',
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
                           color: AppTheme.orange,
@@ -675,7 +662,7 @@ class _DashboardHero extends StatelessWidget {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'highest queued load',
+                        'highest activity level',
                         textAlign: TextAlign.center,
                         style: Theme.of(
                           context,
@@ -700,7 +687,7 @@ class _DashboardHero extends StatelessWidget {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          '8 nodes healthy',
+                          'Healthy operating window',
                           style: Theme.of(context).textTheme.labelLarge,
                         ),
                       ],
@@ -892,14 +879,7 @@ class _ClusterStatusPanel extends StatelessWidget {
             padding: const EdgeInsets.only(bottom: 12),
             child: AppSurface(
               padding: const EdgeInsets.all(16),
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: <Color>[
-                  toneColor.withValues(alpha: 0.08),
-                  AppTheme.sand,
-                ],
-              ),
+              color: AppTheme.white,
               child: Column(
                 children: <Widget>[
                   Row(
@@ -991,7 +971,7 @@ class _SupportMetricCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppSurface(
       padding: const EdgeInsets.all(16),
-      color: AppTheme.sand,
+      color: AppTheme.white,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[

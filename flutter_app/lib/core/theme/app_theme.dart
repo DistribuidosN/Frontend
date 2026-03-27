@@ -130,9 +130,9 @@ class AppTheme {
       useMaterial3: true,
       scaffoldBackgroundColor: white,
       splashFactory: NoSplash.splashFactory,
-      hoverColor: gold.withValues(alpha: 0.08),
+      hoverColor: navy.withValues(alpha: 0.04),
       highlightColor: white,
-      focusColor: orange.withValues(alpha: 0.12),
+      focusColor: gold.withValues(alpha: 0.08),
       colorScheme: const ColorScheme.light(
         primary: red,
         secondary: orange,
@@ -148,7 +148,7 @@ class AppTheme {
       cardColor: white,
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: sand.withValues(alpha: 0.38),
+        fillColor: sand.withValues(alpha: 0.22),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 18,
           vertical: 16,
@@ -244,7 +244,7 @@ class AppTheme {
               return gold.withValues(alpha: 0.16);
             }
             if (states.contains(WidgetState.hovered)) {
-              return sand.withValues(alpha: 0.52);
+              return sand.withValues(alpha: 0.24);
             }
             return white;
           }),
@@ -350,18 +350,18 @@ class AppTheme {
 
   static List<BoxShadow> get softShadow => <BoxShadow>[
     BoxShadow(
-      color: navy.withValues(alpha: 0.08),
-      blurRadius: 34,
-      offset: const Offset(0, 18),
+      color: navy.withValues(alpha: 0.06),
+      blurRadius: 30,
+      offset: const Offset(0, 16),
       spreadRadius: -22,
     ),
   ];
 
   static List<BoxShadow> get cardShadow => <BoxShadow>[
     BoxShadow(
-      color: navy.withValues(alpha: 0.07),
-      blurRadius: 22,
-      offset: const Offset(0, 14),
+      color: navy.withValues(alpha: 0.05),
+      blurRadius: 18,
+      offset: const Offset(0, 12),
       spreadRadius: -18,
     ),
   ];

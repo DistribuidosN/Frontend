@@ -94,7 +94,7 @@ class _NodesPageState extends State<NodesPage> {
         const SizedBox(height: 20),
         AdaptiveGrid(
           minItemWidth: 220,
-          childAspectRatio: 1.35,
+          childAspectRatio: 1.22,
           children: <Widget>[
             _NodesSummaryCard(
               icon: Icons.check_circle_outline_rounded,
@@ -354,43 +354,75 @@ class _NodesSummaryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppSurface(
       radius: 16,
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: iconBackground,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(icon, size: 20, color: iconColor),
-          ),
-          const SizedBox(height: 14),
-          Text(
-            label,
-            style: Theme.of(
-              context,
-            ).textTheme.bodySmall?.copyWith(color: AppTheme.slate),
-          ),
-          const SizedBox(height: 6),
-          RichText(
-            text: TextSpan(
-              style: AppTheme.displayStyle(context, size: 30, height: 1.0),
-              children: <InlineSpan>[
-                TextSpan(text: value),
-                if (suffix != null)
-                  TextSpan(
-                    text: suffix,
-                    style: Theme.of(
-                      context,
-                    ).textTheme.titleMedium?.copyWith(color: AppTheme.slate),
+      padding: EdgeInsets.zero,
+      child: LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          final bool compact =
+              constraints.maxWidth < 220 || constraints.maxHeight < 150;
+          final double contentPadding = compact ? 16 : 24;
+          final double iconBox = compact ? 34 : 40;
+          final double iconSize = compact ? 18 : 20;
+          final double titleGap = compact ? 10 : 14;
+          final double valueGap = compact ? 4 : 6;
+
+          return Padding(
+            padding: EdgeInsets.all(contentPadding),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Container(
+                  width: iconBox,
+                  height: iconBox,
+                  decoration: BoxDecoration(
+                    color: iconBackground,
+                    borderRadius: BorderRadius.circular(compact ? 11 : 12),
                   ),
+                  child: Icon(icon, size: iconSize, color: iconColor),
+                ),
+                SizedBox(height: titleGap),
+                Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: AppTheme.slate),
+                ),
+                SizedBox(height: valueGap),
+                Flexible(
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: RichText(
+                        text: TextSpan(
+                          style: AppTheme.displayStyle(
+                            context,
+                            size: compact ? 24 : 30,
+                            height: 1.0,
+                          ),
+                          children: <InlineSpan>[
+                            TextSpan(text: value),
+                            if (suffix != null)
+                              TextSpan(
+                                text: suffix,
+                                style: Theme.of(context).textTheme.titleMedium
+                                    ?.copyWith(
+                                      color: AppTheme.slate,
+                                      fontSize: compact ? 14 : null,
+                                    ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }

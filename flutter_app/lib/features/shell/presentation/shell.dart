@@ -125,26 +125,56 @@ class _AppShell extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
-        final bool compact = constraints.maxWidth < 1180;
+        final double viewportWidth = constraints.maxWidth;
+        final bool compact = viewportWidth < 1200;
+        final bool mobile = viewportWidth < 760;
+        final bool desktopLarge = viewportWidth >= 1540;
+        final bool desktopMedium = viewportWidth >= 1360;
+
+        final double railWidth = desktopLarge
+            ? 392
+            : (desktopMedium ? 364 : 344);
+        final double railPaddingH = desktopLarge ? 24 : 18;
+        final double railPaddingV = desktopLarge ? 24 : 18;
+        final double sidebarMaxWidth = desktopLarge ? 344 : 332;
+        final double drawerEdgeGap = mobile ? 8 : 14;
+        final double drawerWidth = math.min(
+          mobile ? 356 : 396,
+          viewportWidth - (drawerEdgeGap * 2),
+        );
+        final double contentHorizontalPadding = compact
+            ? (mobile ? 14 : 18)
+            : (desktopLarge ? 34 : 28);
 
         return Scaffold(
           key: scaffoldKey,
           drawer: compact
               ? Drawer(
-                  width: math.min(360, constraints.maxWidth - 12),
-                  backgroundColor: Colors.transparent,
+                  width: drawerWidth,
+                  backgroundColor: AppTheme.navy.withValues(alpha: 0.92),
                   elevation: 0,
                   child: SafeArea(
                     child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: _ShellSidebar(
-                        dropdownMode: true,
-                        activePage: activePage,
-                        onNavigate: (AppPage page) {
-                          Navigator.of(context).maybePop();
-                          onNavigate(page);
-                        },
-                        onLogout: onLogout,
+                      padding: EdgeInsets.fromLTRB(
+                        mobile ? 10 : 14,
+                        mobile ? 12 : 16,
+                        mobile ? 10 : 14,
+                        mobile ? 10 : 14,
+                      ),
+                      child: Align(
+                        alignment: Alignment.topCenter,
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 344),
+                          child: _ShellSidebar(
+                            dropdownMode: true,
+                            activePage: activePage,
+                            onNavigate: (AppPage page) {
+                              Navigator.of(context).maybePop();
+                              onNavigate(page);
+                            },
+                            onLogout: onLogout,
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -202,13 +232,46 @@ class _AppShell extends StatelessWidget {
                   children: <Widget>[
                     if (!compact)
                       SizedBox(
-                        width: 316,
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(20, 20, 0, 20),
-                          child: _ShellSidebar(
-                            activePage: activePage,
-                            onNavigate: onNavigate,
-                            onLogout: onLogout,
+                        width: railWidth,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: <Color>[
+                                AppTheme.navy,
+                                Color.alphaBlend(
+                                  AppTheme.gold.withValues(alpha: 0.08),
+                                  AppTheme.navy,
+                                ),
+                              ],
+                            ),
+                            border: Border(
+                              right: BorderSide(
+                                color: AppTheme.gold.withValues(alpha: 0.18),
+                              ),
+                            ),
+                          ),
+                          child: Padding(
+                            padding: EdgeInsets.fromLTRB(
+                              railPaddingH,
+                              railPaddingV,
+                              railPaddingH,
+                              railPaddingV,
+                            ),
+                            child: Align(
+                              alignment: Alignment.topCenter,
+                              child: ConstrainedBox(
+                                constraints: BoxConstraints(
+                                  maxWidth: sidebarMaxWidth,
+                                ),
+                                child: _ShellSidebar(
+                                  activePage: activePage,
+                                  onNavigate: onNavigate,
+                                  onLogout: onLogout,
+                                ),
+                              ),
+                            ),
                           ),
                         ),
                       ),
@@ -225,9 +288,9 @@ class _AppShell extends StatelessWidget {
                             child: SingleChildScrollView(
                               key: ValueKey<AppPage>(activePage),
                               padding: EdgeInsets.fromLTRB(
-                                compact ? 16 : 28,
+                                contentHorizontalPadding,
                                 24,
-                                compact ? 16 : 28,
+                                contentHorizontalPadding,
                                 28,
                               ),
                               child: Align(
@@ -308,7 +371,7 @@ class _ShellSidebar extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
-        final bool narrow = constraints.maxWidth < 330;
+        final bool narrow = constraints.maxWidth < 324;
         final bool shortHeight = constraints.maxHeight < 760;
         final Color shellBorder = dropdownMode
             ? AppTheme.gold.withValues(alpha: 0.36)
@@ -333,8 +396,13 @@ class _ShellSidebar extends StatelessWidget {
                 AppTheme.white,
                 AppTheme.sand.withValues(alpha: 0.34),
               ];
-        final EdgeInsets shellPadding = EdgeInsets.all(narrow ? 16 : 18);
-        final EdgeInsets cardPadding = EdgeInsets.all(narrow ? 14 : 16);
+        final EdgeInsets shellPadding = EdgeInsets.fromLTRB(
+          narrow ? 14 : 20,
+          narrow ? 14 : 20,
+          narrow ? 12 : 20,
+          narrow ? 14 : 18,
+        );
+        final EdgeInsets cardPadding = EdgeInsets.all(narrow ? 14 : 18);
 
         return DecoratedBox(
           decoration: BoxDecoration(
@@ -358,7 +426,7 @@ class _ShellSidebar extends StatelessWidget {
                   child: SingleChildScrollView(
                     key: const PageStorageKey<String>('shell-sidebar-scroll'),
                     physics: const BouncingScrollPhysics(),
-                    padding: EdgeInsets.only(right: narrow ? 2 : 4),
+                    padding: EdgeInsets.only(right: narrow ? 2 : 6),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
@@ -371,7 +439,7 @@ class _ShellSidebar extends StatelessWidget {
                           narrow: narrow,
                           cardPadding: cardPadding,
                         ),
-                        SizedBox(height: shortHeight ? 18 : 22),
+                        SizedBox(height: shortHeight ? 18 : 24),
                         Text(
                           'WORKSPACE',
                           style: Theme.of(context).textTheme.labelSmall
@@ -380,7 +448,7 @@ class _ShellSidebar extends StatelessWidget {
                                 color: workspaceLabel,
                               ),
                         ),
-                        const SizedBox(height: 10),
+                        const SizedBox(height: 12),
                         for (int index = 0; index < shellPages.length; index++)
                           Padding(
                             padding: EdgeInsets.only(
@@ -407,7 +475,7 @@ class _ShellSidebar extends StatelessWidget {
                     ),
                   ),
                 ),
-                SizedBox(height: shortHeight ? 12 : 14),
+                SizedBox(height: shortHeight ? 10 : 16),
                 SizedBox(
                   width: double.infinity,
                   child: OutlinedButton.icon(

@@ -138,6 +138,7 @@ class _AppShell extends StatelessWidget {
                     child: Padding(
                       padding: const EdgeInsets.all(16),
                       child: _ShellSidebar(
+                        dropdownMode: true,
                         activePage: activePage,
                         onNavigate: (AppPage page) {
                           Navigator.of(context).maybePop();
@@ -292,11 +293,13 @@ class _PageViewport extends StatelessWidget {
 
 class _ShellSidebar extends StatelessWidget {
   const _ShellSidebar({
+    this.dropdownMode = false,
     required this.activePage,
     required this.onNavigate,
     required this.onLogout,
   });
 
+  final bool dropdownMode;
   final AppPage activePage;
   final ValueChanged<AppPage> onNavigate;
   final VoidCallback onLogout;
@@ -307,22 +310,41 @@ class _ShellSidebar extends StatelessWidget {
       builder: (BuildContext context, BoxConstraints constraints) {
         final bool narrow = constraints.maxWidth < 330;
         final bool shortHeight = constraints.maxHeight < 760;
+        final Color shellBorder = dropdownMode
+            ? AppTheme.gold.withValues(alpha: 0.36)
+            : AppTheme.border;
+        final Color workspaceLabel = dropdownMode
+            ? AppTheme.sand.withValues(alpha: 0.78)
+            : AppTheme.navy.withValues(alpha: 0.62);
+        final List<Color> shellGradient = dropdownMode
+            ? <Color>[
+                AppTheme.navy,
+                Color.alphaBlend(
+                  AppTheme.gold.withValues(alpha: 0.06),
+                  AppTheme.navy,
+                ),
+                Color.alphaBlend(
+                  AppTheme.sand.withValues(alpha: 0.12),
+                  AppTheme.navy,
+                ),
+              ]
+            : <Color>[
+                AppTheme.white,
+                AppTheme.white,
+                AppTheme.sand.withValues(alpha: 0.34),
+              ];
         final EdgeInsets shellPadding = EdgeInsets.all(narrow ? 16 : 18);
         final EdgeInsets cardPadding = EdgeInsets.all(narrow ? 14 : 16);
 
         return DecoratedBox(
           decoration: BoxDecoration(
-            color: AppTheme.white,
-            border: Border.all(color: AppTheme.border),
+            color: shellGradient.first,
+            border: Border.all(color: shellBorder),
             borderRadius: BorderRadius.circular(36),
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: <Color>[
-                AppTheme.white,
-                AppTheme.white,
-                AppTheme.sand.withValues(alpha: 0.34),
-              ],
+              colors: shellGradient,
               stops: <double>[0, 0.38, 1],
             ),
             boxShadow: AppTheme.softShadow,
@@ -355,7 +377,7 @@ class _ShellSidebar extends StatelessWidget {
                           style: Theme.of(context).textTheme.labelSmall
                               ?.copyWith(
                                 letterSpacing: narrow ? 2.0 : 2.4,
-                                color: AppTheme.navy.withValues(alpha: 0.62),
+                                color: workspaceLabel,
                               ),
                         ),
                         const SizedBox(height: 10),

@@ -10,6 +10,16 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
+  static const List<String> _supportedOutputFormats = <String>[
+    'JPG',
+    'PNG',
+    'WEBP',
+    'BMP',
+    'GIF',
+    'TIFF',
+    'ICO',
+  ];
+
   bool _emailNotifications = true;
   bool _processingCompleted = true;
   bool _processingFailed = true;
@@ -119,10 +129,10 @@ class _SettingsPageState extends State<SettingsPage> {
                   child: Column(
                     children: <Widget>[
                       _SettingsFieldPair(
-                        left: const _SettingsLabeledDropdown(
+                        left: _SettingsLabeledDropdown(
                           label: 'Default Output Format',
                           initialValue: 'JPG',
-                          items: <String>['JPG', 'PNG', 'WEBP', 'TIFF'],
+                          items: _supportedOutputFormats,
                         ),
                         right: const _SettingsLabeledDropdown(
                           label: 'Default Quality',

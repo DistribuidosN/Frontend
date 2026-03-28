@@ -13,6 +13,16 @@ class TaskBuilderPage extends StatefulWidget {
 }
 
 class _TaskBuilderPageState extends State<TaskBuilderPage> {
+  static const List<String> _supportedOutputFormats = <String>[
+    'JPG',
+    'PNG',
+    'WEBP',
+    'BMP',
+    'GIF',
+    'TIFF',
+    'ICO',
+  ];
+
   final Set<String> _transforms = <String>{};
   double _brightness = 100;
   double _contrast = 100;
@@ -349,9 +359,7 @@ class _TaskBuilderPageState extends State<TaskBuilderPage> {
                   Wrap(
                     spacing: 10,
                     runSpacing: 10,
-                    children: <String>['JPG', 'PNG', 'WEBP', 'TIFF'].map((
-                      String format,
-                    ) {
+                    children: _supportedOutputFormats.map((String format) {
                       return TogglePill(
                         label: format,
                         selected: _format == format,

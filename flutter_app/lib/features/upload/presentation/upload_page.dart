@@ -86,7 +86,7 @@ class _UploadPageState extends State<UploadPage> {
                 ),
                 const SizedBox(height: 14),
                 Text(
-                  'Supports: JPG, PNG, WEBP, TIFF. Max 50MB per file.',
+                  'Supports: JPG, PNG, WEBP, BMP, GIF (static), TIFF, ICO. Max 50MB per file.',
                   style: Theme.of(
                     context,
                   ).textTheme.bodySmall?.copyWith(color: AppTheme.slate),

@@ -2,6 +2,8 @@ import 'dart:math' as math;
 import 'dart:ui' show PointerDeviceKind;
 
 import 'package:flutter/material.dart';
+import 'package:imageflow_flutter/core/workspace/workspace_controller.dart';
+import 'package:imageflow_flutter/core/workspace/workspace_scope.dart';
 import 'package:imageflow_flutter/core/theme/app_theme.dart';
 import 'package:imageflow_flutter/features/auth/domain/auth_view.dart';
 import 'package:imageflow_flutter/features/auth/presentation/auth_pages.dart';
@@ -26,23 +28,45 @@ class ImageFlowApp extends StatefulWidget {
 }
 
 class _ImageFlowAppState extends State<ImageFlowApp> {
-  bool _isAuthenticated = false;
+  late final WorkspaceController _workspaceController = WorkspaceController();
   AuthView _authView = AuthView.login;
   AppPage _activePage = AppPage.dashboard;
 
-  void _handleLogin() {
+  Future<void> _handleLogin(String email, String password) async {
+    await _workspaceController.login(email: email, password: password);
     setState(() {
-      _isAuthenticated = true;
       _activePage = AppPage.dashboard;
     });
   }
 
   void _handleLogout() {
+    _workspaceController.logout();
     setState(() {
-      _isAuthenticated = false;
       _authView = AuthView.login;
       _activePage = AppPage.dashboard;
     });
+  }
+
+  Future<void> _handleRegister({
+    required String username,
+    required String email,
+    required String password,
+  }) async {
+    await _workspaceController.register(
+      username: username,
+      email: email,
+      password: password,
+    );
+    setState(() {
+      _authView = AuthView.login;
+    });
+  }
+
+  Future<void> _handleForgotPassword(String email, String newPassword) async {
+    await _workspaceController.forgetPassword(
+      email: email,
+      newPassword: newPassword,
+    );
   }
 
   void _navigate(AppPage page) {
@@ -52,33 +76,47 @@ class _ImageFlowAppState extends State<ImageFlowApp> {
   }
 
   @override
+  void dispose() {
+    _workspaceController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Enfok',
-      theme: AppTheme.lightTheme(),
-      scrollBehavior: const MaterialScrollBehavior().copyWith(
-        dragDevices: <PointerDeviceKind>{
-          PointerDeviceKind.touch,
-          PointerDeviceKind.mouse,
-          PointerDeviceKind.trackpad,
-          PointerDeviceKind.stylus,
-          PointerDeviceKind.invertedStylus,
-          PointerDeviceKind.unknown,
+    return WorkspaceScope(
+      controller: _workspaceController,
+      child: AnimatedBuilder(
+        animation: _workspaceController,
+        builder: (BuildContext context, Widget? child) {
+          return MaterialApp(
+            debugShowCheckedModeBanner: false,
+            title: 'Enfok',
+            theme: AppTheme.lightTheme(),
+            scrollBehavior: const MaterialScrollBehavior().copyWith(
+              dragDevices: <PointerDeviceKind>{
+                PointerDeviceKind.touch,
+                PointerDeviceKind.mouse,
+                PointerDeviceKind.trackpad,
+                PointerDeviceKind.stylus,
+                PointerDeviceKind.invertedStylus,
+                PointerDeviceKind.unknown,
+              },
+            ),
+            home: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 220),
+              switchInCurve: Curves.easeOut,
+              switchOutCurve: Curves.easeIn,
+              child: _workspaceController.isAuthenticated
+                  ? _AppShell(
+                      key: const ValueKey<String>('shell'),
+                      activePage: _activePage,
+                      onNavigate: _navigate,
+                      onLogout: _handleLogout,
+                    )
+                  : _buildAuthView(),
+            ),
+          );
         },
-      ),
-      home: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 220),
-        switchInCurve: Curves.easeOut,
-        switchOutCurve: Curves.easeIn,
-        child: _isAuthenticated
-            ? _AppShell(
-                key: const ValueKey<String>('shell'),
-                activePage: _activePage,
-                onNavigate: _navigate,
-                onLogout: _handleLogout,
-              )
-            : _buildAuthView(),
       ),
     );
   }
@@ -95,13 +133,14 @@ class _ImageFlowAppState extends State<ImageFlowApp> {
       case AuthView.register:
         return RegisterPage(
           key: const ValueKey<String>('register'),
-          onRegister: _handleLogin,
+          onRegister: _handleRegister,
           onLogin: () => setState(() => _authView = AuthView.login),
         );
       case AuthView.forgot:
         return ForgotPasswordPage(
           key: const ValueKey<String>('forgot'),
           onBack: () => setState(() => _authView = AuthView.login),
+          onResetPassword: _handleForgotPassword,
         );
     }
   }
@@ -189,11 +228,11 @@ class _AppShell extends StatelessWidget {
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: <Color>[
-                        AppTheme.white,
-                        AppTheme.sand.withValues(alpha: 0.22),
-                        AppTheme.white,
+                        AppTheme.background,
+                        AppTheme.surfaceContainer.withValues(alpha: 0.55),
+                        AppTheme.background,
                       ],
-                      stops: const <double>[0, 0.55, 1],
+                      stops: const <double>[0, 0.48, 1],
                     ),
                   ),
                 ),
@@ -203,25 +242,11 @@ class _AppShell extends StatelessWidget {
                 top: 90,
                 child: IgnorePointer(
                   child: Container(
-                    width: 280,
-                    height: 280,
+                    width: 220,
+                    height: 220,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: AppTheme.sand.withValues(alpha: 0.22),
-                    ),
-                  ),
-                ),
-              ),
-              Positioned(
-                right: -120,
-                top: -40,
-                child: IgnorePointer(
-                  child: Container(
-                    width: 320,
-                    height: 320,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: AppTheme.gold.withValues(alpha: 0.08),
+                      color: AppTheme.surfaceMuted.withValues(alpha: 0.28),
                     ),
                   ),
                 ),
@@ -235,20 +260,10 @@ class _AppShell extends StatelessWidget {
                         width: railWidth,
                         child: Container(
                           decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: <Color>[
-                                AppTheme.navy,
-                                Color.alphaBlend(
-                                  AppTheme.gold.withValues(alpha: 0.08),
-                                  AppTheme.navy,
-                                ),
-                              ],
-                            ),
+                            color: AppTheme.onSurface,
                             border: Border(
                               right: BorderSide(
-                                color: AppTheme.gold.withValues(alpha: 0.18),
+                                color: AppTheme.outline.withValues(alpha: 0.35),
                               ),
                             ),
                           ),
@@ -374,33 +389,33 @@ class _ShellSidebar extends StatelessWidget {
         final bool narrow = constraints.maxWidth < 324;
         final bool shortHeight = constraints.maxHeight < 760;
         final Color shellBorder = dropdownMode
-            ? AppTheme.gold.withValues(alpha: 0.36)
-            : AppTheme.border;
+            ? AppTheme.outline.withValues(alpha: 0.5)
+            : AppTheme.outlineVariant;
         final Color workspaceLabel = dropdownMode
-            ? AppTheme.sand.withValues(alpha: 0.78)
-            : AppTheme.navy.withValues(alpha: 0.62);
+            ? AppTheme.surfaceContainer.withValues(alpha: 0.78)
+            : AppTheme.onSurfaceVariant;
         final List<Color> shellGradient = dropdownMode
             ? <Color>[
-                AppTheme.navy,
+                AppTheme.onSurface,
                 Color.alphaBlend(
-                  AppTheme.gold.withValues(alpha: 0.06),
-                  AppTheme.navy,
+                  AppTheme.secondary.withValues(alpha: 0.08),
+                  AppTheme.onSurface,
                 ),
                 Color.alphaBlend(
-                  AppTheme.sand.withValues(alpha: 0.12),
-                  AppTheme.navy,
+                  AppTheme.surfaceMuted.withValues(alpha: 0.06),
+                  AppTheme.onSurface,
                 ),
               ]
             : <Color>[
-                AppTheme.white,
-                AppTheme.white,
-                AppTheme.sand.withValues(alpha: 0.34),
+                AppTheme.surface,
+                AppTheme.surface,
+                AppTheme.surfaceContainer.withValues(alpha: 0.82),
               ];
         final EdgeInsets shellPadding = EdgeInsets.fromLTRB(
+          narrow ? 14 : 22,
+          narrow ? 14 : 22,
+          narrow ? 12 : 22,
           narrow ? 14 : 20,
-          narrow ? 14 : 20,
-          narrow ? 12 : 20,
-          narrow ? 14 : 18,
         );
         final EdgeInsets cardPadding = EdgeInsets.all(narrow ? 14 : 18);
 
@@ -408,7 +423,7 @@ class _ShellSidebar extends StatelessWidget {
           decoration: BoxDecoration(
             color: shellGradient.first,
             border: Border.all(color: shellBorder),
-            borderRadius: BorderRadius.circular(36),
+            borderRadius: BorderRadius.circular(34),
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
@@ -542,9 +557,9 @@ class _SidebarOverviewCard extends StatelessWidget {
                 const SizedBox(height: 16),
                 Container(
                   width: double.infinity,
-                  padding: EdgeInsets.all(narrow ? 16 : 18),
+                  padding: EdgeInsets.all(narrow ? 16 : 20),
                   decoration: BoxDecoration(
-                    color: AppTheme.white,
+                    color: AppTheme.surfaceRaised,
                     borderRadius: BorderRadius.circular(narrow ? 22 : 24),
                     border: Border.all(color: AppTheme.border),
                   ),
@@ -563,6 +578,13 @@ class _SidebarOverviewCard extends StatelessWidget {
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
                           color: AppTheme.slate,
                           letterSpacing: narrow ? 1.8 : 2,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        'Premium operational control for asset-heavy teams.',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppTheme.inkSoft,
                         ),
                       ),
                     ],
@@ -662,9 +684,9 @@ class _SidebarHealthCard extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
             decoration: BoxDecoration(
-              color: AppTheme.white,
+              color: AppTheme.surfaceContainer,
               borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: AppTheme.border),
+              border: Border.all(color: AppTheme.outlineVariant),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -735,18 +757,28 @@ class _ShellHeader extends StatelessWidget {
     return Container(
       padding: EdgeInsets.fromLTRB(
         compact ? 16 : 28,
-        20,
+        18,
         compact ? 16 : 28,
-        22,
+        18,
       ),
       decoration: BoxDecoration(
-        color: AppTheme.navy,
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: <Color>[
+            AppTheme.navy,
+            Color.alphaBlend(
+              AppTheme.secondary.withValues(alpha: 0.12),
+              AppTheme.navy,
+            ),
+          ],
+        ),
         border: Border(
-          bottom: BorderSide(color: AppTheme.gold.withValues(alpha: 0.38)),
+          bottom: BorderSide(color: AppTheme.outline.withValues(alpha: 0.45)),
         ),
         boxShadow: <BoxShadow>[
           BoxShadow(
-            color: AppTheme.navy.withValues(alpha: 0.34),
+            color: AppTheme.navy.withValues(alpha: 0.16),
             blurRadius: 24,
             offset: const Offset(0, 12),
             spreadRadius: -16,
@@ -763,24 +795,31 @@ class _ShellHeader extends StatelessWidget {
               Text(
                 activePage.label.toUpperCase(),
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: AppTheme.gold.withValues(alpha: 0.92),
+                  color: AppTheme.surfaceContainer.withValues(alpha: 0.88),
                   letterSpacing: 2.4,
                 ),
               ),
               const SizedBox(height: 8),
-              Text(
-                _pageHeadline(activePage),
-                style: AppTheme.displayStyle(
-                  context,
-                  size: compact ? 28 : 34,
-                  color: AppTheme.sand,
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 620),
+                child: Text(
+                  _pageHeadline(activePage),
+                  style: AppTheme.displayStyle(
+                    context,
+                    size: compact ? 28 : 32,
+                    color: AppTheme.sand,
+                  ),
                 ),
               ),
               const SizedBox(height: 6),
-              Text(
-                _pageSummary(activePage),
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppTheme.sand.withValues(alpha: 0.84),
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 620),
+                child: Text(
+                  _pageSummary(activePage),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppTheme.sand.withValues(alpha: 0.78),
+                    height: 1.6,
+                  ),
                 ),
               ),
             ],
@@ -796,13 +835,13 @@ class _ShellHeader extends StatelessWidget {
                     IconButton(
                       onPressed: onMenuTap,
                       style: IconButton.styleFrom(
-                        backgroundColor: AppTheme.sand,
+                        backgroundColor: AppTheme.surfaceContainer,
                         foregroundColor: AppTheme.navy,
-                        side: BorderSide(
-                          color: AppTheme.gold.withValues(alpha: 0.65),
-                        ),
+                        side: BorderSide(color: AppTheme.outline),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(18),
+                          borderRadius: BorderRadius.circular(
+                            AppTheme.radii.md,
+                          ),
                         ),
                       ),
                       icon: const Icon(Icons.menu_rounded),
@@ -837,38 +876,24 @@ class _ShellHeader extends StatelessWidget {
               Row(
                 children: <Widget>[
                   Expanded(
-                    child: TextField(
-                      style: Theme.of(
-                        context,
-                      ).textTheme.bodyMedium?.copyWith(color: AppTheme.navy),
-                      decoration: InputDecoration(
-                        hintText: 'Search queues, assets, requests, nodes...',
-                        filled: true,
-                        fillColor: AppTheme.sand.withValues(alpha: 0.94),
-                        prefixIcon: const Icon(
-                          Icons.search_rounded,
-                          color: AppTheme.navy,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: AppTheme.surface.withValues(alpha: 0.96),
+                        borderRadius: BorderRadius.circular(AppTheme.radii.lg),
+                        border: Border.all(
+                          color: AppTheme.outline.withValues(alpha: 0.4),
                         ),
-                        suffixIcon: const Icon(
-                          Icons.tune_rounded,
-                          color: AppTheme.navy,
-                        ),
-                        hintStyle: Theme.of(context).textTheme.bodyMedium
-                            ?.copyWith(
-                              color: AppTheme.navy.withValues(alpha: 0.54),
-                            ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(18),
-                          borderSide: BorderSide(
-                            color: AppTheme.gold.withValues(alpha: 0.62),
-                          ),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(18),
-                          borderSide: const BorderSide(
-                            color: AppTheme.orange,
-                            width: 1.4,
-                          ),
+                      ),
+                      child: TextField(
+                        decoration: InputDecoration(
+                          hintText: 'Search queues, assets, requests, nodes...',
+                          filled: true,
+                          fillColor: Colors.transparent,
+                          prefixIcon: const Icon(Icons.search_rounded),
+                          suffixIcon: const Icon(Icons.tune_rounded),
+                          enabledBorder: InputBorder.none,
+                          focusedBorder: InputBorder.none,
+                          border: InputBorder.none,
                         ),
                       ),
                     ),
@@ -900,8 +925,8 @@ class _HealthBadge extends StatelessWidget {
         vertical: compact ? 10 : 12,
       ),
       decoration: BoxDecoration(
-        color: AppTheme.sand,
-        border: Border.all(color: AppTheme.gold.withValues(alpha: 0.55)),
+        color: AppTheme.surfaceRaised,
+        border: Border.all(color: AppTheme.outline),
         borderRadius: BorderRadius.circular(compact ? 18 : 20),
       ),
       child: Row(
@@ -948,9 +973,9 @@ class _NotificationButton extends StatelessWidget {
           onPressed: () {},
           style: IconButton.styleFrom(
             fixedSize: const Size(48, 48),
-            backgroundColor: AppTheme.sand,
+            backgroundColor: AppTheme.surfaceContainer,
             foregroundColor: AppTheme.navy,
-            side: BorderSide(color: AppTheme.gold.withValues(alpha: 0.65)),
+            side: BorderSide(color: AppTheme.outline),
           ),
           icon: const Icon(Icons.notifications_none_rounded),
         ),
@@ -961,7 +986,7 @@ class _NotificationButton extends StatelessWidget {
             width: 10,
             height: 10,
             decoration: const BoxDecoration(
-              color: AppTheme.gold,
+              color: AppTheme.tertiary,
               shape: BoxShape.circle,
             ),
           ),
@@ -979,10 +1004,10 @@ class _ProfilePill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: AppTheme.sand,
-        border: Border.all(color: AppTheme.gold.withValues(alpha: 0.55)),
+        color: AppTheme.surfaceRaised,
+        border: Border.all(color: AppTheme.outline),
         borderRadius: BorderRadius.circular(24),
-        boxShadow: AppTheme.softShadow,
+        boxShadow: const <BoxShadow>[],
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -1007,12 +1032,12 @@ class _ProfilePill extends StatelessWidget {
             width: 42,
             height: 42,
             decoration: BoxDecoration(
-              color: AppTheme.navy,
+              color: AppTheme.onSurface,
               borderRadius: BorderRadius.circular(18),
             ),
             child: const Icon(
               Icons.person_outline_rounded,
-              color: AppTheme.sand,
+              color: AppTheme.surfaceContainer,
             ),
           ),
         ],
@@ -1045,16 +1070,12 @@ class _SidebarTile extends StatelessWidget {
           duration: const Duration(milliseconds: 160),
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           decoration: BoxDecoration(
-            color: active
-                ? AppTheme.sand.withValues(alpha: 0.74)
-                : AppTheme.white,
+            color: active ? AppTheme.surfaceRaised : AppTheme.surface,
             borderRadius: BorderRadius.circular(22),
             border: Border.all(
-              color: active
-                  ? AppTheme.gold.withValues(alpha: 0.8)
-                  : AppTheme.border,
+              color: active ? AppTheme.secondary : AppTheme.outlineVariant,
             ),
-            boxShadow: active ? AppTheme.cardShadow : const <BoxShadow>[],
+            boxShadow: active ? AppTheme.softShadow : const <BoxShadow>[],
           ),
           child: Row(
             children: <Widget>[
@@ -1064,7 +1085,7 @@ class _SidebarTile extends StatelessWidget {
                   height: 28,
                   margin: const EdgeInsets.only(right: 12),
                   decoration: BoxDecoration(
-                    color: AppTheme.orange,
+                    color: AppTheme.tertiary,
                     borderRadius: BorderRadius.circular(999),
                   ),
                 ),
@@ -1072,13 +1093,15 @@ class _SidebarTile extends StatelessWidget {
                 width: 42,
                 height: 42,
                 decoration: BoxDecoration(
-                  color: active ? AppTheme.navy : AppTheme.sand,
+                  color: active
+                      ? AppTheme.onSurface
+                      : AppTheme.surfaceContainer,
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: Icon(
                   icon,
                   size: 20,
-                  color: active ? AppTheme.sand : AppTheme.navy,
+                  color: active ? AppTheme.surfaceContainer : AppTheme.navy,
                 ),
               ),
               const SizedBox(width: 12),
@@ -1112,9 +1135,9 @@ class _SidebarConsoleTag extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: AppTheme.white,
+        color: AppTheme.surface,
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: AppTheme.border),
+        border: Border.all(color: AppTheme.outlineVariant),
       ),
       child: Text(
         'WORKSPACE OVERVIEW',
@@ -1166,9 +1189,9 @@ class _SidebarLivePill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: AppTheme.white,
+        color: AppTheme.surface,
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: AppTheme.border),
+        border: Border.all(color: AppTheme.outlineVariant),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -1177,7 +1200,7 @@ class _SidebarLivePill extends StatelessWidget {
             width: 8,
             height: 8,
             decoration: const BoxDecoration(
-              color: AppTheme.orange,
+              color: AppTheme.tertiary,
               shape: BoxShape.circle,
             ),
           ),
@@ -1211,9 +1234,9 @@ class _SidebarMetricPill extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: AppTheme.sand.withValues(alpha: 0.18),
+        color: AppTheme.surfaceMuted,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppTheme.border),
+        border: Border.all(color: AppTheme.outlineVariant),
       ),
       child: Row(
         children: <Widget>[
@@ -1260,9 +1283,9 @@ class _HeaderContextCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: AppTheme.sand,
+        color: AppTheme.surfaceContainer,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppTheme.gold.withValues(alpha: 0.55)),
+        border: Border.all(color: AppTheme.outline),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1290,9 +1313,9 @@ class _HeaderPulsePill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: AppTheme.sand,
+        color: AppTheme.surfaceContainer,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppTheme.gold.withValues(alpha: 0.55)),
+        border: Border.all(color: AppTheme.outline),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

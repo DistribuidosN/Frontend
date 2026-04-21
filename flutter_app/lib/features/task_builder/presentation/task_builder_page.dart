@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:imageflow_flutter/core/workspace/workspace_scope.dart';
 import 'package:imageflow_flutter/core/theme/app_theme.dart';
 import 'package:imageflow_flutter/features/shell/domain/app_page.dart';
 import 'package:imageflow_flutter/shared/widgets/shared_widgets.dart';
@@ -33,9 +34,36 @@ class _TaskBuilderPageState extends State<TaskBuilderPage> {
   bool _preserveMetadata = false;
   bool _autoOptimize = true;
   bool _stripProfile = false;
+  bool _isSubmitting = false;
+
+  Future<void> _startProcessing() async {
+    final workspace = WorkspaceScope.of(context);
+    workspace.setSelectedFilters(_transforms);
+
+    setState(() => _isSubmitting = true);
+    try {
+      await workspace.submitBatch();
+      if (!mounted) {
+        return;
+      }
+      widget.onNavigate(AppPage.progress);
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.toString())));
+    } finally {
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final int fileCount = WorkspaceScope.of(context).selectedFiles.length;
     final List<String> quickTransforms = <String>[
       'Grayscale',
       'Flip Horizontal',
@@ -73,8 +101,8 @@ class _TaskBuilderPageState extends State<TaskBuilderPage> {
             OutlinedButton(onPressed: () {}, child: const Text('Save Preset')),
             const SizedBox(width: 10),
             FilledButton(
-              onPressed: () => widget.onNavigate(AppPage.progress),
-              child: const Text('Start Processing'),
+              onPressed: _isSubmitting ? null : _startProcessing,
+              child: Text(_isSubmitting ? 'Submitting...' : 'Start Processing'),
             ),
           ],
         ),
@@ -418,7 +446,7 @@ class _TaskBuilderPageState extends State<TaskBuilderPage> {
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          'These settings will be applied to all 24 images in the current request.',
+                          'These settings will be applied to all $fileCount images in the current request.',
                           style: Theme.of(context).textTheme.bodySmall
                               ?.copyWith(color: AppTheme.slate),
                         ),

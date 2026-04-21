@@ -52,31 +52,39 @@ class AppSurface extends StatelessWidget {
   const AppSurface({
     super.key,
     required this.child,
-    this.padding = const EdgeInsets.all(24),
-    this.radius = 16,
-    this.color = AppTheme.white,
+    this.padding,
+    this.radius,
+    this.color,
     this.gradient,
-    this.borderColor = AppTheme.border,
+    this.borderColor,
     this.shadow,
   });
 
   final Widget child;
-  final EdgeInsetsGeometry padding;
-  final double radius;
-  final Color color;
+  final EdgeInsetsGeometry? padding;
+  final double? radius;
+  final Color? color;
   final Gradient? gradient;
-  final Color borderColor;
+  final Color? borderColor;
   final List<BoxShadow>? shadow;
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final AppRadii radii = theme.extension<AppRadii>() ?? AppTheme.radii;
+    final AppSpacing spacing =
+        theme.extension<AppSpacing>() ?? AppTheme.spacing;
+
     return Container(
-      padding: padding,
+      padding: padding ?? EdgeInsets.all(spacing.xxl),
       decoration: BoxDecoration(
-        color: gradient == null ? color : null,
+        color: gradient == null ? (color ?? AppTheme.surfaceRaised) : null,
         gradient: gradient,
-        borderRadius: BorderRadius.circular(radius),
-        border: Border.all(color: borderColor, width: 1.1),
+        borderRadius: BorderRadius.circular(radius ?? radii.lg),
+        border: Border.all(
+          color: borderColor ?? AppTheme.outlineVariant,
+          width: 1.1,
+        ),
         boxShadow: shadow ?? AppTheme.cardShadow,
       ),
       child: child,
@@ -100,42 +108,53 @@ class SectionPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppSurface(
-      radius: 28,
-      color: AppTheme.white,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Row(
+    final AppSpacing spacing =
+        Theme.of(context).extension<AppSpacing>() ?? AppTheme.spacing;
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        final bool stacked = action != null && constraints.maxWidth < 900;
+
+        return AppSurface(
+          radius: AppTheme.radii.xl,
+          color: AppTheme.surface,
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(title, style: Theme.of(context).textTheme.titleLarge),
-                    if (description != null) ...<Widget>[
-                      const SizedBox(height: 8),
-                      Text(
-                        description!,
-                        style: Theme.of(
-                          context,
-                        ).textTheme.bodyMedium?.copyWith(color: AppTheme.slate),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-              if (action != null) ...<Widget>[
-                const SizedBox(width: 14),
-                action!,
-              ],
+              stacked
+                  ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        _SectionHeaderCopy(
+                          title: title,
+                          description: description,
+                        ),
+                        SizedBox(height: spacing.lg),
+                        action!,
+                      ],
+                    )
+                  : Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Expanded(
+                          child: _SectionHeaderCopy(
+                            title: title,
+                            description: description,
+                          ),
+                        ),
+                        if (action != null) ...<Widget>[
+                          SizedBox(width: spacing.md),
+                          action!,
+                        ],
+                      ],
+                    ),
+              SizedBox(height: spacing.lg),
+              Divider(color: AppTheme.outlineVariant),
+              SizedBox(height: spacing.xl),
+              child,
             ],
           ),
-          const SizedBox(height: 24),
-          child,
-        ],
-      ),
+        );
+      },
     );
   }
 }
@@ -156,6 +175,8 @@ class PageIntro extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final AppSpacing spacing =
+        Theme.of(context).extension<AppSpacing>() ?? AppTheme.spacing;
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         final bool stacked = actions != null && constraints.maxWidth < 1080;
@@ -164,9 +185,9 @@ class PageIntro extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             _Kicker(text: kicker, icon: Icons.insights_outlined),
-            const SizedBox(height: 16),
+            SizedBox(height: spacing.lg),
             Text(title, style: AppTheme.displayStyle(context, size: 32)),
-            const SizedBox(height: 12),
+            SizedBox(height: spacing.md),
             ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 760),
               child: Text(
@@ -181,16 +202,16 @@ class PageIntro extends StatelessWidget {
         );
 
         return AppSurface(
-          radius: 30,
-          color: AppTheme.white,
-          padding: const EdgeInsets.all(30),
+          radius: AppTheme.radii.xl,
+          color: AppTheme.surfaceRaised,
+          padding: EdgeInsets.all(spacing.section),
           child: stacked
               ? Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     copy,
                     if (actions != null) ...<Widget>[
-                      const SizedBox(height: 22),
+                      SizedBox(height: spacing.xl),
                       actions!,
                     ],
                   ],
@@ -200,7 +221,7 @@ class PageIntro extends StatelessWidget {
                   children: <Widget>[
                     Expanded(child: copy),
                     if (actions != null) ...<Widget>[
-                      const SizedBox(width: 20),
+                      SizedBox(width: spacing.xl),
                       actions!,
                     ],
                   ],
@@ -264,24 +285,26 @@ class StatusChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
       decoration: BoxDecoration(
         color: background,
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: color.withValues(alpha: 0.12)),
+        borderRadius: BorderRadius.circular(AppTheme.radii.pill),
+        border: Border.all(color: color.withValues(alpha: 0.14), width: 1),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           if (icon != null) ...<Widget>[
-            Icon(icon, size: 14, color: color),
-            const SizedBox(width: 6),
+            Icon(icon, size: 13, color: color),
+            const SizedBox(width: 5),
           ],
           Text(
             label,
-            style: Theme.of(
-              context,
-            ).textTheme.labelMedium?.copyWith(color: color, letterSpacing: 0.2),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: color,
+              letterSpacing: 0.15,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ],
       ),
@@ -381,19 +404,15 @@ class TogglePill extends StatelessWidget {
       color: AppTheme.navy.withValues(alpha: 0),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(AppTheme.radii.md),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 160),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           decoration: BoxDecoration(
-            color: selected
-                ? AppTheme.sand.withValues(alpha: 0.72)
-                : AppTheme.white,
-            borderRadius: BorderRadius.circular(18),
+            color: selected ? AppTheme.surfaceContainer : AppTheme.surface,
+            borderRadius: BorderRadius.circular(AppTheme.radii.md),
             border: Border.all(
-              color: selected
-                  ? AppTheme.gold.withValues(alpha: 0.82)
-                  : AppTheme.border,
+              color: selected ? AppTheme.secondary : AppTheme.outlineVariant,
             ),
             boxShadow: selected ? AppTheme.softShadow : const <BoxShadow>[],
           ),
@@ -435,20 +454,23 @@ class MiniLabel extends StatelessWidget {
 }
 
 class FilterField extends StatelessWidget {
-  const FilterField({super.key, required this.icon, required this.label});
+  const FilterField({
+    super.key,
+    required this.icon,
+    required this.label,
+    this.width,
+  });
 
   final IconData icon;
   final String label;
+  final double? width;
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 360,
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxWidth: width ?? 360, minHeight: 48),
       child: TextField(
-        decoration: InputDecoration(
-          hintText: label,
-          prefixIcon: Icon(icon, color: AppTheme.slate),
-        ),
+        decoration: InputDecoration(hintText: label, prefixIcon: Icon(icon)),
       ),
     );
   }
@@ -559,14 +581,14 @@ class SmallIconButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(AppTheme.radii.sm),
       child: Container(
-        width: 34,
-        height: 34,
+        width: 40,
+        height: 40,
         decoration: BoxDecoration(
-          color: AppTheme.sand,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppTheme.border),
+          color: AppTheme.surface,
+          borderRadius: BorderRadius.circular(AppTheme.radii.sm),
+          border: Border.all(color: AppTheme.outlineVariant),
         ),
         child: Icon(icon, size: 18, color: AppTheme.ink),
       ),
@@ -583,11 +605,11 @@ class _Kicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: AppTheme.sand,
-        border: Border.all(color: AppTheme.borderSoft),
-        borderRadius: BorderRadius.circular(18),
+        color: AppTheme.surfaceContainer,
+        border: Border.all(color: AppTheme.outlineVariant),
+        borderRadius: BorderRadius.circular(AppTheme.radii.md),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -601,6 +623,35 @@ class _Kicker extends StatelessWidget {
               letterSpacing: 1.4,
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SectionHeaderCopy extends StatelessWidget {
+  const _SectionHeaderCopy({required this.title, required this.description});
+
+  final String title;
+  final String? description;
+
+  @override
+  Widget build(BuildContext context) {
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 720),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(title, style: Theme.of(context).textTheme.titleLarge),
+          if (description != null) ...<Widget>[
+            const SizedBox(height: 8),
+            Text(
+              description!,
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: AppTheme.slate),
+            ),
+          ],
         ],
       ),
     );

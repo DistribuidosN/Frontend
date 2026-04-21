@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:imageflow_flutter/core/theme/app_theme.dart';
+import 'package:imageflow_flutter/core/workspace/workspace_scope.dart';
 import 'package:imageflow_flutter/features/results/data/results_mock_data.dart';
 import 'package:imageflow_flutter/features/results/domain/result_asset.dart';
 import 'package:imageflow_flutter/shared/widgets/shared_widgets.dart';
@@ -9,38 +10,70 @@ class ResultsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final workspace = WorkspaceScope.of(context);
+    final latestBatch = workspace.latestBatch;
+    final List<String> filters = latestBatch?.filters ?? sampleTransforms;
+
+    final List<ResultAsset> assets = latestBatch == null
+        ? resultAssets
+        : latestBatch.fileNames
+              .map(
+                (String fileName) => ResultAsset(
+                  id: latestBatch.fileNames.indexOf(fileName) + 1,
+                  name: fileName,
+                  size:
+                      workspace.selectedFiles
+                          .where((file) => file.name == fileName)
+                          .map((file) => file.sizeLabel)
+                          .cast<String?>()
+                          .firstWhere(
+                            (String? size) => size != null,
+                            orElse: () => 'pending',
+                          ) ??
+                      'pending',
+                  transforms: filters,
+                ),
+              )
+              .toList();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Row(
-          children: <Widget>[
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(
-                    'Processing Results',
-                    style: AppTheme.displayStyle(context, size: 30),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Request ID: req-4522 - Completed successfully',
-                    style: Theme.of(
-                      context,
-                    ).textTheme.bodySmall?.copyWith(color: AppTheme.slate),
-                  ),
-                ],
-              ),
-            ),
-            FilledButton.icon(
-              onPressed: () {},
-              icon: const Icon(Icons.download_rounded, size: 18),
-              label: const Text('Download All (ZIP)'),
-            ),
-          ],
+        PageIntro(
+          kicker: 'Completed request',
+          title: 'Processing results',
+          description:
+              'Review the last batch submitted from the workspace and verify exactly what went out to the backend.',
+          actions: FilledButton.icon(
+            onPressed: latestBatch == null
+                ? null
+                : () async {
+                    final messenger = ScaffoldMessenger.of(context);
+                    try {
+                      final String location = await workspace
+                          .downloadLatestBatchArchive();
+                      if (!context.mounted) {
+                        return;
+                      }
+                      messenger.showSnackBar(
+                        SnackBar(content: Text('Archive saved to $location')),
+                      );
+                    } catch (error) {
+                      if (!context.mounted) {
+                        return;
+                      }
+                      messenger.showSnackBar(
+                        SnackBar(content: Text(error.toString())),
+                      );
+                    }
+                  },
+            icon: const Icon(Icons.download_rounded, size: 18),
+            label: const Text('Download All (ZIP)'),
+          ),
         ),
         const SizedBox(height: 20),
         AppSurface(
+          radius: AppTheme.radii.xl,
           child: Column(
             children: <Widget>[
               Row(
@@ -48,9 +81,9 @@ class ResultsPage extends StatelessWidget {
                   Container(
                     width: 46,
                     height: 46,
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                       color: AppTheme.successSoft,
-                      borderRadius: BorderRadius.all(Radius.circular(16)),
+                      borderRadius: BorderRadius.circular(AppTheme.radii.md),
                     ),
                     child: const Icon(
                       Icons.check_circle_outline,
@@ -63,14 +96,17 @@ class ResultsPage extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         Text(
-                          'All images processed successfully',
+                          latestBatch?.message ??
+                              'All images processed successfully',
                           style: Theme.of(context).textTheme.titleLarge,
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          '24 images - Completed in 52 seconds',
+                          latestBatch == null
+                              ? '24 images - Completed in 52 seconds'
+                              : '${latestBatch.fileCount} images - Request ${latestBatch.requestId}',
                           style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(color: AppTheme.slate),
+                              ?.copyWith(color: AppTheme.onSurfaceVariant),
                         ),
                       ],
                     ),
@@ -81,25 +117,25 @@ class ResultsPage extends StatelessWidget {
               AdaptiveGrid(
                 minItemWidth: 180,
                 childAspectRatio: 1.5,
-                children: const <Widget>[
+                children: <Widget>[
                   SummaryMetricCard(
                     label: 'Total Images',
-                    value: '24',
+                    value: '${latestBatch?.fileCount ?? assets.length}',
                     color: AppTheme.ink,
                   ),
                   SummaryMetricCard(
-                    label: 'Success Rate',
-                    value: '100%',
+                    label: 'Status',
+                    value: latestBatch?.status ?? 'complete',
                     color: AppTheme.success,
                   ),
                   SummaryMetricCard(
-                    label: 'Processing Time',
-                    value: '52s',
+                    label: 'Filters',
+                    value: '${filters.length}',
                     color: AppTheme.ink,
                   ),
                   SummaryMetricCard(
                     label: 'Output Size',
-                    value: '38.4 MB',
+                    value: assets.isEmpty ? 'pending' : assets.first.size,
                     color: AppTheme.ink,
                   ),
                 ],
@@ -109,32 +145,40 @@ class ResultsPage extends StatelessWidget {
         ),
         const SizedBox(height: 20),
         SectionPanel(
+          title: 'Applied Filters',
+          description: 'Filters included in the latest batch request.',
+          child: Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            alignment: WrapAlignment.start,
+            children: filters
+                .map(
+                  (String transform) => StatusChip(
+                    label: transform,
+                    color: AppTheme.ink,
+                    background: AppTheme.surfaceContainer,
+                  ),
+                )
+                .toList(),
+          ),
+        ),
+        const SizedBox(height: 20),
+        SectionPanel(
           title: 'Sample Comparison',
+          description: 'A quick side-by-side check of representative output.',
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              AdaptiveGrid(
-                minItemWidth: 320,
-                childAspectRatio: 1.3,
-                children: const <Widget>[
-                  ImageComparisonCard(label: 'Before', grayscale: false),
-                  ImageComparisonCard(label: 'After', grayscale: true),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Wrap(
-                spacing: 10,
-                runSpacing: 10,
-                alignment: WrapAlignment.start,
-                children: sampleTransforms
-                    .map(
-                      (String transform) => StatusChip(
-                        label: transform,
-                        color: AppTheme.ink,
-                        background: AppTheme.sand,
-                      ),
-                    )
-                    .toList(),
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 900),
+                child: AdaptiveGrid(
+                  minItemWidth: 320,
+                  childAspectRatio: 1.68,
+                  children: const <Widget>[
+                    ImageComparisonCard(label: 'Before', grayscale: false),
+                    ImageComparisonCard(label: 'After', grayscale: true),
+                  ],
+                ),
               ),
             ],
           ),
@@ -142,6 +186,8 @@ class ResultsPage extends StatelessWidget {
         const SizedBox(height: 20),
         SectionPanel(
           title: 'All Results',
+          description:
+              'Browse the filenames that belong to the latest submitted batch.',
           action: Row(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
@@ -161,19 +207,21 @@ class ResultsPage extends StatelessWidget {
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 crossAxisCount: crossAxisCount,
-                crossAxisSpacing: 14,
-                mainAxisSpacing: 14,
-                childAspectRatio: 0.82,
-                children: resultAssets.map((ResultAsset result) {
+                crossAxisSpacing: 16,
+                mainAxisSpacing: 16,
+                childAspectRatio: 0.84,
+                children: assets.map((ResultAsset result) {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Expanded(
                         child: Container(
                           decoration: BoxDecoration(
-                            color: AppTheme.canvasSoft,
-                            borderRadius: BorderRadius.circular(18),
-                            border: Border.all(color: AppTheme.border),
+                            color: AppTheme.surfaceContainer,
+                            borderRadius: BorderRadius.circular(
+                              AppTheme.radii.lg,
+                            ),
+                            border: Border.all(color: AppTheme.outlineVariant),
                           ),
                           child: Center(
                             child: Column(
@@ -181,10 +229,10 @@ class ResultsPage extends StatelessWidget {
                               children: <Widget>[
                                 const Icon(
                                   Icons.image_outlined,
-                                  size: 30,
-                                  color: AppTheme.muted,
+                                  size: 32,
+                                  color: AppTheme.onSurfaceVariant,
                                 ),
-                                const SizedBox(height: 14),
+                                const SizedBox(height: 16),
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: <Widget>[
@@ -195,7 +243,37 @@ class ResultsPage extends StatelessWidget {
                                     const SizedBox(width: 8),
                                     SmallIconButton(
                                       icon: Icons.download_rounded,
-                                      onTap: () {},
+                                      onTap: () async {
+                                        final messenger = ScaffoldMessenger.of(
+                                          context,
+                                        );
+                                        try {
+                                          final String location =
+                                              await workspace
+                                                  .downloadResultImage(
+                                                    result.name,
+                                                  );
+                                          if (!context.mounted) {
+                                            return;
+                                          }
+                                          messenger.showSnackBar(
+                                            SnackBar(
+                                              content: Text(
+                                                'Saved file to $location',
+                                              ),
+                                            ),
+                                          );
+                                        } catch (error) {
+                                          if (!context.mounted) {
+                                            return;
+                                          }
+                                          messenger.showSnackBar(
+                                            SnackBar(
+                                              content: Text(error.toString()),
+                                            ),
+                                          );
+                                        }
+                                      },
                                     ),
                                   ],
                                 ),

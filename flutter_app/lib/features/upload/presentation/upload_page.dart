@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:imageflow_flutter/core/workspace/workspace_scope.dart';
 import 'package:imageflow_flutter/core/theme/app_theme.dart';
 import 'package:imageflow_flutter/features/shell/domain/app_page.dart';
 import 'package:imageflow_flutter/features/upload/domain/upload_file_item.dart';
@@ -14,90 +15,123 @@ class UploadPage extends StatefulWidget {
 }
 
 class _UploadPageState extends State<UploadPage> {
-  final List<UploadFileItem> _files = <UploadFileItem>[];
-
-  void _addFiles() {
-    final int start = _files.length;
-    setState(() {
-      _files.addAll(
-        List<UploadFileItem>.generate(
-          4,
-          (int index) => UploadFileItem(
-            id: 'file-${start + index + 1}',
-            name: 'image-${(start + index + 1).toString().padLeft(3, '0')}.jpg',
-            size: '${(2 + (index * 0.6)).toStringAsFixed(1)} MB',
-          ),
-        ),
+  Future<void> _addFiles() async {
+    final bool picked = await WorkspaceScope.of(context).pickFiles();
+    if (!picked && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No valid image files were selected.')),
       );
-    });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final double totalSize = _files.length * 3.2;
+    final workspace = WorkspaceScope.of(context);
+    final List<UploadFileItem> files = workspace.selectedFiles;
+    final double totalSize =
+        files.fold<int>(
+          0,
+          (int sum, UploadFileItem file) => sum + file.sizeBytes,
+        ) /
+        (1024 * 1024);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text('Upload Images', style: AppTheme.displayStyle(context, size: 30)),
-        const SizedBox(height: 8),
-        Text(
-          'Upload a batch of images for processing',
-          style: Theme.of(
-            context,
-          ).textTheme.bodyMedium?.copyWith(color: AppTheme.slate),
+        const PageIntro(
+          kicker: 'Batch intake',
+          title: 'Upload images',
+          description:
+              'Stage a batch of assets, validate them visually and move them into configuration without friction.',
         ),
         const SizedBox(height: 20),
-        GestureDetector(
-          onTap: _addFiles,
-          child: AppSurface(
-            padding: const EdgeInsets.all(36),
-            child: Column(
-              children: <Widget>[
-                Container(
-                  width: 56,
-                  height: 56,
-                  decoration: BoxDecoration(
-                    color: AppTheme.canvasSoft,
-                    borderRadius: BorderRadius.circular(18),
-                    border: Border.all(color: AppTheme.border),
+        LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) {
+            final bool wide = constraints.maxWidth >= 980;
+
+            return GestureDetector(
+              onTap: _addFiles,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: wide ? 440 : 380,
+                  maxWidth: double.infinity,
+                ),
+                child: AppSurface(
+                  radius: AppTheme.radii.xl,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: wide ? 48 : 28,
+                    vertical: wide ? 52 : 36,
                   ),
-                  child: const Icon(
-                    Icons.file_upload_outlined,
-                    color: AppTheme.ink,
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 760),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Container(
+                            width: wide ? 84 : 72,
+                            height: wide ? 84 : 72,
+                            decoration: BoxDecoration(
+                              color: AppTheme.surfaceContainer,
+                              borderRadius: BorderRadius.circular(
+                                AppTheme.radii.lg,
+                              ),
+                              border: Border.all(
+                                color: AppTheme.outlineVariant,
+                              ),
+                            ),
+                            child: const Icon(
+                              Icons.file_upload_outlined,
+                              color: AppTheme.secondary,
+                              size: 34,
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          Text(
+                            'Drop your images here',
+                            textAlign: TextAlign.center,
+                            style: Theme.of(context).textTheme.headlineMedium,
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            'or click to browse from your computer',
+                            textAlign: TextAlign.center,
+                            style: Theme.of(context).textTheme.bodyLarge
+                                ?.copyWith(color: AppTheme.onSurfaceVariant),
+                          ),
+                          const SizedBox(height: 28),
+                          FilledButton(
+                            onPressed: _addFiles,
+                            style: FilledButton.styleFrom(
+                              backgroundColor: AppTheme.primary,
+                              foregroundColor: AppTheme.white,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 28,
+                                vertical: 18,
+                              ),
+                            ),
+                            child: const Text('Browse Files'),
+                          ),
+                          const SizedBox(height: 18),
+                          Text(
+                            'Supports: JPG, PNG, WEBP, BMP, GIF (static), TIFF, ICO. Max 50MB per file.',
+                            textAlign: TextAlign.center,
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(color: AppTheme.onSurfaceVariant),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
-                const SizedBox(height: 16),
-                Text(
-                  'Drop your images here',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  'or click to browse from your computer',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodySmall?.copyWith(color: AppTheme.slate),
-                ),
-                const SizedBox(height: 18),
-                FilledButton(
-                  onPressed: _addFiles,
-                  child: const Text('Browse Files'),
-                ),
-                const SizedBox(height: 14),
-                Text(
-                  'Supports: JPG, PNG, WEBP, BMP, GIF (static), TIFF, ICO. Max 50MB per file.',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodySmall?.copyWith(color: AppTheme.slate),
-                ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         ),
-        if (_files.isNotEmpty) ...<Widget>[
+        if (files.isNotEmpty) ...<Widget>[
           const SizedBox(height: 20),
           AppSurface(
+            radius: AppTheme.radii.xl,
             child: Column(
               children: <Widget>[
                 Row(
@@ -109,12 +143,12 @@ class _UploadPageState extends State<UploadPage> {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      '${_files.length} images uploaded',
+                      '${files.length} images uploaded',
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                     const Spacer(),
                     TextButton(
-                      onPressed: () => setState(_files.clear),
+                      onPressed: workspace.clearFiles,
                       child: const Text('Clear all'),
                     ),
                   ],
@@ -131,10 +165,10 @@ class _UploadPageState extends State<UploadPage> {
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
                       crossAxisCount: crossAxisCount,
-                      crossAxisSpacing: 14,
-                      mainAxisSpacing: 14,
-                      childAspectRatio: 0.82,
-                      children: _files.map((UploadFileItem file) {
+                      crossAxisSpacing: 16,
+                      mainAxisSpacing: 16,
+                      childAspectRatio: 0.84,
+                      children: files.map((UploadFileItem file) {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
@@ -143,17 +177,19 @@ class _UploadPageState extends State<UploadPage> {
                                 children: <Widget>[
                                   Container(
                                     decoration: BoxDecoration(
-                                      color: AppTheme.canvasSoft,
-                                      borderRadius: BorderRadius.circular(18),
+                                      color: AppTheme.surfaceContainer,
+                                      borderRadius: BorderRadius.circular(
+                                        AppTheme.radii.lg,
+                                      ),
                                       border: Border.all(
-                                        color: AppTheme.border,
+                                        color: AppTheme.outlineVariant,
                                       ),
                                     ),
                                     child: const Center(
                                       child: Icon(
                                         Icons.image_outlined,
-                                        color: AppTheme.muted,
-                                        size: 28,
+                                        color: AppTheme.onSurfaceVariant,
+                                        size: 30,
                                       ),
                                     ),
                                   ),
@@ -161,22 +197,21 @@ class _UploadPageState extends State<UploadPage> {
                                     top: 8,
                                     right: 8,
                                     child: InkWell(
-                                      onTap: () => setState(
-                                        () => _files.removeWhere(
-                                          (UploadFileItem item) =>
-                                              item.id == file.id,
-                                        ),
+                                      onTap: () =>
+                                          workspace.removeFile(file.id),
+                                      borderRadius: BorderRadius.circular(
+                                        AppTheme.radii.pill,
                                       ),
                                       child: Container(
-                                        width: 26,
-                                        height: 26,
+                                        width: 28,
+                                        height: 28,
                                         decoration: const BoxDecoration(
                                           color: AppTheme.danger,
                                           shape: BoxShape.circle,
                                         ),
                                         child: const Icon(
                                           Icons.close_rounded,
-                                          color: AppTheme.sand,
+                                          color: AppTheme.white,
                                           size: 16,
                                         ),
                                       ),
@@ -193,7 +228,7 @@ class _UploadPageState extends State<UploadPage> {
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              file.size,
+                              file.sizeLabel,
                               style: Theme.of(context).textTheme.bodySmall,
                             ),
                           ],
@@ -207,13 +242,17 @@ class _UploadPageState extends State<UploadPage> {
                   children: <Widget>[
                     Text(
                       'Total size: ${totalSize.toStringAsFixed(1)} MB',
-                      style: Theme.of(
-                        context,
-                      ).textTheme.bodySmall?.copyWith(color: AppTheme.slate),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppTheme.onSurfaceVariant,
+                      ),
                     ),
                     const Spacer(),
                     FilledButton(
                       onPressed: () => widget.onNavigate(AppPage.taskBuilder),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: AppTheme.primary,
+                        foregroundColor: AppTheme.white,
+                      ),
                       child: const Text('Continue to Configuration'),
                     ),
                   ],

@@ -482,15 +482,32 @@ class _RegisterPageState extends State<RegisterPage> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Row(
-                children: <Widget>[
-                  const _AuthBrandMark(darkSurface: false),
-                  const Spacer(),
-                  const _AuthFormMetaPill(
+              LayoutBuilder(
+                builder: (BuildContext context, BoxConstraints constraints) {
+                  const Widget quickSetupPill = _AuthFormMetaPill(
                     icon: Icons.group_add_outlined,
                     label: 'Quick setup',
-                  ),
-                ],
+                  );
+
+                  if (constraints.maxWidth < 430) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: const <Widget>[
+                        _AuthBrandMark(darkSurface: false),
+                        SizedBox(height: 14),
+                        quickSetupPill,
+                      ],
+                    );
+                  }
+
+                  return const Row(
+                    children: <Widget>[
+                      Flexible(child: _AuthBrandMark(darkSurface: false)),
+                      Spacer(),
+                      quickSetupPill,
+                    ],
+                  );
+                },
               ),
               const SizedBox(height: 20),
               Container(

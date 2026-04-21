@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:imageflow_flutter/core/theme/app_theme.dart';
-import 'package:imageflow_flutter/features/history/data/history_mock_data.dart';
+import 'package:imageflow_flutter/core/workspace/workspace_scope.dart';
 import 'package:imageflow_flutter/features/history/domain/history_request.dart';
 import 'package:imageflow_flutter/features/shell/domain/app_page.dart';
 import 'package:imageflow_flutter/shared/widgets/shared_widgets.dart';
@@ -12,6 +12,9 @@ class HistoryPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final workspace = WorkspaceScope.of(context);
+    final List<HistoryRequest> historyRequests = workspace.historyRequests;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -42,149 +45,239 @@ class HistoryPage extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 20),
-        Column(
-          children: historyRequests.map((HistoryRequest request) {
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: AppSurface(
-                padding: const EdgeInsets.all(18),
-                child: LayoutBuilder(
-                  builder: (BuildContext context, BoxConstraints constraints) {
-                    final bool compact = constraints.maxWidth < 1020;
-                    final Widget status = StatusChip(
-                      label: request.status == RequestStatus.completed
-                          ? 'completed'
-                          : 'failed',
-                      color: request.status == RequestStatus.completed
-                          ? AppTheme.statusGreen
-                          : AppTheme.danger,
-                      background: request.status == RequestStatus.completed
-                          ? AppTheme.sand
-                          : AppTheme.dangerSoft,
-                    );
-                    final Widget idColumn = Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        TextButton(
-                          onPressed: () => onNavigate(AppPage.requestDetail),
-                          style: TextButton.styleFrom(
-                            padding: EdgeInsets.zero,
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          ),
-                          child: Text(
-                            request.id,
-                            style: Theme.of(context).textTheme.titleMedium
-                                ?.copyWith(color: AppTheme.goldDeep),
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          request.date,
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(color: AppTheme.slate),
-                        ),
-                      ],
-                    );
-                    final Widget transforms = Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: request.transforms
-                          .take(2)
-                          .map(
-                            (String transform) => StatusChip(
-                              label: transform,
-                              color: AppTheme.ink,
-                              background: AppTheme.sand,
-                            ),
-                          )
-                          .toList(),
-                    );
-                    final Widget actions = Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        SmallIconButton(
-                          icon: Icons.visibility_outlined,
-                          onTap: () => onNavigate(AppPage.requestDetail),
-                        ),
-                        if (request.status ==
-                            RequestStatus.completed) ...<Widget>[
-                          const SizedBox(width: 8),
-                          SmallIconButton(
-                            icon: Icons.download_rounded,
-                            onTap: () {},
-                          ),
-                        ],
-                      ],
-                    );
-
-                    if (compact) {
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Row(
+        if (historyRequests.isEmpty)
+          const AppSurface(
+            child: Text(
+              'No batches have been submitted yet. Run one from Upload and Task Builder to populate history.',
+            ),
+          )
+        else
+          Column(
+            children: historyRequests.map((HistoryRequest request) {
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: AppSurface(
+                  padding: const EdgeInsets.all(18),
+                  child: LayoutBuilder(
+                    builder:
+                        (BuildContext context, BoxConstraints constraints) {
+                          final bool compact = constraints.maxWidth < 1020;
+                          final Widget status = StatusChip(
+                            label: request.status == RequestStatus.completed
+                                ? 'completed'
+                                : 'failed',
+                            color: request.status == RequestStatus.completed
+                                ? AppTheme.statusGreen
+                                : AppTheme.danger,
+                            background:
+                                request.status == RequestStatus.completed
+                                ? AppTheme.sand
+                                : AppTheme.dangerSoft,
+                          );
+                          final Widget idColumn = Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
-                              Expanded(child: idColumn),
-                              status,
+                              TextButton(
+                                onPressed: () =>
+                                    onNavigate(AppPage.requestDetail),
+                                style: TextButton.styleFrom(
+                                  padding: EdgeInsets.zero,
+                                  tapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
+                                ),
+                                child: Text(
+                                  request.id,
+                                  style: Theme.of(context).textTheme.titleMedium
+                                      ?.copyWith(color: AppTheme.goldDeep),
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                request.date,
+                                style: Theme.of(context).textTheme.bodySmall
+                                    ?.copyWith(color: AppTheme.slate),
+                              ),
+                            ],
+                          );
+                          final List<String> previewTransforms = request
+                              .transforms
+                              .take(3)
+                              .toList();
+                          final Widget transforms = Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: <Widget>[
+                              Container(
+                                width: 28,
+                                height: 28,
+                                decoration: BoxDecoration(
+                                  color: AppTheme.surfaceContainer,
+                                  borderRadius: BorderRadius.circular(
+                                    AppTheme.radii.sm,
+                                  ),
+                                  border: Border.all(
+                                    color: AppTheme.outlineVariant,
+                                  ),
+                                ),
+                                child: const Icon(
+                                  Icons.tune_rounded,
+                                  size: 14,
+                                  color: AppTheme.onSurfaceVariant,
+                                ),
+                              ),
                               const SizedBox(width: 10),
+                              Flexible(
+                                child: RichText(
+                                  maxLines: compact ? 2 : 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  text: TextSpan(
+                                    children: <InlineSpan>[
+                                      TextSpan(
+                                        text: 'Filters: ',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall
+                                            ?.copyWith(
+                                              color: AppTheme.onSurfaceVariant,
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                      ),
+                                      TextSpan(
+                                        text: previewTransforms.join(' • '),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium
+                                            ?.copyWith(
+                                              color: AppTheme.onSurface,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          );
+                          final Widget actions = Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: <Widget>[
+                              SmallIconButton(
+                                icon: Icons.visibility_outlined,
+                                onTap: () => onNavigate(AppPage.requestDetail),
+                              ),
+                              if (request.status ==
+                                  RequestStatus.completed) ...<Widget>[
+                                const SizedBox(width: 8),
+                                SmallIconButton(
+                                  icon: Icons.download_rounded,
+                                  onTap: () async {
+                                    final messenger = ScaffoldMessenger.of(
+                                      context,
+                                    );
+                                    try {
+                                      final String location = await workspace
+                                          .downloadLatestBatchArchive();
+                                      if (!context.mounted) {
+                                        return;
+                                      }
+                                      messenger.showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            'Archive saved to $location',
+                                          ),
+                                        ),
+                                      );
+                                    } catch (error) {
+                                      if (!context.mounted) {
+                                        return;
+                                      }
+                                      messenger.showSnackBar(
+                                        SnackBar(
+                                          content: Text(error.toString()),
+                                        ),
+                                      );
+                                    }
+                                  },
+                                ),
+                              ],
+                            ],
+                          );
+
+                          if (compact) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Row(
+                                  children: <Widget>[
+                                    Expanded(child: idColumn),
+                                    status,
+                                    const SizedBox(width: 10),
+                                    actions,
+                                  ],
+                                ),
+                                const SizedBox(height: 14),
+                                transforms,
+                                const SizedBox(height: 12),
+                                Wrap(
+                                  spacing: 16,
+                                  runSpacing: 8,
+                                  children: <Widget>[
+                                    Text(
+                                      '${request.images} images',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.copyWith(color: AppTheme.slate),
+                                    ),
+                                    Text(
+                                      request.duration,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.copyWith(color: AppTheme.slate),
+                                    ),
+                                    Text(
+                                      '${request.nodes} nodes',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.copyWith(color: AppTheme.slate),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            );
+                          }
+
+                          return Row(
+                            children: <Widget>[
+                              Expanded(flex: 2, child: idColumn),
+                              Expanded(
+                                child: Text(
+                                  '${request.images}',
+                                  style: Theme.of(
+                                    context,
+                                  ).textTheme.labelMedium,
+                                ),
+                              ),
+                              Expanded(flex: 2, child: transforms),
+                              Expanded(
+                                child: Text(
+                                  request.duration,
+                                  style: Theme.of(context).textTheme.bodySmall
+                                      ?.copyWith(color: AppTheme.slate),
+                                ),
+                              ),
+                              status,
+                              const SizedBox(width: 16),
                               actions,
                             ],
-                          ),
-                          const SizedBox(height: 14),
-                          transforms,
-                          const SizedBox(height: 12),
-                          Wrap(
-                            spacing: 16,
-                            runSpacing: 8,
-                            children: <Widget>[
-                              Text(
-                                '${request.images} images',
-                                style: Theme.of(context).textTheme.bodySmall
-                                    ?.copyWith(color: AppTheme.slate),
-                              ),
-                              Text(
-                                request.duration,
-                                style: Theme.of(context).textTheme.bodySmall
-                                    ?.copyWith(color: AppTheme.slate),
-                              ),
-                              Text(
-                                '${request.nodes} nodes',
-                                style: Theme.of(context).textTheme.bodySmall
-                                    ?.copyWith(color: AppTheme.slate),
-                              ),
-                            ],
-                          ),
-                        ],
-                      );
-                    }
-
-                    return Row(
-                      children: <Widget>[
-                        Expanded(flex: 2, child: idColumn),
-                        Expanded(
-                          child: Text(
-                            '${request.images}',
-                            style: Theme.of(context).textTheme.labelMedium,
-                          ),
-                        ),
-                        Expanded(flex: 2, child: transforms),
-                        Expanded(
-                          child: Text(
-                            request.duration,
-                            style: Theme.of(context).textTheme.bodySmall
-                                ?.copyWith(color: AppTheme.slate),
-                          ),
-                        ),
-                        status,
-                        const SizedBox(width: 16),
-                        actions,
-                      ],
-                    );
-                  },
+                          );
+                        },
+                  ),
                 ),
-              ),
-            );
-          }).toList(),
-        ),
+              );
+            }).toList(),
+          ),
       ],
     );
   }

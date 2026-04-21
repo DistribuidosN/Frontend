@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:imageflow_flutter/core/workspace/workspace_scope.dart';
 import 'package:imageflow_flutter/core/theme/app_theme.dart';
 import 'package:imageflow_flutter/shared/widgets/shared_widgets.dart';
 
@@ -31,16 +32,15 @@ class _SettingsPageState extends State<SettingsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final workspace = WorkspaceScope.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text('Settings', style: AppTheme.displayStyle(context, size: 30)),
-        const SizedBox(height: 8),
-        Text(
-          'Manage your account and application preferences',
-          style: Theme.of(
-            context,
-          ).textTheme.bodyMedium?.copyWith(color: AppTheme.slate),
+        const PageIntro(
+          kicker: 'Workspace preferences',
+          title: 'Settings',
+          description:
+              'Manage account details, processing defaults and operator preferences with clearer grouping and lower visual noise.',
         ),
         const SizedBox(height: 24),
         LayoutBuilder(
@@ -246,11 +246,10 @@ class _SettingsPageState extends State<SettingsPage> {
                               final bool fieldStacked =
                                   fieldConstraints.maxWidth < 420;
 
-                              final Widget apiField = const Expanded(
+                              final Widget apiField = Expanded(
                                 child: _SettingsLabeledField(
-                                  label: 'API Key',
-                                  initialValue: 'sk_live_****************',
-                                  obscureText: true,
+                                  label: 'Backend Base URL',
+                                  initialValue: workspace.apiBaseUrl,
                                   readOnly: true,
                                 ),
                               );
@@ -269,10 +268,9 @@ class _SettingsPageState extends State<SettingsPage> {
                               if (fieldStacked) {
                                 return Column(
                                   children: <Widget>[
-                                    const _SettingsLabeledField(
-                                      label: 'API Key',
-                                      initialValue: 'sk_live_****************',
-                                      obscureText: true,
+                                    _SettingsLabeledField(
+                                      label: 'Backend Base URL',
+                                      initialValue: workspace.apiBaseUrl,
                                       readOnly: true,
                                     ),
                                     const SizedBox(height: 12),
@@ -299,7 +297,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         width: double.infinity,
                         child: OutlinedButton(
                           onPressed: () {},
-                          child: const Text('Regenerate API Key'),
+                          child: const Text('Connected via workspace config'),
                         ),
                       ),
                       const SizedBox(height: 18),
@@ -315,18 +313,18 @@ class _SettingsPageState extends State<SettingsPage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
                             Text(
-                              'Usage this month',
+                              'Connected endpoint',
                               style: Theme.of(context).textTheme.bodySmall
                                   ?.copyWith(color: AppTheme.slate),
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              '1,247',
+                              'REST v1',
                               style: AppTheme.displayStyle(context, size: 30),
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              'API requests',
+                              'Backend proxy target',
                               style: Theme.of(context).textTheme.bodySmall
                                   ?.copyWith(color: AppTheme.slate),
                             ),
@@ -345,14 +343,12 @@ class _SettingsPageState extends State<SettingsPage> {
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: <Color>[
-                        AppTheme.sand,
-                        AppTheme.gold.withValues(alpha: 0.14),
+                        AppTheme.surfaceContainer,
+                        AppTheme.surfaceMuted,
                       ],
                     ),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: AppTheme.gold.withValues(alpha: 0.2),
-                    ),
+                    borderRadius: BorderRadius.circular(AppTheme.radii.lg),
+                    border: Border.all(color: AppTheme.outlineVariant),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -425,7 +421,7 @@ class _SettingsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppSurface(
-      radius: 16,
+      radius: AppTheme.radii.lg,
       padding: const EdgeInsets.all(24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -437,7 +433,7 @@ class _SettingsSection extends StatelessWidget {
                 height: 40,
                 decoration: BoxDecoration(
                   color: iconBackground,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(AppTheme.radii.sm),
                 ),
                 child: Icon(icon, size: 20, color: iconColor),
               ),
@@ -616,10 +612,5 @@ class _SettingsCheckboxRow extends StatelessWidget {
 }
 
 InputDecoration _settingsInputDecoration(String? hintText) {
-  return InputDecoration(
-    hintText: hintText,
-    filled: true,
-    fillColor: AppTheme.canvasSoft,
-    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-  );
+  return InputDecoration(hintText: hintText);
 }

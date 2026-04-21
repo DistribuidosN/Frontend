@@ -16,75 +16,59 @@ ThemeData _authFormTheme(BuildContext context) {
   final ThemeData base = Theme.of(context);
 
   return base.copyWith(
-    inputDecorationTheme: InputDecorationTheme(
-      filled: true,
-      fillColor: _AuthPalette.sand,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(18),
-        borderSide: const BorderSide(color: _AuthPalette.gold, width: 1.2),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(18),
-        borderSide: const BorderSide(color: _AuthPalette.gold, width: 1.2),
-      ),
-      disabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(18),
-        borderSide: const BorderSide(color: _AuthPalette.gold, width: 1.2),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(18),
-        borderSide: const BorderSide(color: _AuthPalette.red, width: 1.6),
-      ),
-      errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(18),
-        borderSide: const BorderSide(color: _AuthPalette.red, width: 1.4),
-      ),
-      focusedErrorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(18),
-        borderSide: const BorderSide(color: _AuthPalette.red, width: 1.6),
-      ),
-      hintStyle: base.textTheme.bodyMedium?.copyWith(
-        color: _AuthPalette.navy.withValues(alpha: 0.56),
-      ),
-      labelStyle: base.textTheme.bodyMedium?.copyWith(
-        color: _AuthPalette.navy.withValues(alpha: 0.88),
-      ),
-      prefixIconColor: _AuthPalette.navy,
-      suffixIconColor: _AuthPalette.navy,
+    inputDecorationTheme: base.inputDecorationTheme.copyWith(
+      fillColor: AppTheme.surfaceContainer,
     ),
     filledButtonTheme: FilledButtonThemeData(
-      style: FilledButton.styleFrom(
-        backgroundColor: _AuthPalette.red,
-        foregroundColor: _AuthPalette.sand,
-        disabledBackgroundColor: _AuthPalette.orange,
-        disabledForegroundColor: _AuthPalette.sand,
-        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 18),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-        textStyle: base.textTheme.labelLarge,
-        elevation: 0,
+      style: ButtonStyle(
+        minimumSize: WidgetStateProperty.all(const Size(0, 48)),
+        padding: WidgetStateProperty.all<EdgeInsetsGeometry>(
+          const EdgeInsets.symmetric(horizontal: 22, vertical: 18),
+        ),
+        backgroundColor: WidgetStateProperty.resolveWith<Color>((states) {
+          if (states.contains(WidgetState.disabled)) {
+            return _AuthPalette.orange.withValues(alpha: 0.65);
+          }
+          if (states.contains(WidgetState.pressed)) {
+            return _AuthPalette.orange;
+          }
+          return _AuthPalette.red;
+        }),
+        foregroundColor: WidgetStateProperty.all<Color>(_AuthPalette.sand),
+        shape: WidgetStateProperty.all<OutlinedBorder>(
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+        ),
+        textStyle: WidgetStateProperty.all<TextStyle?>(
+          base.textTheme.labelLarge,
+        ),
+        elevation: WidgetStateProperty.all<double>(0),
       ),
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
-      style: OutlinedButton.styleFrom(
-        foregroundColor: _AuthPalette.navy,
-        backgroundColor: _AuthPalette.sand,
-        side: const BorderSide(color: _AuthPalette.gold, width: 1.2),
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-        textStyle: base.textTheme.labelLarge,
+      style: ButtonStyle(
+        minimumSize: WidgetStateProperty.all(const Size(0, 48)),
+        padding: WidgetStateProperty.all<EdgeInsetsGeometry>(
+          const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+        ),
+        foregroundColor: WidgetStateProperty.all<Color>(_AuthPalette.navy),
+        backgroundColor: WidgetStateProperty.resolveWith<Color>((states) {
+          if (states.contains(WidgetState.pressed)) {
+            return _AuthPalette.gold.withValues(alpha: 0.18);
+          }
+          return _AuthPalette.sand;
+        }),
+        side: WidgetStateProperty.all<BorderSide>(
+          const BorderSide(color: _AuthPalette.gold, width: 1.2),
+        ),
+        shape: WidgetStateProperty.all<OutlinedBorder>(
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+        ),
+        textStyle: WidgetStateProperty.all<TextStyle?>(
+          base.textTheme.labelLarge,
+        ),
       ),
     ),
-    checkboxTheme: CheckboxThemeData(
-      fillColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
-        return states.contains(WidgetState.selected)
-            ? _AuthPalette.red
-            : _AuthPalette.sand;
-      }),
-      checkColor: WidgetStateProperty.all<Color>(_AuthPalette.sand),
-      side: const BorderSide(color: _AuthPalette.orange, width: 1.4),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
-    ),
+    checkboxTheme: base.checkboxTheme,
   );
 }
 
@@ -127,7 +111,7 @@ class LoginPage extends StatefulWidget {
     required this.onForgotPassword,
   });
 
-  final VoidCallback onLogin;
+  final Future<void> Function(String email, String password) onLogin;
   final VoidCallback onRegister;
   final VoidCallback onForgotPassword;
 
@@ -136,8 +120,49 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
   bool _showPassword = false;
   bool _rememberMe = true;
+  bool _isSubmitting = false;
+  String? _errorMessage;
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submit() async {
+    final String email = _emailController.text.trim();
+    final String password = _passwordController.text;
+
+    if (email.isEmpty || password.isEmpty) {
+      setState(() => _errorMessage = 'Enter your email and password.');
+      return;
+    }
+
+    setState(() {
+      _isSubmitting = true;
+      _errorMessage = null;
+    });
+
+    try {
+      await widget.onLogin(email, password);
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _errorMessage = error.toString();
+      });
+    } finally {
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -164,8 +189,8 @@ class _LoginPageState extends State<LoginPage> {
         child: Container(
           padding: const EdgeInsets.all(38),
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(32),
+            color: AppTheme.surfaceRaised,
+            borderRadius: BorderRadius.circular(28),
             border: Border.all(
               color: _AuthPalette.navy.withValues(alpha: 0.08),
               width: 1.1,
@@ -202,12 +227,7 @@ class _LoginPageState extends State<LoginPage> {
               const SizedBox(height: 22),
               Text(
                 'Welcome back',
-                style: AppTheme.displayStyle(
-                  context,
-                  size: 38,
-                  height: 1,
-                  color: _AuthPalette.navy,
-                ),
+                style: Theme.of(context).textTheme.displayMedium,
               ),
               const SizedBox(height: 10),
               Text(
@@ -220,9 +240,11 @@ class _LoginPageState extends State<LoginPage> {
               const SizedBox(height: 28),
               const _AuthFieldLabel('Email address'),
               const SizedBox(height: 8),
-              const TextField(
+              TextField(
+                controller: _emailController,
                 style: TextStyle(color: _AuthPalette.navy),
-                decoration: InputDecoration(hintText: 'alex@enfok.co'),
+                keyboardType: TextInputType.emailAddress,
+                decoration: const InputDecoration(hintText: 'alex@enfok.co'),
               ),
               const SizedBox(height: 16),
               Row(
@@ -238,6 +260,7 @@ class _LoginPageState extends State<LoginPage> {
               ),
               const SizedBox(height: 8),
               TextField(
+                controller: _passwordController,
                 style: const TextStyle(color: _AuthPalette.navy),
                 obscureText: !_showPassword,
                 decoration: InputDecoration(
@@ -253,6 +276,15 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
               ),
+              if (_errorMessage != null) ...<Widget>[
+                const SizedBox(height: 12),
+                Text(
+                  _errorMessage!,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: _AuthPalette.red),
+                ),
+              ],
               const SizedBox(height: 12),
               Row(
                 children: <Widget>[
@@ -285,8 +317,8 @@ class _LoginPageState extends State<LoginPage> {
               SizedBox(
                 width: double.infinity,
                 child: FilledButton(
-                  onPressed: widget.onLogin,
-                  child: const Text('Sign in'),
+                  onPressed: _isSubmitting ? null : _submit,
+                  child: Text(_isSubmitting ? 'Signing in...' : 'Sign in'),
                 ),
               ),
               const SizedBox(height: 16),
@@ -342,7 +374,12 @@ class RegisterPage extends StatefulWidget {
     required this.onLogin,
   });
 
-  final VoidCallback onRegister;
+  final Future<void> Function({
+    required String username,
+    required String email,
+    required String password,
+  })
+  onRegister;
   final VoidCallback onLogin;
 
   @override
@@ -350,9 +387,66 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
+  final TextEditingController _firstNameController = TextEditingController();
+  final TextEditingController _lastNameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmController = TextEditingController();
   bool _showPassword = false;
   bool _showConfirm = false;
   bool _agreeToTerms = true;
+  bool _isSubmitting = false;
+  String? _errorMessage;
+
+  @override
+  void dispose() {
+    _firstNameController.dispose();
+    _lastNameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submit() async {
+    final String firstName = _firstNameController.text.trim();
+    final String lastName = _lastNameController.text.trim();
+    final String username = '$firstName $lastName'.trim();
+    final String email = _emailController.text.trim();
+    final String password = _passwordController.text;
+    final String confirm = _confirmController.text;
+
+    if (username.isEmpty || email.isEmpty || password.isEmpty) {
+      setState(() => _errorMessage = 'Complete the required fields first.');
+      return;
+    }
+    if (password != confirm) {
+      setState(() => _errorMessage = 'Password confirmation does not match.');
+      return;
+    }
+
+    setState(() {
+      _isSubmitting = true;
+      _errorMessage = null;
+    });
+
+    try {
+      await widget.onRegister(
+        username: username,
+        email: email,
+        password: password,
+      );
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+      setState(() => _errorMessage = error.toString());
+    } finally {
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -376,8 +470,8 @@ class _RegisterPageState extends State<RegisterPage> {
         child: Container(
           padding: const EdgeInsets.all(34),
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(32),
+            color: AppTheme.surfaceRaised,
+            borderRadius: BorderRadius.circular(28),
             border: Border.all(
               color: _AuthPalette.navy.withValues(alpha: 0.08),
               width: 1.1,
@@ -420,12 +514,7 @@ class _RegisterPageState extends State<RegisterPage> {
               const SizedBox(height: 20),
               Text(
                 'Create account',
-                style: AppTheme.displayStyle(
-                  context,
-                  size: 34,
-                  height: 1,
-                  color: _AuthPalette.navy,
-                ),
+                style: Theme.of(context).textTheme.displayMedium,
               ),
               const SizedBox(height: 10),
               Text(
@@ -452,25 +541,27 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
               const SizedBox(height: 28),
               _AuthResponsivePair(
-                left: const Column(
+                left: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    _AuthFieldLabel('First name'),
-                    SizedBox(height: 8),
+                    const _AuthFieldLabel('First name'),
+                    const SizedBox(height: 8),
                     TextField(
+                      controller: _firstNameController,
                       style: TextStyle(color: _AuthPalette.navy),
-                      decoration: InputDecoration(hintText: 'Alex'),
+                      decoration: const InputDecoration(hintText: 'Alex'),
                     ),
                   ],
                 ),
-                right: const Column(
+                right: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    _AuthFieldLabel('Last name'),
-                    SizedBox(height: 8),
+                    const _AuthFieldLabel('Last name'),
+                    const SizedBox(height: 8),
                     TextField(
+                      controller: _lastNameController,
                       style: TextStyle(color: _AuthPalette.navy),
-                      decoration: InputDecoration(hintText: 'Morgan'),
+                      decoration: const InputDecoration(hintText: 'Morgan'),
                     ),
                   ],
                 ),
@@ -478,14 +569,17 @@ class _RegisterPageState extends State<RegisterPage> {
               const SizedBox(height: 16),
               const _AuthFieldLabel('Email address'),
               const SizedBox(height: 8),
-              const TextField(
+              TextField(
+                controller: _emailController,
                 style: TextStyle(color: _AuthPalette.navy),
-                decoration: InputDecoration(hintText: 'alex@enfok.co'),
+                keyboardType: TextInputType.emailAddress,
+                decoration: const InputDecoration(hintText: 'alex@enfok.co'),
               ),
               const SizedBox(height: 16),
               const _AuthFieldLabel('Password'),
               const SizedBox(height: 8),
               TextField(
+                controller: _passwordController,
                 style: const TextStyle(color: _AuthPalette.navy),
                 obscureText: !_showPassword,
                 decoration: InputDecoration(
@@ -505,6 +599,7 @@ class _RegisterPageState extends State<RegisterPage> {
               const _AuthFieldLabel('Confirm password'),
               const SizedBox(height: 8),
               TextField(
+                controller: _confirmController,
                 style: const TextStyle(color: _AuthPalette.navy),
                 obscureText: !_showConfirm,
                 decoration: InputDecoration(
@@ -520,6 +615,15 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                 ),
               ),
+              if (_errorMessage != null) ...<Widget>[
+                const SizedBox(height: 12),
+                Text(
+                  _errorMessage!,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: _AuthPalette.red),
+                ),
+              ],
               const SizedBox(height: 12),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -546,8 +650,10 @@ class _RegisterPageState extends State<RegisterPage> {
               SizedBox(
                 width: double.infinity,
                 child: FilledButton(
-                  onPressed: _agreeToTerms ? widget.onRegister : null,
-                  child: const Text('Create account'),
+                  onPressed: _agreeToTerms && !_isSubmitting ? _submit : null,
+                  child: Text(
+                    _isSubmitting ? 'Creating account...' : 'Create account',
+                  ),
                 ),
               ),
               const SizedBox(height: 18),
@@ -575,21 +681,76 @@ class _RegisterPageState extends State<RegisterPage> {
 }
 
 class ForgotPasswordPage extends StatefulWidget {
-  const ForgotPasswordPage({super.key, required this.onBack});
+  const ForgotPasswordPage({
+    super.key,
+    required this.onBack,
+    required this.onResetPassword,
+  });
 
   final VoidCallback onBack;
+  final Future<void> Function(String email, String newPassword) onResetPassword;
 
   @override
   State<ForgotPasswordPage> createState() => _ForgotPasswordPageState();
 }
 
 class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
-  int _step = 0;
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmController = TextEditingController();
+  bool _isSubmitting = false;
+  String? _errorMessage;
+  bool _completed = false;
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submit() async {
+    final String email = _emailController.text.trim();
+    final String password = _passwordController.text;
+    final String confirmation = _confirmController.text;
+
+    if (email.isEmpty || password.isEmpty) {
+      setState(() => _errorMessage = 'Enter your email and the new password.');
+      return;
+    }
+    if (password != confirmation) {
+      setState(() => _errorMessage = 'Password confirmation does not match.');
+      return;
+    }
+
+    setState(() {
+      _isSubmitting = true;
+      _errorMessage = null;
+    });
+
+    try {
+      await widget.onResetPassword(email, password);
+      if (!mounted) {
+        return;
+      }
+      setState(() => _completed = true);
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+      setState(() => _errorMessage = error.toString());
+    } finally {
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppTheme.background,
       body: SafeArea(
         child: Stack(
           children: <Widget>[
@@ -603,15 +764,15 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                     child: Container(
                       padding: const EdgeInsets.all(30),
                       decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(32),
+                        color: AppTheme.surface,
+                        borderRadius: BorderRadius.circular(28),
                         border: Border.all(
                           color: _AuthPalette.navy.withValues(alpha: 0.08),
                           width: 1.1,
                         ),
                         boxShadow: AppTheme.softShadow,
                       ),
-                      child: _step == 3
+                      child: _completed
                           ? Column(
                               mainAxisSize: MainAxisSize.min,
                               children: <Widget>[
@@ -719,11 +880,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                                 ),
                                 const SizedBox(height: 10),
                                 Text(
-                                  _step == 0
-                                      ? 'Enter the email address tied to your workspace and we will send a recovery code.'
-                                      : _step == 1
-                                      ? 'Enter the 6-digit code that just reached your inbox.'
-                                      : 'Create a new password for your Enfok account.',
+                                  'Use the recovery endpoint connected to the backend to set a new password for your workspace.',
                                   style: Theme.of(context).textTheme.bodyMedium
                                       ?.copyWith(
                                         color: _AuthPalette.navy,
@@ -731,81 +888,64 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                                       ),
                                 ),
                                 const SizedBox(height: 22),
-                                if (_step == 0) ...<Widget>[
-                                  const _AuthFieldLabel('Email address'),
-                                  const SizedBox(height: 8),
-                                  const TextField(
-                                    style: TextStyle(color: _AuthPalette.navy),
-                                    decoration: InputDecoration(
-                                      hintText: 'alex@enfok.co',
-                                    ),
+                                const _AuthFieldLabel('Email address'),
+                                const SizedBox(height: 8),
+                                TextField(
+                                  controller: _emailController,
+                                  style: const TextStyle(
+                                    color: _AuthPalette.navy,
                                   ),
-                                  const SizedBox(height: 18),
-                                  SizedBox(
-                                    width: double.infinity,
-                                    child: FilledButton(
-                                      onPressed: () =>
-                                          setState(() => _step = 1),
-                                      child: const Text('Send reset code'),
-                                    ),
+                                  keyboardType: TextInputType.emailAddress,
+                                  decoration: const InputDecoration(
+                                    hintText: 'alex@enfok.co',
                                   ),
-                                ],
-                                if (_step == 1) ...<Widget>[
-                                  const _AuthFieldLabel('Verification code'),
-                                  const SizedBox(height: 8),
-                                  const TextField(
-                                    style: TextStyle(color: _AuthPalette.navy),
-                                    textAlign: TextAlign.center,
-                                    decoration: InputDecoration(
-                                      hintText: '000000',
-                                    ),
+                                ),
+                                const SizedBox(height: 16),
+                                const _AuthFieldLabel('New password'),
+                                const SizedBox(height: 8),
+                                TextField(
+                                  controller: _passwordController,
+                                  style: const TextStyle(
+                                    color: _AuthPalette.navy,
                                   ),
-                                  const SizedBox(height: 10),
+                                  obscureText: true,
+                                  decoration: const InputDecoration(
+                                    hintText: '********',
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                const _AuthFieldLabel('Confirm password'),
+                                const SizedBox(height: 8),
+                                TextField(
+                                  controller: _confirmController,
+                                  style: const TextStyle(
+                                    color: _AuthPalette.navy,
+                                  ),
+                                  obscureText: true,
+                                  decoration: const InputDecoration(
+                                    hintText: '********',
+                                  ),
+                                ),
+                                if (_errorMessage != null) ...<Widget>[
+                                  const SizedBox(height: 12),
                                   Text(
-                                    'Check your email for the verification code.',
+                                    _errorMessage!,
                                     style: Theme.of(context).textTheme.bodySmall
-                                        ?.copyWith(color: _AuthPalette.navy),
-                                  ),
-                                  const SizedBox(height: 18),
-                                  SizedBox(
-                                    width: double.infinity,
-                                    child: FilledButton(
-                                      onPressed: () =>
-                                          setState(() => _step = 2),
-                                      child: const Text('Verify code'),
-                                    ),
+                                        ?.copyWith(color: _AuthPalette.red),
                                   ),
                                 ],
-                                if (_step == 2) ...<Widget>[
-                                  const _AuthFieldLabel('New password'),
-                                  const SizedBox(height: 8),
-                                  const TextField(
-                                    style: TextStyle(color: _AuthPalette.navy),
-                                    obscureText: true,
-                                    decoration: InputDecoration(
-                                      hintText: '********',
+                                const SizedBox(height: 18),
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: FilledButton(
+                                    onPressed: _isSubmitting ? null : _submit,
+                                    child: Text(
+                                      _isSubmitting
+                                          ? 'Updating password...'
+                                          : 'Reset password',
                                     ),
                                   ),
-                                  const SizedBox(height: 16),
-                                  const _AuthFieldLabel('Confirm password'),
-                                  const SizedBox(height: 8),
-                                  const TextField(
-                                    style: TextStyle(color: _AuthPalette.navy),
-                                    obscureText: true,
-                                    decoration: InputDecoration(
-                                      hintText: '********',
-                                    ),
-                                  ),
-                                  const SizedBox(height: 18),
-                                  SizedBox(
-                                    width: double.infinity,
-                                    child: FilledButton(
-                                      onPressed: () =>
-                                          setState(() => _step = 3),
-                                      child: const Text('Reset password'),
-                                    ),
-                                  ),
-                                ],
+                                ),
                               ],
                             ),
                     ),
@@ -848,7 +988,7 @@ class _AuthLayout extends StatelessWidget {
         final double compactMaxWidth = mediumCanvas ? 700 : 560;
 
         return Scaffold(
-          backgroundColor: Colors.white,
+          backgroundColor: AppTheme.background,
           body: SafeArea(
             child: Stack(
               children: <Widget>[
@@ -857,11 +997,11 @@ class _AuthLayout extends StatelessWidget {
                 ),
                 showHero
                     ? Padding(
-                        padding: const EdgeInsets.all(18),
+                        padding: const EdgeInsets.all(20),
                         child: DecoratedBox(
                           decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(34),
+                            color: AppTheme.surfaceRaised,
+                            borderRadius: BorderRadius.circular(28),
                             border: Border.all(
                               color: _AuthPalette.navy.withValues(alpha: 0.08),
                               width: 1.1,
@@ -869,7 +1009,7 @@ class _AuthLayout extends StatelessWidget {
                             boxShadow: AppTheme.softShadow,
                           ),
                           child: ClipRRect(
-                            borderRadius: BorderRadius.circular(34),
+                            borderRadius: BorderRadius.circular(28),
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: <Widget>[
@@ -888,7 +1028,7 @@ class _AuthLayout extends StatelessWidget {
                                   flex: 8,
                                   child: Container(
                                     decoration: BoxDecoration(
-                                      color: Colors.white,
+                                      color: AppTheme.surfaceRaised,
                                       border: Border(
                                         left: BorderSide(
                                           color: _AuthPalette.navy.withValues(
@@ -902,8 +1042,8 @@ class _AuthLayout extends StatelessWidget {
                                       alignment: Alignment.center,
                                       child: SingleChildScrollView(
                                         padding: const EdgeInsets.symmetric(
-                                          horizontal: 36,
-                                          vertical: 32,
+                                          horizontal: 40,
+                                          vertical: 36,
                                         ),
                                         child: ConstrainedBox(
                                           constraints: const BoxConstraints(
@@ -983,7 +1123,7 @@ class _AuthHeroPane extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
-      decoration: const BoxDecoration(color: Colors.white),
+      decoration: const BoxDecoration(color: AppTheme.background),
       child: Stack(
         fit: StackFit.expand,
         children: <Widget>[
@@ -997,7 +1137,7 @@ class _AuthHeroPane extends StatelessWidget {
                 height: 260,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: _AuthPalette.sand.withValues(alpha: 0.36),
+                  color: _AuthPalette.sand.withValues(alpha: 0.24),
                 ),
               ),
             ),
@@ -1011,7 +1151,7 @@ class _AuthHeroPane extends StatelessWidget {
                 height: 280,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: _AuthPalette.gold.withValues(alpha: 0.24),
+                  color: _AuthPalette.gold.withValues(alpha: 0.16),
                 ),
               ),
             ),
@@ -1023,9 +1163,9 @@ class _AuthHeroPane extends StatelessWidget {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: <Color>[
-                    Colors.white.withValues(alpha: 0.92),
-                    _AuthPalette.sand.withValues(alpha: 0.36),
-                    Colors.white.withValues(alpha: 0.9),
+                    AppTheme.surfaceRaised.withValues(alpha: 0.96),
+                    _AuthPalette.sand.withValues(alpha: 0.26),
+                    AppTheme.surfaceRaised.withValues(alpha: 0.92),
                   ],
                 ),
               ),
@@ -1044,7 +1184,7 @@ class _AuthHeroPane extends StatelessWidget {
               final bool useScroll =
                   availableHeight < (lightweightHero ? 620 : 680);
               final bool allowSpacer = !compact && !useScroll;
-              final double titleSize = ultraCompact ? 40 : (compact ? 46 : 54);
+              final double titleSize = ultraCompact ? 42 : (compact ? 48 : 56);
               final double titleGap = compact ? 18 : 24;
               final double descriptionGap = compact ? 12 : 18;
               final double featuresGap = compact ? 18 : 30;
@@ -1056,7 +1196,7 @@ class _AuthHeroPane extends StatelessWidget {
                 constraints: const BoxConstraints(maxWidth: 560),
                 padding: EdgeInsets.all(compact ? 18 : 22),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.9),
+                  color: AppTheme.surfaceRaised.withValues(alpha: 0.94),
                   borderRadius: BorderRadius.circular(28),
                   border: Border.all(
                     color: _AuthPalette.navy.withValues(alpha: 0.08),
@@ -1077,7 +1217,7 @@ class _AuthHeroPane extends StatelessWidget {
                     Text(
                       'Operator highlights',
                       style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        color: _AuthPalette.navy.withValues(alpha: 0.68),
+                        color: _AuthPalette.navy.withValues(alpha: 0.62),
                         letterSpacing: 0.3,
                       ),
                     ),
@@ -1113,7 +1253,9 @@ class _AuthHeroPane extends StatelessWidget {
                             vertical: compact ? 8 : 10,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.82),
+                            color: AppTheme.surfaceRaised.withValues(
+                              alpha: 0.88,
+                            ),
                             borderRadius: BorderRadius.circular(999),
                             border: Border.all(
                               color: _AuthPalette.gold.withValues(alpha: 0.44),
@@ -1172,7 +1314,7 @@ class _AuthHeroPane extends StatelessWidget {
                         context,
                         size: titleSize,
                         color: _AuthPalette.navy,
-                        height: 0.96,
+                        height: 0.94,
                       ),
                     ),
                   ),
@@ -1322,7 +1464,7 @@ class _CompactAuthHero extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppTheme.surfaceRaised,
         borderRadius: BorderRadius.circular(28),
         border: Border.all(color: _AuthPalette.navy.withValues(alpha: 0.08)),
         boxShadow: AppTheme.softShadow,
@@ -1428,7 +1570,7 @@ class _AuthFeatureCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 230,
+      width: 244,
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -1436,7 +1578,7 @@ class _AuthFeatureCard extends StatelessWidget {
           end: Alignment.bottomRight,
           colors: <Color>[
             lightMode
-                ? Colors.white.withValues(alpha: 0.94)
+                ? AppTheme.surfaceRaised.withValues(alpha: 0.96)
                 : _AuthPalette.sand.withValues(alpha: 0.12),
             lightMode
                 ? _AuthPalette.sand.withValues(alpha: 0.22)
@@ -1459,9 +1601,14 @@ class _AuthFeatureCard extends StatelessWidget {
             height: 44,
             decoration: BoxDecoration(
               color: lightMode
-                  ? _AuthPalette.sand.withValues(alpha: 0.78)
+                  ? _AuthPalette.sand.withValues(alpha: 0.92)
                   : _AuthPalette.red.withValues(alpha: 0.26),
               borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: lightMode
+                    ? _AuthPalette.gold.withValues(alpha: 0.35)
+                    : Colors.transparent,
+              ),
             ),
             child: Icon(
               icon,
@@ -1650,9 +1797,9 @@ class _AuthSceneBackground extends StatelessWidget {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: <Color>[
-                    Colors.white,
-                    _AuthPalette.sand.withValues(alpha: 0.26),
-                    Colors.white,
+                    AppTheme.background,
+                    AppTheme.surfaceContainer.withValues(alpha: 0.78),
+                    AppTheme.background,
                   ],
                 ),
               ),
@@ -1668,7 +1815,7 @@ class _AuthSceneBackground extends StatelessWidget {
                 height: 220,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: _AuthPalette.gold.withValues(alpha: 0.08),
+                  color: AppTheme.tertiary.withValues(alpha: 0.08),
                 ),
               ),
             ),
@@ -1683,7 +1830,7 @@ class _AuthSceneBackground extends StatelessWidget {
                 height: 200,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: _AuthPalette.orange.withValues(alpha: 0.05),
+                  color: AppTheme.secondary.withValues(alpha: 0.05),
                 ),
               ),
             ),

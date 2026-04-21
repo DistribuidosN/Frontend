@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:imageflow_flutter/core/theme/app_theme.dart';
-import 'package:imageflow_flutter/features/nodes/data/worker_nodes_mock_data.dart';
+import 'package:imageflow_flutter/core/workspace/workspace_scope.dart';
 import 'package:imageflow_flutter/features/nodes/domain/worker_node.dart';
 import 'package:imageflow_flutter/shared/widgets/shared_widgets.dart';
 
@@ -18,6 +18,7 @@ class _NodesPageState extends State<NodesPage> {
 
   @override
   Widget build(BuildContext context) {
+    final List<WorkerNode> workerNodes = WorkspaceScope.of(context).workerNodes;
     final int activeCount = workerNodes
         .where((WorkerNode node) => node.active)
         .length;
@@ -113,8 +114,8 @@ class _NodesPageState extends State<NodesPage> {
             ),
             _NodesSummaryCard(
               icon: Icons.dns_outlined,
-              iconColor: AppTheme.orange,
-              iconBackground: AppTheme.gold,
+              iconColor: AppTheme.goldDeep,
+              iconBackground: AppTheme.warningSoft,
               label: 'Active Jobs',
               value: '$totalJobs',
             ),
@@ -376,8 +377,9 @@ class _NodesSummaryCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: iconBackground,
                     borderRadius: BorderRadius.circular(compact ? 11 : 12),
+                    border: Border.all(color: AppTheme.outlineVariant),
                   ),
-                  child: Icon(icon, size: iconSize, color: iconColor),
+                  child: Icon(icon, size: iconSize + 1, color: iconColor),
                 ),
                 SizedBox(height: titleGap),
                 Text(

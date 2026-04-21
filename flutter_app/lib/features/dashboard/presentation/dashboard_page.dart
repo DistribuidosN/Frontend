@@ -43,7 +43,7 @@ class _DashboardPageState extends State<DashboardPage> {
         const SizedBox(height: 20),
         AdaptiveGrid(
           minItemWidth: 250,
-          childAspectRatio: 1.55,
+          childAspectRatio: 1.38,
           children: current.cards.asMap().entries.map((
             MapEntry<int, OverviewMetric> entry,
           ) {
@@ -59,6 +59,7 @@ class _DashboardPageState extends State<DashboardPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Container(
                         width: 46,
@@ -66,17 +67,16 @@ class _DashboardPageState extends State<DashboardPage> {
                         decoration: BoxDecoration(
                           color: style.iconBackground,
                           borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: AppTheme.outlineVariant),
                         ),
-                        child: Icon(card.icon, size: 20, color: style.color),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          card.label,
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(color: AppTheme.slate),
+                        child: Icon(
+                          card.icon,
+                          size: 22,
+                          color: style.iconColor,
                         ),
                       ),
+                      const SizedBox(width: 14),
+                      Expanded(child: const SizedBox.shrink()),
                       StatusChip(
                         label: style.badge,
                         color: style.color,
@@ -84,12 +84,20 @@ class _DashboardPageState extends State<DashboardPage> {
                       ),
                     ],
                   ),
+                  const SizedBox(height: 18),
+                  Text(
+                    card.label.toUpperCase(),
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: AppTheme.slate,
+                      letterSpacing: 1.4,
+                    ),
+                  ),
                   const Spacer(),
                   Text(
                     card.value,
                     style: AppTheme.displayStyle(
                       context,
-                      size: 30,
+                      size: 32,
                       color: style.textColor,
                     ),
                   ),
@@ -109,7 +117,7 @@ class _DashboardPageState extends State<DashboardPage> {
         LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
             final bool stacked = constraints.maxWidth < 1120;
-            const double desktopTopPanelMinHeight = 820;
+            const double desktopTopPanelMinHeight = 760;
             final Widget throughputPanel = SectionPanel(
               title: 'Activity overview',
               description: 'A clear read on completed work and pending demand.',
@@ -125,9 +133,9 @@ class _DashboardPageState extends State<DashboardPage> {
                     width: double.infinity,
                     padding: const EdgeInsets.all(18),
                     decoration: BoxDecoration(
-                      color: AppTheme.canvasWarm,
+                      color: AppTheme.surfaceContainer,
                       borderRadius: BorderRadius.circular(22),
-                      border: Border.all(color: AppTheme.borderSoft),
+                      border: Border.all(color: AppTheme.outlineVariant),
                     ),
                     child: Row(
                       children: <Widget>[
@@ -142,9 +150,19 @@ class _DashboardPageState extends State<DashboardPage> {
                           ),
                         ),
                         const SizedBox(width: 16),
-                        const Icon(
-                          Icons.insights_rounded,
-                          color: AppTheme.sapphire,
+                        Container(
+                          width: 42,
+                          height: 42,
+                          decoration: BoxDecoration(
+                            color: AppTheme.surface,
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(color: AppTheme.outlineVariant),
+                          ),
+                          child: const Icon(
+                            Icons.insights_rounded,
+                            color: AppTheme.sapphire,
+                            size: 20,
+                          ),
                         ),
                       ],
                     ),
@@ -385,6 +403,7 @@ class _BatchVisual {
 class _OverviewCardStyle {
   const _OverviewCardStyle({
     required this.color,
+    required this.iconColor,
     required this.textColor,
     required this.background,
     required this.iconBackground,
@@ -392,6 +411,7 @@ class _OverviewCardStyle {
   });
 
   final Color color;
+  final Color iconColor;
   final Color textColor;
   final Color background;
   final Color iconBackground;
@@ -403,25 +423,28 @@ _OverviewCardStyle _overviewCardStyle(int index) {
     case 0:
       return const _OverviewCardStyle(
         color: AppTheme.navy,
+        iconColor: AppTheme.navy,
         textColor: AppTheme.ink,
         background: AppTheme.white,
-        iconBackground: AppTheme.gold,
+        iconBackground: AppTheme.surfaceContainer,
         badge: 'volume',
       );
     case 1:
       return const _OverviewCardStyle(
         color: AppTheme.orange,
+        iconColor: AppTheme.goldDeep,
         textColor: AppTheme.ink,
         background: AppTheme.white,
-        iconBackground: AppTheme.sand,
+        iconBackground: AppTheme.warningSoft,
         badge: 'pace',
       );
     default:
       return const _OverviewCardStyle(
         color: AppTheme.red,
+        iconColor: AppTheme.danger,
         textColor: AppTheme.ink,
         background: AppTheme.white,
-        iconBackground: AppTheme.sand,
+        iconBackground: AppTheme.dangerSoft,
         badge: 'review',
       );
   }
@@ -501,7 +524,7 @@ class _DashboardHero extends StatelessWidget {
               const SizedBox(height: 18),
               Text(
                 'Dashboard',
-                style: AppTheme.displayStyle(context, size: 30),
+                style: AppTheme.displayStyle(context, size: 28),
               ),
               const SizedBox(height: 12),
               ConstrainedBox(
@@ -519,9 +542,9 @@ class _DashboardHero extends StatelessWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.all(18),
                 decoration: BoxDecoration(
-                  color: AppTheme.sand.withValues(alpha: 0.58),
+                  color: AppTheme.surfaceRaised,
                   borderRadius: BorderRadius.circular(26),
-                  border: Border.all(color: AppTheme.borderSoft),
+                  border: Border.all(color: AppTheme.outlineVariant),
                 ),
                 child: LayoutBuilder(
                   builder:
@@ -640,9 +663,9 @@ class _DashboardHero extends StatelessWidget {
                     vertical: 16,
                   ),
                   decoration: BoxDecoration(
-                    color: AppTheme.sand.withValues(alpha: 0.42),
+                    color: AppTheme.surfaceContainer,
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: AppTheme.borderSoft),
+                    border: Border.all(color: AppTheme.outlineVariant),
                   ),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -1148,9 +1171,9 @@ class _SignalMiniStat extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: AppTheme.sand,
+        color: AppTheme.surfaceContainer,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppTheme.borderSoft),
+        border: Border.all(color: AppTheme.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

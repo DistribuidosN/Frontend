@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:imageflow_flutter/core/workspace/workspace_scope.dart';
 import 'package:imageflow_flutter/core/theme/app_theme.dart';
 import 'package:imageflow_flutter/features/shell/domain/app_page.dart';
 import 'package:imageflow_flutter/shared/widgets/shared_widgets.dart';
@@ -45,9 +46,18 @@ class _ProgressPageState extends State<ProgressPage> {
 
   @override
   Widget build(BuildContext context) {
-    final int completed = ((_progress / 100) * 24).round().clamp(0, 24);
-    final int processing = _progress < 100 ? math.min(6, 24 - completed) : 0;
-    final int queued = _progress < 100 ? math.max(0, 24 - completed - 6) : 0;
+    final latestBatch = WorkspaceScope.of(context).latestBatch;
+    final int totalFiles = latestBatch?.fileCount ?? 0;
+    final int completed = ((_progress / 100) * totalFiles).round().clamp(
+      0,
+      totalFiles,
+    );
+    final int processing = _progress < 100
+        ? math.min(6, totalFiles - completed)
+        : 0;
+    final int queued = _progress < 100
+        ? math.max(0, totalFiles - completed - 6)
+        : 0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -64,7 +74,7 @@ class _ProgressPageState extends State<ProgressPage> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Request ID: req-4522',
+                    'Request ID: ${latestBatch?.requestId ?? 'pending'}',
                     style: Theme.of(
                       context,
                     ).textTheme.bodySmall?.copyWith(color: AppTheme.slate),
@@ -96,7 +106,9 @@ class _ProgressPageState extends State<ProgressPage> {
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          'Processing 24 images across 8 worker nodes',
+                          totalFiles == 0
+                              ? 'No batch has been submitted yet.'
+                              : 'Processing $totalFiles images across connected worker nodes',
                           style: Theme.of(context).textTheme.bodySmall
                               ?.copyWith(color: AppTheme.slate),
                         ),
@@ -111,7 +123,7 @@ class _ProgressPageState extends State<ProgressPage> {
                         style: AppTheme.displayStyle(context, size: 32),
                       ),
                       Text(
-                        '$completed of 24 completed',
+                        '$completed of $totalFiles completed',
                         style: Theme.of(
                           context,
                         ).textTheme.bodySmall?.copyWith(color: AppTheme.slate),

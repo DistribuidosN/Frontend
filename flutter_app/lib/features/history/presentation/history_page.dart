@@ -15,52 +15,67 @@ class HistoryPage extends StatelessWidget {
     final workspace = WorkspaceScope.of(context);
     final List<HistoryRequest> historyRequests = workspace.historyRequests;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Text(
-          'Processing History',
-          style: AppTheme.displayStyle(context, size: 30),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'View all previous image processing requests',
-          style: Theme.of(
-            context,
-          ).textTheme.bodyMedium?.copyWith(color: AppTheme.slate),
-        ),
-        const SizedBox(height: 20),
-        AppSurface(
-          child: Wrap(
-            spacing: 12,
-            runSpacing: 12,
-            children: const <Widget>[
-              FilterField(
-                icon: Icons.search_rounded,
-                label: 'Search by request ID, transformations...',
-              ),
-              ChipFilter(icon: Icons.date_range_outlined, label: 'Date Range'),
-              ChipFilter(icon: Icons.filter_alt_outlined, label: 'Filters'),
-            ],
-          ),
-        ),
-        const SizedBox(height: 20),
-        if (historyRequests.isEmpty)
-          const AppSurface(
-            child: Text(
-              'No batches have been submitted yet. Run one from Upload and Task Builder to populate history.',
+    return AppSurface(
+      radius: 32,
+      color: AppTheme.white,
+      padding: const EdgeInsets.all(28),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 520),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              'Processing History',
+              style: AppTheme.displayStyle(context, size: 30),
             ),
-          )
-        else
-          Column(
-            children: historyRequests.map((HistoryRequest request) {
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: AppSurface(
-                  padding: const EdgeInsets.all(18),
-                  child: LayoutBuilder(
-                    builder:
-                        (BuildContext context, BoxConstraints constraints) {
+            const SizedBox(height: 8),
+            Text(
+              'View all previous image processing requests',
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: AppTheme.slate),
+            ),
+            const SizedBox(height: 20),
+            AppSurface(
+              color: AppTheme.surfaceRaised,
+              child: Wrap(
+                spacing: 12,
+                runSpacing: 12,
+                children: const <Widget>[
+                  FilterField(
+                    icon: Icons.search_rounded,
+                    label: 'Search by request ID, transformations...',
+                    width: 440,
+                  ),
+                  ChipFilter(
+                    icon: Icons.date_range_outlined,
+                    label: 'Date Range',
+                  ),
+                  ChipFilter(
+                    icon: Icons.filter_alt_outlined,
+                    label: 'Filters',
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+            if (historyRequests.isEmpty)
+              const AppSurface(
+                color: AppTheme.surfaceRaised,
+                child: Text(
+                  'No batches have been submitted yet. Run one from Upload and Task Builder to populate history.',
+                ),
+              )
+            else
+              Column(
+                children: historyRequests.map((HistoryRequest request) {
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: AppSurface(
+                      padding: const EdgeInsets.all(18),
+                      child: LayoutBuilder(
+                        builder:
+                            (BuildContext context, BoxConstraints constraints) {
                           final bool compact = constraints.maxWidth < 1020;
                           final Widget status = StatusChip(
                             label: request.status == RequestStatus.completed
@@ -248,37 +263,39 @@ class HistoryPage extends StatelessWidget {
                             );
                           }
 
-                          return Row(
-                            children: <Widget>[
-                              Expanded(flex: 2, child: idColumn),
-                              Expanded(
-                                child: Text(
-                                  '${request.images}',
-                                  style: Theme.of(
-                                    context,
-                                  ).textTheme.labelMedium,
+                            return Row(
+                              children: <Widget>[
+                                Expanded(flex: 2, child: idColumn),
+                                Expanded(
+                                  child: Text(
+                                    '${request.images}',
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.labelMedium,
+                                  ),
                                 ),
-                              ),
-                              Expanded(flex: 2, child: transforms),
-                              Expanded(
-                                child: Text(
-                                  request.duration,
-                                  style: Theme.of(context).textTheme.bodySmall
-                                      ?.copyWith(color: AppTheme.slate),
+                                Expanded(flex: 2, child: transforms),
+                                Expanded(
+                                  child: Text(
+                                    request.duration,
+                                    style: Theme.of(context).textTheme.bodySmall
+                                        ?.copyWith(color: AppTheme.slate),
+                                  ),
                                 ),
-                              ),
-                              status,
-                              const SizedBox(width: 16),
-                              actions,
-                            ],
-                          );
-                        },
-                  ),
-                ),
-              );
-            }).toList(),
-          ),
-      ],
+                                status,
+                                const SizedBox(width: 16),
+                                actions,
+                              ],
+                            );
+                          },
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+          ],
+        ),
+      ),
     );
   }
 }

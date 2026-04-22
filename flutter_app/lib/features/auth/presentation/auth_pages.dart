@@ -387,8 +387,7 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
-  final TextEditingController _firstNameController = TextEditingController();
-  final TextEditingController _lastNameController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmController = TextEditingController();
@@ -400,8 +399,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
   @override
   void dispose() {
-    _firstNameController.dispose();
-    _lastNameController.dispose();
+    _usernameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _confirmController.dispose();
@@ -409,9 +407,7 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   Future<void> _submit() async {
-    final String firstName = _firstNameController.text.trim();
-    final String lastName = _lastNameController.text.trim();
-    final String username = '$firstName $lastName'.trim();
+    final String username = _usernameController.text.trim();
     final String email = _emailController.text.trim();
     final String password = _passwordController.text;
     final String confirm = _confirmController.text;
@@ -557,31 +553,17 @@ class _RegisterPageState extends State<RegisterPage> {
                 ],
               ),
               const SizedBox(height: 28),
-              _AuthResponsivePair(
-                left: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    const _AuthFieldLabel('First name'),
-                    const SizedBox(height: 8),
-                    TextField(
-                      controller: _firstNameController,
-                      style: TextStyle(color: _AuthPalette.navy),
-                      decoration: const InputDecoration(hintText: 'Alex'),
-                    ),
-                  ],
-                ),
-                right: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    const _AuthFieldLabel('Last name'),
-                    const SizedBox(height: 8),
-                    TextField(
-                      controller: _lastNameController,
-                      style: TextStyle(color: _AuthPalette.navy),
-                      decoration: const InputDecoration(hintText: 'Morgan'),
-                    ),
-                  ],
-                ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  const _AuthFieldLabel('Username'),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _usernameController,
+                    style: const TextStyle(color: _AuthPalette.navy),
+                    decoration: const InputDecoration(hintText: 'usuario_demo'),
+                  ),
+                ],
               ),
               const SizedBox(height: 16),
               const _AuthFieldLabel('Email address'),
@@ -642,26 +624,33 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
               ],
               const SizedBox(height: 12),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Checkbox(
-                    value: _agreeToTerms,
-                    onChanged: (bool? value) =>
-                        setState(() => _agreeToTerms = value ?? false),
-                  ),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 12),
-                      child: Text(
-                        'I agree to the Terms of Service and Privacy Policy.',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: _AuthPalette.navy,
+              InkWell(
+                onTap: () => setState(() => _agreeToTerms = !_agreeToTerms),
+                borderRadius: BorderRadius.circular(12),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: Wrap(
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: <Widget>[
+                      Checkbox(
+                        value: _agreeToTerms,
+                        onChanged: (bool? value) =>
+                            setState(() => _agreeToTerms = value ?? false),
+                      ),
+                      ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 220),
+                        child: Text(
+                          'I agree to the Terms of Service and Privacy Policy.',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: _AuthPalette.navy,
+                          ),
                         ),
                       ),
-                    ),
+                    ],
                   ),
-                ],
+                ),
               ),
               const SizedBox(height: 8),
               SizedBox(
@@ -1700,35 +1689,6 @@ class _AuthFieldLabel extends StatelessWidget {
       style: Theme.of(
         context,
       ).textTheme.labelLarge?.copyWith(color: _AuthPalette.navy),
-    );
-  }
-}
-
-class _AuthResponsivePair extends StatelessWidget {
-  const _AuthResponsivePair({required this.left, required this.right});
-
-  final Widget left;
-  final Widget right;
-
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (BuildContext context, BoxConstraints constraints) {
-        if (constraints.maxWidth < 520) {
-          return Column(
-            children: <Widget>[left, const SizedBox(height: 16), right],
-          );
-        }
-
-        return Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Expanded(child: left),
-            const SizedBox(width: 14),
-            Expanded(child: right),
-          ],
-        );
-      },
     );
   }
 }

@@ -36,6 +36,13 @@ class _TaskBuilderPageState extends State<TaskBuilderPage> {
   bool _stripProfile = false;
   bool _isSubmitting = false;
 
+  static const List<_TransformOption> _quickTransforms = <_TransformOption>[
+    _TransformOption(label: 'Grayscale', value: 'grayscale'),
+    _TransformOption(label: 'Flip Horizontal', value: 'flip_horizontal'),
+    _TransformOption(label: 'Sharpen', value: 'sharpen'),
+    _TransformOption(label: 'Extract Text (OCR)', value: 'ocr'),
+  ];
+
   Future<void> _startProcessing() async {
     final workspace = WorkspaceScope.of(context);
     workspace.setSelectedFilters(_transforms);
@@ -64,15 +71,11 @@ class _TaskBuilderPageState extends State<TaskBuilderPage> {
   @override
   Widget build(BuildContext context) {
     final int fileCount = WorkspaceScope.of(context).selectedFiles.length;
-    final List<String> quickTransforms = <String>[
-      'Grayscale',
-      'Flip Horizontal',
-      'Sharpen',
-    ];
-    final double previewScale = _transforms.contains('Flip Horizontal')
+    final double previewScale = _transforms.contains('flip_horizontal')
         ? -1
         : 1;
-    final bool grayscale = _transforms.contains('Grayscale');
+    final bool grayscale = _transforms.contains('grayscale');
+    final bool ocrEnabled = _transforms.contains('ocr');
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -221,7 +224,9 @@ class _TaskBuilderPageState extends State<TaskBuilderPage> {
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          'This configuration keeps contrast crisp, adds controlled brightness and avoids over-processing the batch.',
+                          ocrEnabled
+                              ? 'OCR is enabled for this batch, so the pipeline will also try to extract text from the selected images.'
+                              : 'This configuration keeps contrast crisp, adds controlled brightness and avoids over-processing the batch.',
                           style: Theme.of(context).textTheme.bodySmall
                               ?.copyWith(color: AppTheme.slate),
                         ),
@@ -259,16 +264,16 @@ class _TaskBuilderPageState extends State<TaskBuilderPage> {
                   Wrap(
                     spacing: 10,
                     runSpacing: 10,
-                    children: quickTransforms.map((String transform) {
+                    children: _quickTransforms.map((_TransformOption transform) {
                       return TogglePill(
-                        label: transform,
-                        selected: _transforms.contains(transform),
+                        label: transform.label,
+                        selected: _transforms.contains(transform.value),
                         onTap: () {
                           setState(() {
-                            if (_transforms.contains(transform)) {
-                              _transforms.remove(transform);
+                            if (_transforms.contains(transform.value)) {
+                              _transforms.remove(transform.value);
                             } else {
-                              _transforms.add(transform);
+                              _transforms.add(transform.value);
                             }
                           });
                         },
@@ -484,6 +489,13 @@ class _TaskBuilderPageState extends State<TaskBuilderPage> {
       ],
     );
   }
+}
+
+class _TransformOption {
+  const _TransformOption({required this.label, required this.value});
+
+  final String label;
+  final String value;
 }
 
 class _SwitchTile extends StatelessWidget {

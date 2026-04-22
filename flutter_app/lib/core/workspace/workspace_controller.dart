@@ -119,7 +119,7 @@ class WorkspaceController extends ChangeNotifier {
         'username': username,
         'email': email,
         'password': password,
-        'role_id': 1,
+        'role_id': 2,
       },
     );
     _appendLog(

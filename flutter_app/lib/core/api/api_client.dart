@@ -89,7 +89,7 @@ class ApiClient {
     if (token != null && token.isNotEmpty) {
       request.headers['Authorization'] = 'Bearer $token';
     }
-    request.fields['filters'] = filters.join(',');
+    request.fields['filters'] = filters.join('\n');
     request.files.addAll(
       files.map(
         (UploadFileItem file) => http.MultipartFile.fromBytes(

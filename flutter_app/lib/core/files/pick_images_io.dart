@@ -7,7 +7,8 @@ import 'pick_images.dart';
 Future<List<PickedImageData>> pickImagesImpl() async {
   final FilePickerResult? result = await FilePicker.platform.pickFiles(
     allowMultiple: true,
-    type: FileType.image,
+    type: FileType.custom,
+    allowedExtensions: kSupportedUploadExtensions,
     withData: true,
     withReadStream: true,
     lockParentWindow: true,

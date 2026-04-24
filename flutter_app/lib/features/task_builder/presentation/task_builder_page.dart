@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:imageflow_flutter/core/workspace/workspace_scope.dart';
 import 'package:imageflow_flutter/core/theme/app_theme.dart';
+import 'package:imageflow_flutter/core/workspace/backend_filters.dart';
 import 'package:imageflow_flutter/features/shell/domain/app_page.dart';
 import 'package:imageflow_flutter/shared/widgets/shared_widgets.dart';
 
@@ -45,7 +46,16 @@ class _TaskBuilderPageState extends State<TaskBuilderPage> {
 
   Future<void> _startProcessing() async {
     final workspace = WorkspaceScope.of(context);
-    workspace.setSelectedFilters(_transforms);
+    workspace.setSelectedFilters(
+      buildBackendFilters(
+        toggles: _transforms,
+        brightnessPercent: _brightness,
+        contrastPercent: _contrast,
+        blurRadius: _blur,
+        rotationDegrees: _rotation,
+        outputFormat: _format,
+      ),
+    );
 
     setState(() => _isSubmitting = true);
     try {

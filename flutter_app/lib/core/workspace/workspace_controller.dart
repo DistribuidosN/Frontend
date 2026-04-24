@@ -1,6 +1,5 @@
 import 'dart:math';
 
-import 'package:archive/archive.dart';
 import 'package:flutter/foundation.dart';
 import 'package:imageflow_flutter/core/api/api_client.dart';
 import 'package:imageflow_flutter/core/api/api_config.dart';
@@ -807,24 +806,16 @@ class WorkspaceController extends ChangeNotifier {
         message: 'Downloaded archive for ${batch.requestId} from backend.',
         job: batch.requestId,
       );
-    } catch (_) {
-      if (_selectedFiles.isEmpty) {
-        throw StateError(
-          'ZIP download is not available for remote batches because the backend archive endpoint did not respond.',
-        );
-      }
-      final Archive archive = Archive();
-      for (final UploadFileItem file in _selectedFiles) {
-        archive.add(ArchiveFile(file.name, file.bytes.length, file.bytes));
-      }
-      bytes = ZipEncoder().encode(archive);
-      fileName = '${batch.requestId}-demo.zip';
+    } catch (error) {
       _appendLog(
         level: LogLevel.warning,
-        source: 'demo',
+        source: 'api',
         message:
-            'Backend download unavailable for ${batch.requestId}; exported staged files as demo ZIP.',
+            'Backend download unavailable for ${batch.requestId}; refusing to export original staged files as a fake ZIP.',
         job: batch.requestId,
+      );
+      throw StateError(
+        'The backend ZIP download failed for ${batch.requestId}. The app stopped instead of exporting the original local files without filters. Details: $error',
       );
     }
 

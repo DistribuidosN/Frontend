@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:imageflow_flutter/core/theme/app_theme.dart';
+import 'package:imageflow_flutter/core/workspace/backend_filters.dart';
 import 'package:imageflow_flutter/core/workspace/workspace_scope.dart';
 import 'package:imageflow_flutter/features/shell/domain/app_page.dart';
 import 'package:imageflow_flutter/features/upload/domain/upload_file_item.dart';
@@ -95,7 +96,7 @@ class _UploadPageState extends State<UploadPage> {
           kicker: 'Primary flow',
           title: 'Start a processing batch',
           description:
-              'Upload images, configure filters immediately, and launch the request without bouncing across separate screens.',
+              'Upload images or archives, configure filters immediately, and launch the request without bouncing across separate screens.',
         ),
         const SizedBox(height: 20),
         AppSurface(
@@ -124,7 +125,7 @@ class _UploadPageState extends State<UploadPage> {
                   ),
                   const SizedBox(height: 28),
                   Text(
-                    'Drop your images here',
+                    'Drop your files here',
                     style: Theme.of(context).textTheme.displaySmall,
                   ),
                   const SizedBox(height: 14),
@@ -132,8 +133,8 @@ class _UploadPageState extends State<UploadPage> {
                     constraints: const BoxConstraints(maxWidth: 720),
                     child: Text(
                       files.isEmpty
-                          ? 'Select images and the filter window will open immediately on top of this screen.'
-                          : 'Your images are staged. Open the filter window to review settings or start processing.',
+                          ? 'Select images or ZIP/TAR archives and the filter window will open immediately on top of this screen.'
+                          : 'Your files are staged. Open the filter window to review settings or start processing.',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         color: AppTheme.onSurfaceVariant,
                         height: 1.5,
@@ -205,7 +206,7 @@ class _UploadPageState extends State<UploadPage> {
                     ),
                     const SizedBox(height: 18),
                     Text(
-                      'Supports JPG, PNG, WEBP, BMP, GIF, TIFF and ICO. Large images are optimized automatically and each batch is capped at 8 MB to avoid server rejection.',
+                      'Supports JPG, PNG, WEBP, BMP, GIF, TIFF, ICO, ZIP, TAR and TAR.GZ/TGZ. Large images are optimized automatically and each batch is capped at 8 MB to avoid server rejection.',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: AppTheme.onSurfaceVariant,
                         height: 1.5,
@@ -394,13 +395,31 @@ class _BatchBuilderSheetState extends State<_BatchBuilderSheet> {
 
   void _applyAndClose() {
     final workspace = WorkspaceScope.of(context);
-    workspace.setSelectedFilters(_transforms);
+    workspace.setSelectedFilters(
+      buildBackendFilters(
+        toggles: _transforms,
+        brightnessPercent: _brightness,
+        contrastPercent: _contrast,
+        blurRadius: _blur,
+        rotationDegrees: _rotation,
+        outputFormat: _format,
+      ),
+    );
     Navigator.of(context).pop();
   }
 
   Future<void> _start() async {
     final workspace = WorkspaceScope.of(context);
-    workspace.setSelectedFilters(_transforms);
+    workspace.setSelectedFilters(
+      buildBackendFilters(
+        toggles: _transforms,
+        brightnessPercent: _brightness,
+        contrastPercent: _contrast,
+        blurRadius: _blur,
+        rotationDegrees: _rotation,
+        outputFormat: _format,
+      ),
+    );
 
     setState(() => _isSubmitting = true);
     try {
@@ -721,7 +740,7 @@ class _BatchBuilderSheetState extends State<_BatchBuilderSheet> {
                                         : _start,
                                     child: Text(
                                       !hasFiles
-                                          ? 'Select images to continue'
+                                          ? 'Select files to continue'
                                           : _isSubmitting
                                           ? 'Submitting...'
                                           : 'Start Processing',

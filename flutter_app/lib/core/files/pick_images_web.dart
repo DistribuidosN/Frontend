@@ -11,7 +11,7 @@ const int _targetMaxDimension = 1600;
 
 Future<List<PickedImageData>> pickImagesImpl() async {
   final html.FileUploadInputElement input = html.FileUploadInputElement()
-    ..accept = 'image/*'
+    ..accept = 'image/*,.zip,.tar,.gz,.tgz'
     ..multiple = true;
 
   final Completer<List<PickedImageData>> completer =
@@ -51,6 +51,16 @@ Future<PickedImageData?> _prepareFile(html.File file) async {
   final Uint8List bytes = await _readFileBytes(file);
   if (bytes.isEmpty) {
     return null;
+  }
+
+  if (!isOptimizableImageName(file.name)) {
+    return PickedImageData(
+      name: file.name,
+      bytes: bytes,
+      sizeBytes: file.size,
+      identifier: file.name,
+      originalSizeBytes: file.size,
+    );
   }
 
   final bool needsOptimization =

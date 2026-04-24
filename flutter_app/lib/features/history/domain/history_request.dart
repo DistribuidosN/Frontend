@@ -9,6 +9,7 @@ class HistoryRequest {
     required this.status,
     required this.duration,
     required this.nodes,
+    this.coverImageUrl,
   });
 
   final String id;
@@ -18,4 +19,5 @@ class HistoryRequest {
   final RequestStatus status;
   final String duration;
   final int nodes;
+  final String? coverImageUrl;
 }

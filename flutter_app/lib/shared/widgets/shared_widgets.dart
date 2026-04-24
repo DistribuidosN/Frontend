@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -76,7 +77,7 @@ class AppSurface extends StatelessWidget {
         theme.extension<AppSpacing>() ?? AppTheme.spacing;
 
     return Container(
-      padding: padding ?? EdgeInsets.all(spacing.xxl),
+      padding: padding ?? EdgeInsets.all(spacing.xl),
       decoration: BoxDecoration(
         color: gradient == null ? (color ?? AppTheme.surfaceRaised) : null,
         gradient: gradient,
@@ -149,7 +150,7 @@ class SectionPanel extends StatelessWidget {
                     ),
               SizedBox(height: spacing.lg),
               Divider(color: AppTheme.outlineVariant),
-              SizedBox(height: spacing.xl),
+              SizedBox(height: spacing.lg),
               child,
             ],
           ),
@@ -179,7 +180,7 @@ class PageIntro extends StatelessWidget {
         Theme.of(context).extension<AppSpacing>() ?? AppTheme.spacing;
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
-        final bool stacked = actions != null && constraints.maxWidth < 1080;
+        final bool stacked = actions != null && constraints.maxWidth < 1240;
 
         final Widget copy = Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -194,7 +195,7 @@ class PageIntro extends StatelessWidget {
                 description,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: AppTheme.slate,
-                  height: 1.7,
+                  height: 1.6,
                 ),
               ),
             ),
@@ -211,7 +212,7 @@ class PageIntro extends StatelessWidget {
                   children: <Widget>[
                     copy,
                     if (actions != null) ...<Widget>[
-                      SizedBox(height: spacing.xl),
+                      SizedBox(height: spacing.lg),
                       actions!,
                     ],
                   ],
@@ -221,8 +222,13 @@ class PageIntro extends StatelessWidget {
                   children: <Widget>[
                     Expanded(child: copy),
                     if (actions != null) ...<Widget>[
-                      SizedBox(width: spacing.xl),
-                      actions!,
+                      SizedBox(width: spacing.lg),
+                      Flexible(
+                        child: Align(
+                          alignment: Alignment.topRight,
+                          child: actions!,
+                        ),
+                      ),
                     ],
                   ],
                 ),
@@ -238,7 +244,7 @@ class AdaptiveGrid extends StatelessWidget {
     required this.children,
     this.minItemWidth = 260,
     this.childAspectRatio = 1.2,
-    this.spacing = 16,
+    this.spacing = 12,
   });
 
   final List<Widget> children;
@@ -507,7 +513,7 @@ class SummaryMetricCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppSurface(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -521,6 +527,8 @@ class SummaryMetricCard extends StatelessWidget {
           Text(
             value,
             style: AppTheme.displayStyle(context, size: 28, color: color),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
@@ -533,40 +541,158 @@ class ImageComparisonCard extends StatelessWidget {
     super.key,
     required this.label,
     required this.grayscale,
+    this.previewBytes,
+    this.caption,
   });
 
   final String label;
   final bool grayscale;
+  final Uint8List? previewBytes;
+  final String? caption;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text(
-          label,
-          style: Theme.of(
-            context,
-          ).textTheme.bodySmall?.copyWith(color: AppTheme.slate),
+        Row(
+          children: <Widget>[
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: grayscale
+                    ? AppTheme.surfaceContainer
+                    : AppTheme.successSoft,
+                borderRadius: BorderRadius.circular(AppTheme.radii.pill),
+                border: Border.all(
+                  color: grayscale
+                      ? AppTheme.outlineVariant
+                      : AppTheme.success.withValues(alpha: 0.22),
+                ),
+              ),
+              child: Text(
+                label,
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  color: grayscale ? AppTheme.slate : AppTheme.success,
+                ),
+              ),
+            ),
+            const Spacer(),
+            Icon(
+              grayscale ? Icons.auto_fix_high_rounded : Icons.photo_outlined,
+              size: 18,
+              color: grayscale ? AppTheme.slate : AppTheme.ink,
+            ),
+          ],
         ),
         const SizedBox(height: 8),
         Expanded(
           child: Container(
             decoration: BoxDecoration(
-              color: AppTheme.canvasSoft,
+              color: grayscale ? AppTheme.sand : AppTheme.canvasSoft,
               borderRadius: BorderRadius.circular(20),
               border: Border.all(color: AppTheme.border),
+              boxShadow: AppTheme.softShadow,
             ),
-            child: Center(
-              child: Icon(
-                Icons.image_outlined,
-                size: 54,
-                color: grayscale ? AppTheme.slate : AppTheme.muted,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: Stack(
+                fit: StackFit.expand,
+                children: <Widget>[
+                  if (previewBytes != null)
+                    ColorFiltered(
+                      colorFilter: grayscale
+                          ? const ColorFilter.matrix(<double>[
+                              0.2126, 0.7152, 0.0722, 0, 0,
+                              0.2126, 0.7152, 0.0722, 0, 0,
+                              0.2126, 0.7152, 0.0722, 0, 0,
+                              0, 0, 0, 1, 0,
+                            ])
+                          : const ColorFilter.mode(
+                              Colors.transparent,
+                              BlendMode.srcOver,
+                            ),
+                      child: Image.memory(
+                        previewBytes!,
+                        fit: BoxFit.cover,
+                        errorBuilder: (
+                          BuildContext context,
+                          Object error,
+                          StackTrace? stackTrace,
+                        ) {
+                          return _ComparisonPlaceholder(grayscale: grayscale);
+                        },
+                      ),
+                    )
+                  else
+                    _ComparisonPlaceholder(grayscale: grayscale),
+                  DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: <Color>[
+                          AppTheme.navy.withValues(alpha: 0),
+                          AppTheme.navy.withValues(alpha: 0.08),
+                          AppTheme.navy.withValues(alpha: 0.35),
+                        ],
+                      ),
+                    ),
+                  ),
+                  if (caption != null)
+                    Positioned(
+                      left: 16,
+                      right: 16,
+                      bottom: 14,
+                      child: Text(
+                        caption!,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppTheme.white,
+                          fontWeight: FontWeight.w600,
+                          height: 1.4,
+                        ),
+                      ),
+                    ),
+                ],
               ),
             ),
           ),
         ),
       ],
+    );
+  }
+}
+
+class _ComparisonPlaceholder extends StatelessWidget {
+  const _ComparisonPlaceholder({required this.grayscale});
+
+  final bool grayscale;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: grayscale ? AppTheme.sand : AppTheme.canvasSoft,
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Icon(
+              Icons.image_outlined,
+              size: 54,
+              color: grayscale ? AppTheme.slate : AppTheme.muted,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              grayscale ? 'Processed preview' : 'Original preview',
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: AppTheme.slate),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 enum AppPage {
+  admin,
   dashboard,
   upload,
   taskBuilder,
@@ -16,6 +17,8 @@ enum AppPage {
 extension AppPageMeta on AppPage {
   String get label {
     switch (this) {
+      case AppPage.admin:
+        return 'Admin Center';
       case AppPage.dashboard:
         return 'Dashboard';
       case AppPage.upload:
@@ -41,6 +44,8 @@ extension AppPageMeta on AppPage {
 
   IconData get icon {
     switch (this) {
+      case AppPage.admin:
+        return Icons.admin_panel_settings_outlined;
       case AppPage.dashboard:
         return Icons.dashboard_outlined;
       case AppPage.upload:
@@ -66,9 +71,9 @@ extension AppPageMeta on AppPage {
 }
 
 const List<AppPage> shellPages = <AppPage>[
+  AppPage.admin,
   AppPage.dashboard,
   AppPage.upload,
-  AppPage.taskBuilder,
   AppPage.progress,
   AppPage.results,
   AppPage.history,

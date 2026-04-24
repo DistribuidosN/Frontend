@@ -2,8 +2,9 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:imageflow_flutter/core/workspace/workspace_scope.dart';
 import 'package:imageflow_flutter/core/theme/app_theme.dart';
+import 'package:imageflow_flutter/core/workspace/workspace_scope.dart';
+import 'package:imageflow_flutter/features/results/domain/batch_gallery_image.dart';
 import 'package:imageflow_flutter/features/shell/domain/app_page.dart';
 import 'package:imageflow_flutter/shared/widgets/shared_widgets.dart';
 
@@ -17,47 +18,63 @@ class ProgressPage extends StatefulWidget {
 }
 
 class _ProgressPageState extends State<ProgressPage> {
-  late final Timer _timer;
-  double _progress = 45;
+  Timer? _pollTimer;
 
   @override
   void initState() {
     super.initState();
-    _timer = Timer.periodic(const Duration(milliseconds: 150), (Timer timer) {
-      if (!mounted) {
-        timer.cancel();
-        return;
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _refresh();
+      if (mounted) {
+        _pollTimer = Timer.periodic(const Duration(seconds: 3), (_) => _refresh());
       }
-      setState(() {
-        if (_progress >= 100) {
-          timer.cancel();
-        } else {
-          _progress += 1;
-        }
-      });
     });
   }
 
   @override
   void dispose() {
-    _timer.cancel();
+    _pollTimer?.cancel();
     super.dispose();
+  }
+
+  Future<void> _refresh() async {
+    final workspace = WorkspaceScope.of(context);
+    try {
+      await workspace.refreshLatestBatchImages(notify: false);
+      await workspace.refreshHistory(notify: false);
+      if (!mounted) {
+        return;
+      }
+      setState(() {});
+      final batch = workspace.latestBatch;
+      if (batch != null &&
+          batch.fileCount > 0 &&
+          workspace.latestBatchImages.length >= batch.fileCount) {
+        _pollTimer?.cancel();
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() {});
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final latestBatch = WorkspaceScope.of(context).latestBatch;
+    final workspace = WorkspaceScope.of(context);
+    final latestBatch = workspace.latestBatch;
+    final List<BatchGalleryImage> images = workspace.latestBatchImages;
     final int totalFiles = latestBatch?.fileCount ?? 0;
-    final int completed = ((_progress / 100) * totalFiles).round().clamp(
+    final int completed = images.length.clamp(
       0,
-      totalFiles,
+      totalFiles == 0 ? images.length : totalFiles,
     );
-    final int processing = _progress < 100
-        ? math.min(6, totalFiles - completed)
-        : 0;
-    final int queued = _progress < 100
-        ? math.max(0, totalFiles - completed - 6)
-        : 0;
+    final int processing = completed < totalFiles && totalFiles > 0 ? 1 : 0;
+    final int queued = math.max(0, totalFiles - completed - processing);
+    final double progress = totalFiles == 0
+        ? 0
+        : (completed / totalFiles).clamp(0, 1);
+    final bool finished = totalFiles > 0 && completed >= totalFiles;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -69,12 +86,12 @@ class _ProgressPageState extends State<ProgressPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Text(
-                    'Processing Progress',
+                    finished ? 'Batch completed' : 'Processing Progress',
                     style: AppTheme.displayStyle(context, size: 30),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Request ID: ${latestBatch?.requestId ?? 'pending'}',
+                    'Batch ID: ${latestBatch?.requestId ?? 'pending'}',
                     style: Theme.of(
                       context,
                     ).textTheme.bodySmall?.copyWith(color: AppTheme.slate),
@@ -82,7 +99,7 @@ class _ProgressPageState extends State<ProgressPage> {
                 ],
               ),
             ),
-            if (_progress >= 100)
+            if (finished)
               FilledButton(
                 onPressed: () => widget.onNavigate(AppPage.results),
                 child: const Text('View Results'),
@@ -108,7 +125,9 @@ class _ProgressPageState extends State<ProgressPage> {
                         Text(
                           totalFiles == 0
                               ? 'No batch has been submitted yet.'
-                              : 'Processing $totalFiles images across connected worker nodes',
+                              : finished
+                              ? 'All $totalFiles images already reached the gallery.'
+                              : 'Polling the backend gallery for completed outputs in this batch.',
                           style: Theme.of(context).textTheme.bodySmall
                               ?.copyWith(color: AppTheme.slate),
                         ),
@@ -119,7 +138,7 @@ class _ProgressPageState extends State<ProgressPage> {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: <Widget>[
                       Text(
-                        '${_progress.round()}%',
+                        '${(progress * 100).round()}%',
                         style: AppTheme.displayStyle(context, size: 32),
                       ),
                       Text(
@@ -133,7 +152,12 @@ class _ProgressPageState extends State<ProgressPage> {
                 ],
               ),
               const SizedBox(height: 16),
-              ProgressLine(value: _progress / 100, color: AppTheme.ink),
+              _SignalProgressBar(
+                value: progress,
+                pulse: !finished,
+                completed: completed,
+                total: totalFiles,
+              ),
               const SizedBox(height: 18),
               AdaptiveGrid(
                 minItemWidth: 180,
@@ -170,6 +194,168 @@ class _ProgressPageState extends State<ProgressPage> {
                 ],
               ),
             ],
+          ),
+        ),
+        if (images.isNotEmpty) ...<Widget>[
+          const SizedBox(height: 20),
+          SectionPanel(
+            title: 'Completed outputs',
+            description:
+                'Every image that already made it to the gallery appears here while the batch is still running.',
+            child: LayoutBuilder(
+              builder: (BuildContext context, BoxConstraints constraints) {
+                final int crossAxisCount = constraints.maxWidth >= 1200
+                    ? 5
+                    : constraints.maxWidth >= 900
+                    ? 4
+                    : 2;
+                return GridView.count(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  crossAxisCount: crossAxisCount,
+                  crossAxisSpacing: 14,
+                  mainAxisSpacing: 14,
+                  childAspectRatio: 0.88,
+                  children: images.map((BatchGalleryImage image) {
+                    final previewFile = workspace.selectedFiles.cast<dynamic>().firstWhere(
+                      (dynamic file) => file.name == image.originalName,
+                      orElse: () => null,
+                    );
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Expanded(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: AppTheme.surfaceContainer,
+                              borderRadius: BorderRadius.circular(22),
+                              border: Border.all(color: AppTheme.outlineVariant),
+                            ),
+                            clipBehavior: Clip.antiAlias,
+                            child: previewFile == null
+                                ? const Center(
+                                    child: Icon(
+                                      Icons.image_outlined,
+                                      size: 32,
+                                      color: AppTheme.onSurfaceVariant,
+                                    ),
+                                  )
+                                : Image.memory(
+                                    previewFile.bytes,
+                                    fit: BoxFit.cover,
+                                    width: double.infinity,
+                                    height: double.infinity,
+                                  ),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          image.originalName,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.labelMedium,
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          '${image.status} • ${image.nodeId}',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ],
+                    );
+                  }).toList(),
+                );
+              },
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _SignalProgressBar extends StatefulWidget {
+  const _SignalProgressBar({
+    required this.value,
+    required this.pulse,
+    required this.completed,
+    required this.total,
+  });
+
+  final double value;
+  final bool pulse;
+  final int completed;
+  final int total;
+
+  @override
+  State<_SignalProgressBar> createState() => _SignalProgressBarState();
+}
+
+class _SignalProgressBarState extends State<_SignalProgressBar>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1400),
+  )..repeat();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final double value = widget.value.clamp(0, 1);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        ClipRRect(
+          borderRadius: BorderRadius.circular(999),
+          child: SizedBox(
+            height: 18,
+            child: Stack(
+              fit: StackFit.expand,
+              children: <Widget>[
+                Container(color: AppTheme.border),
+                FractionallySizedBox(
+                  alignment: Alignment.centerLeft,
+                  widthFactor: value,
+                  child: AnimatedBuilder(
+                    animation: _controller,
+                    builder: (BuildContext context, _) {
+                      return DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.centerLeft,
+                            end: Alignment.centerRight,
+                            colors: <Color>[
+                              AppTheme.goldDeep,
+                              AppTheme.secondary,
+                              widget.pulse ? AppTheme.ink : AppTheme.success,
+                            ],
+                            stops: <double>[
+                              0,
+                              0.55,
+                              widget.pulse
+                                  ? (0.75 + (_controller.value * 0.2))
+                                  : 1,
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+        Text(
+          widget.total == 0
+              ? 'Waiting for a batch.'
+              : '${widget.completed} of ${widget.total} outputs already visible in gallery.',
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: AppTheme.slate,
           ),
         ),
       ],

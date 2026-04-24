@@ -58,12 +58,23 @@ class HistoryPage extends StatelessWidget {
                 ],
               ),
             ),
+            const SizedBox(height: 16),
+            Align(
+              alignment: Alignment.centerRight,
+              child: OutlinedButton.icon(
+                onPressed: workspace.isAuthenticated
+                    ? () => workspace.refreshHistory()
+                    : null,
+                icon: const Icon(Icons.refresh_rounded, size: 18),
+                label: const Text('Refresh history'),
+              ),
+            ),
             const SizedBox(height: 20),
             if (historyRequests.isEmpty)
               const AppSurface(
                 color: AppTheme.surfaceRaised,
                 child: Text(
-                  'No batches have been submitted yet. Run one from Upload and Task Builder to populate history.',
+                  'No remote batches are loaded yet. Submit one from Upload or refresh the backend history.',
                 ),
               )
             else
@@ -80,21 +91,26 @@ class HistoryPage extends StatelessWidget {
                           final Widget status = StatusChip(
                             label: request.status == RequestStatus.completed
                                 ? 'completed'
-                                : 'failed',
+                                : 'pending',
                             color: request.status == RequestStatus.completed
                                 ? AppTheme.statusGreen
-                                : AppTheme.danger,
+                                : AppTheme.goldDeep,
                             background:
                                 request.status == RequestStatus.completed
                                 ? AppTheme.sand
-                                : AppTheme.dangerSoft,
+                                : AppTheme.surfaceContainer,
                           );
                           final Widget idColumn = Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
                               TextButton(
-                                onPressed: () =>
-                                    onNavigate(AppPage.requestDetail),
+                                onPressed: () async {
+                                  await workspace.selectHistoryBatch(request.id);
+                                  if (!context.mounted) {
+                                    return;
+                                  }
+                                  onNavigate(AppPage.results);
+                                },
                                 style: TextButton.styleFrom(
                                   padding: EdgeInsets.zero,
                                   tapTargetSize:
@@ -147,7 +163,7 @@ class HistoryPage extends StatelessWidget {
                                   text: TextSpan(
                                     children: <InlineSpan>[
                                       TextSpan(
-                                        text: 'Filters: ',
+                                        text: 'Source: ',
                                         style: Theme.of(context)
                                             .textTheme
                                             .bodySmall
@@ -177,43 +193,48 @@ class HistoryPage extends StatelessWidget {
                             children: <Widget>[
                               SmallIconButton(
                                 icon: Icons.visibility_outlined,
-                                onTap: () => onNavigate(AppPage.requestDetail),
+                                onTap: () async {
+                                  await workspace.selectHistoryBatch(request.id);
+                                  if (!context.mounted) {
+                                    return;
+                                  }
+                                  onNavigate(AppPage.results);
+                                },
                               ),
-                              if (request.status ==
-                                  RequestStatus.completed) ...<Widget>[
-                                const SizedBox(width: 8),
-                                SmallIconButton(
-                                  icon: Icons.download_rounded,
-                                  onTap: () async {
-                                    final messenger = ScaffoldMessenger.of(
-                                      context,
-                                    );
-                                    try {
-                                      final String location = await workspace
-                                          .downloadLatestBatchArchive();
-                                      if (!context.mounted) {
-                                        return;
-                                      }
-                                      messenger.showSnackBar(
-                                        SnackBar(
-                                          content: Text(
-                                            'Archive saved to $location',
-                                          ),
-                                        ),
-                                      );
-                                    } catch (error) {
-                                      if (!context.mounted) {
-                                        return;
-                                      }
-                                      messenger.showSnackBar(
-                                        SnackBar(
-                                          content: Text(error.toString()),
-                                        ),
-                                      );
+                              const SizedBox(width: 8),
+                              SmallIconButton(
+                                icon: Icons.download_rounded,
+                                onTap: () async {
+                                  final messenger = ScaffoldMessenger.of(context);
+                                  try {
+                                    await workspace.selectHistoryBatch(request.id);
+                                    if (!context.mounted) {
+                                      return;
                                     }
-                                  },
-                                ),
-                              ],
+                                    final String location = await workspace
+                                        .downloadLatestBatchArchive();
+                                    if (!context.mounted) {
+                                      return;
+                                    }
+                                    messenger.showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          'Archive saved to $location',
+                                        ),
+                                      ),
+                                    );
+                                  } catch (error) {
+                                    if (!context.mounted) {
+                                      return;
+                                    }
+                                    messenger.showSnackBar(
+                                      SnackBar(
+                                        content: Text(error.toString()),
+                                      ),
+                                    );
+                                  }
+                                },
+                              ),
                             ],
                           );
 
@@ -237,7 +258,9 @@ class HistoryPage extends StatelessWidget {
                                   runSpacing: 8,
                                   children: <Widget>[
                                     Text(
-                                      '${request.images} images',
+                                      request.images > 0
+                                          ? '${request.images} images'
+                                          : 'Images pending sync',
                                       style: Theme.of(context)
                                           .textTheme
                                           .bodySmall
@@ -251,7 +274,9 @@ class HistoryPage extends StatelessWidget {
                                           ?.copyWith(color: AppTheme.slate),
                                     ),
                                     Text(
-                                      '${request.nodes} nodes',
+                                      request.nodes > 0
+                                          ? '${request.nodes} nodes'
+                                          : 'Node count unavailable',
                                       style: Theme.of(context)
                                           .textTheme
                                           .bodySmall
@@ -263,31 +288,29 @@ class HistoryPage extends StatelessWidget {
                             );
                           }
 
-                            return Row(
-                              children: <Widget>[
-                                Expanded(flex: 2, child: idColumn),
-                                Expanded(
-                                  child: Text(
-                                    '${request.images}',
-                                    style: Theme.of(
-                                      context,
-                                    ).textTheme.labelMedium,
-                                  ),
+                          return Row(
+                            children: <Widget>[
+                              Expanded(flex: 2, child: idColumn),
+                              Expanded(
+                                child: Text(
+                                  request.images > 0 ? '${request.images}' : '--',
+                                  style: Theme.of(context).textTheme.labelMedium,
                                 ),
-                                Expanded(flex: 2, child: transforms),
-                                Expanded(
-                                  child: Text(
-                                    request.duration,
-                                    style: Theme.of(context).textTheme.bodySmall
-                                        ?.copyWith(color: AppTheme.slate),
-                                  ),
+                              ),
+                              Expanded(flex: 2, child: transforms),
+                              Expanded(
+                                child: Text(
+                                  request.duration,
+                                  style: Theme.of(context).textTheme.bodySmall
+                                      ?.copyWith(color: AppTheme.slate),
                                 ),
-                                status,
-                                const SizedBox(width: 16),
-                                actions,
-                              ],
-                            );
-                          },
+                              ),
+                              status,
+                              const SizedBox(width: 16),
+                              actions,
+                            ],
+                          );
+                        },
                       ),
                     ),
                   );

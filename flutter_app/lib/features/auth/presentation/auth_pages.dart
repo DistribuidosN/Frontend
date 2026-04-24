@@ -378,6 +378,7 @@ class RegisterPage extends StatefulWidget {
     required String username,
     required String email,
     required String password,
+    required int roleId,
   })
   onRegister;
   final VoidCallback onLogin;
@@ -431,6 +432,7 @@ class _RegisterPageState extends State<RegisterPage> {
         username: username,
         email: email,
         password: password,
+        roleId: 2,
       );
     } catch (error) {
       if (!mounted) {
@@ -685,6 +687,7 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 }
+
 
 class ForgotPasswordPage extends StatefulWidget {
   const ForgotPasswordPage({

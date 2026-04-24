@@ -7,13 +7,13 @@ import 'package:google_fonts/google_fonts.dart';
 class AppSpacing extends ThemeExtension<AppSpacing> {
   const AppSpacing({
     this.xs = 4,
-    this.sm = 8,
-    this.md = 12,
-    this.lg = 16,
-    this.xl = 20,
-    this.xxl = 24,
-    this.section = 28,
-    this.page = 36,
+    this.sm = 6,
+    this.md = 10,
+    this.lg = 14,
+    this.xl = 16,
+    this.xxl = 20,
+    this.section = 22,
+    this.page = 28,
   });
 
   final double xs;

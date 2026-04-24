@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:imageflow_flutter/core/theme/app_theme.dart';
 import 'package:imageflow_flutter/core/workspace/workspace_controller.dart';
 import 'package:imageflow_flutter/core/workspace/workspace_scope.dart';
+import 'package:imageflow_flutter/features/admin/presentation/admin_page.dart';
 import 'package:imageflow_flutter/features/auth/domain/auth_view.dart';
 import 'package:imageflow_flutter/features/auth/presentation/auth_pages.dart';
 import 'package:imageflow_flutter/features/dashboard/presentation/dashboard_page.dart';
@@ -16,7 +17,6 @@ import 'package:imageflow_flutter/features/request_detail/presentation/request_d
 import 'package:imageflow_flutter/features/results/presentation/results_page.dart';
 import 'package:imageflow_flutter/features/settings/presentation/settings_page.dart';
 import 'package:imageflow_flutter/features/shell/domain/app_page.dart';
-import 'package:imageflow_flutter/features/task_builder/presentation/task_builder_page.dart';
 import 'package:imageflow_flutter/features/upload/presentation/upload_page.dart';
 import 'package:imageflow_flutter/shared/widgets/shared_widgets.dart';
 
@@ -28,7 +28,7 @@ class ImageFlowApp extends StatefulWidget {
 }
 
 class _ImageFlowAppState extends State<ImageFlowApp> {
-  static const bool _previewDashboardWithoutAuth = true;
+  static const bool _previewDashboardWithoutAuth = false;
   late final WorkspaceController _workspaceController = WorkspaceController();
   AuthView _authView = AuthView.login;
   AppPage _activePage = AppPage.dashboard;
@@ -36,7 +36,9 @@ class _ImageFlowAppState extends State<ImageFlowApp> {
   Future<void> _handleLogin(String email, String password) async {
     await _workspaceController.login(email: email, password: password);
     setState(() {
-      _activePage = AppPage.dashboard;
+      _activePage = _workspaceController.isAdmin
+          ? AppPage.admin
+          : AppPage.dashboard;
     });
   }
 
@@ -52,11 +54,13 @@ class _ImageFlowAppState extends State<ImageFlowApp> {
     required String username,
     required String email,
     required String password,
+    required int roleId,
   }) async {
     await _workspaceController.register(
       username: username,
       email: email,
       password: password,
+      roleId: roleId,
     );
     setState(() {
       _authView = AuthView.login;
@@ -170,7 +174,7 @@ class _AppShell extends StatelessWidget {
         final bool compact = constraints.maxWidth < 1080;
         final bool mobile = constraints.maxWidth < 760;
         final double sidebarWidth = constraints.maxWidth >= 1440 ? 286 : 264;
-        final double contentPadding = mobile ? 14 : (compact ? 20 : 28);
+        final double contentPadding = mobile ? 12 : (compact ? 16 : 20);
         final double drawerWidth = math.min(
           mobile ? 320 : 360,
           constraints.maxWidth - 20,
@@ -276,25 +280,88 @@ class _PageViewport extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final workspace = WorkspaceScope.of(context);
     switch (activePage) {
+      case AppPage.admin:
+        return workspace.isAdmin
+            ? AdminPage(onNavigate: onNavigate)
+            : const _RestrictedPage(
+                title: 'Admin View Required',
+                description:
+                    'This area is only available for accounts where the backend returns role 1.',
+              );
       case AppPage.dashboard:
-        return const DashboardPage();
+        return workspace.isAdmin
+            ? const _RestrictedPage(
+                title: 'Admin Lane Only',
+                description:
+                    'Admin accounts stay on observability surfaces. Use Admin Center, Logs, and Node metrics instead of the operator workflow.',
+              )
+            : const DashboardPage();
       case AppPage.upload:
-        return UploadPage(onNavigate: onNavigate);
+        return workspace.isAdmin
+            ? const _RestrictedPage(
+                title: 'Admin Lane Only',
+                description:
+                    'Uploading and processing batches belong to operator accounts. Admin stays focused on logs, metrics, and overall system health.',
+              )
+            : UploadPage(onNavigate: onNavigate);
       case AppPage.taskBuilder:
-        return TaskBuilderPage(onNavigate: onNavigate);
+        return workspace.isAdmin
+            ? const _RestrictedPage(
+                title: 'Admin Lane Only',
+                description:
+                    'Task creation is part of the operator flow. Admin accounts only observe platform health and operational signals.',
+              )
+            : UploadPage(onNavigate: onNavigate);
       case AppPage.progress:
-        return ProgressPage(onNavigate: onNavigate);
+        return workspace.isAdmin
+            ? const _RestrictedPage(
+                title: 'Admin Lane Only',
+                description:
+                    'Progress tracking for user batches is not exposed in the admin lane. Review logs and node pressure instead.',
+              )
+            : ProgressPage(onNavigate: onNavigate);
       case AppPage.results:
-        return const ResultsPage();
+        return workspace.isAdmin
+            ? const _RestrictedPage(
+                title: 'Admin Lane Only',
+                description:
+                    'Processed outputs remain in the operator flow. Admin accounts should not browse user results or media.',
+              )
+            : const ResultsPage();
       case AppPage.history:
-        return HistoryPage(onNavigate: onNavigate);
+        return workspace.isAdmin
+            ? const _RestrictedPage(
+                title: 'Admin Lane Only',
+                description:
+                    'Request history stays with the operator workflow. Admin accounts monitor the system without browsing user-owned work.',
+              )
+            : HistoryPage(onNavigate: onNavigate);
       case AppPage.requestDetail:
-        return const RequestDetailPage();
+        return workspace.isAdmin
+            ? const _RestrictedPage(
+                title: 'Admin Lane Only',
+                description:
+                    'Detailed request content is hidden from the admin lane. Use logs and metrics to inspect the platform instead.',
+              )
+            : const RequestDetailPage();
       case AppPage.nodes:
-        return const NodesPage();
+        return workspace.isAdmin
+            ? const NodesPage()
+            : const _RestrictedPage(
+                title: 'Admin View Required',
+                description:
+                    'Node metrics and workspace capacity are only visible when the backend returns role 1.',
+              );
       case AppPage.logs:
-        return const LogsPage();
+        return workspace.isAdmin
+            ? const LogsPage()
+            : const _RestrictedPage(
+                title: 'Admin View Required',
+                description:
+                    'Operational logs are reserved for admin accounts and appear when the signed-in user has role 1.',
+              );
       case AppPage.settings:
         return const SettingsPage();
     }
@@ -316,6 +383,15 @@ class _ShellSidebar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final workspace = WorkspaceScope.of(context);
+    final bool isAdmin = workspace.isAdmin;
+    final List<AppPage> utilityPages = isAdmin ? _adminUtilityPages : _userUtilityPages;
+    final List<AppPage> primaryPages = isAdmin ? _adminPrimaryPages : _userPrimaryPages;
+    final bool utilityActive = <AppPage>[
+      AppPage.settings,
+      if (isAdmin) ...<AppPage>[AppPage.nodes, AppPage.logs],
+    ].contains(activePage);
+
     return Container(
       decoration: BoxDecoration(
         color: AppTheme.navy,
@@ -327,7 +403,27 @@ class _ShellSidebar extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          _SidebarBrandCard(compact: compact),
+          _SidebarBrandCard(compact: compact, isAdmin: isAdmin),
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton.icon(
+              onPressed: () => onNavigate(
+                isAdmin ? AppPage.logs : AppPage.upload,
+              ),
+              icon: Icon(
+                isAdmin
+                    ? Icons.monitor_heart_outlined
+                    : Icons.add_photo_alternate_outlined,
+                size: 18,
+              ),
+              label: Text(isAdmin ? 'Open logs' : 'New batch'),
+              style: FilledButton.styleFrom(
+                backgroundColor: AppTheme.gold,
+                foregroundColor: AppTheme.navy,
+              ),
+            ),
+          ),
           const SizedBox(height: 14),
           Expanded(
             child: SingleChildScrollView(
@@ -336,17 +432,28 @@ class _ShellSidebar extends StatelessWidget {
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: _navSections.map((_NavSection section) {
+                children: primaryPages.map((AppPage page) {
                   return Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: _SidebarSection(
-                      section: section,
-                      activePage: activePage,
-                      onNavigate: onNavigate,
+                    padding: const EdgeInsets.only(bottom: 6),
+                    child: _SidebarTile(
+                      label: page.label,
+                      icon: page.icon,
+                      active: page == activePage,
+                      onTap: () => onNavigate(page),
                     ),
                   );
                 }).toList(),
               ),
+            ),
+          ),
+          _UtilityLauncher(
+            active: utilityActive,
+            label: isAdmin ? 'Admin tools' : 'Workspace tools',
+            onTap: () => _showUtilitySheet(
+              context,
+              onNavigate,
+              utilityPages: utilityPages,
+              isAdmin: isAdmin,
             ),
           ),
           const SizedBox(height: 12),
@@ -372,10 +479,71 @@ class _ShellSidebar extends StatelessWidget {
   }
 }
 
+void _showUtilitySheet(
+  BuildContext context,
+  ValueChanged<AppPage> onNavigate, {
+  required List<AppPage> utilityPages,
+  required bool isAdmin,
+}) {
+  showModalBottomSheet<void>(
+    context: context,
+    backgroundColor: Colors.transparent,
+    isScrollControlled: true,
+    builder: (BuildContext modalContext) {
+      return SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+          child: Container(
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              color: AppTheme.white,
+              borderRadius: BorderRadius.circular(28),
+              border: Border.all(color: AppTheme.outlineVariant),
+              boxShadow: AppTheme.softShadow,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  isAdmin ? 'Admin tools' : 'Workspace tools',
+                  style: Theme.of(modalContext).textTheme.titleLarge,
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  isAdmin
+                      ? 'Logs and performance views live here so the batch flow stays clean for operators.'
+                      : 'Secondary areas live here so the main navigation stays focused on the batch flow.',
+                  style: Theme.of(modalContext).textTheme.bodyMedium?.copyWith(
+                    color: AppTheme.slate,
+                  ),
+                ),
+                const SizedBox(height: 18),
+                for (final AppPage page in utilityPages)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: _UtilitySheetTile(
+                      page: page,
+                      onTap: () {
+                        Navigator.of(modalContext).pop();
+                        onNavigate(page);
+                      },
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      );
+    },
+  );
+}
+
 class _SidebarBrandCard extends StatelessWidget {
-  const _SidebarBrandCard({required this.compact});
+  const _SidebarBrandCard({required this.compact, required this.isAdmin});
 
   final bool compact;
+  final bool isAdmin;
 
   @override
   Widget build(BuildContext context) {
@@ -390,69 +558,28 @@ class _SidebarBrandCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          const LuminousLogo(tone: LuminousBrandTone.onLight, height: 52),
+          const LuminousLogo(tone: LuminousBrandTone.onLight, height: 50),
           const SizedBox(height: 10),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration: BoxDecoration(
-              color: AppTheme.sand,
-              borderRadius: BorderRadius.circular(999),
-              border: Border.all(color: AppTheme.gold.withValues(alpha: 0.5)),
+          if (isAdmin) ...<Widget>[
+            const StatusChip(
+              label: 'Admin role',
+              color: AppTheme.goldDeep,
+              background: AppTheme.sand,
+              icon: Icons.admin_panel_settings_outlined,
             ),
-            child: Text(
-              'WORKSPACE',
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: AppTheme.navy,
-                letterSpacing: 1.8,
-              ),
-            ),
-          ),
-          const SizedBox(height: 10),
+            const SizedBox(height: 10),
+          ],
           Text(
-            'Clean workspace',
-            style: Theme.of(context).textTheme.titleMedium,
+            isAdmin
+                ? 'Monitor logs, capacity and workspace performance from the admin lane.'
+                : 'Process image batches with a guided flow.',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: AppTheme.navy.withValues(alpha: 0.72),
+              height: 1.5,
+            ),
           ),
         ],
       ),
-    );
-  }
-}
-
-class _SidebarSection extends StatelessWidget {
-  const _SidebarSection({
-    required this.section,
-    required this.activePage,
-    required this.onNavigate,
-  });
-
-  final _NavSection section;
-  final AppPage activePage;
-  final ValueChanged<AppPage> onNavigate;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Text(
-          section.label.toUpperCase(),
-          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-            color: AppTheme.surfaceContainer.withValues(alpha: 0.78),
-            letterSpacing: 1.8,
-          ),
-        ),
-        const SizedBox(height: 8),
-        for (final AppPage page in section.pages)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 4),
-            child: _SidebarTile(
-              label: page.label,
-              icon: page.icon,
-              active: page == activePage,
-              onTap: () => onNavigate(page),
-            ),
-          ),
-      ],
     );
   }
 }
@@ -470,6 +597,7 @@ class _ShellHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final workspace = WorkspaceScope.of(context);
     final DateTime now = DateTime.now();
     final String today = '${_monthName(now.month)} ${now.day}, ${now.year}';
 
@@ -515,6 +643,12 @@ class _ShellHeader extends StatelessWidget {
             crossAxisAlignment: WrapCrossAlignment.center,
             children: <Widget>[
               _HeaderPill(icon: Icons.calendar_today_outlined, label: today),
+              _HeaderPill(
+                icon: workspace.isAdmin
+                    ? Icons.admin_panel_settings_outlined
+                    : Icons.person_outline_rounded,
+                label: workspace.isAdmin ? 'Admin role' : 'Operator role',
+              ),
               const _HeaderPill(
                 icon: Icons.monitor_heart_outlined,
                 label: 'Workspace ready',
@@ -656,39 +790,140 @@ class _SidebarTile extends StatelessWidget {
   }
 }
 
-class _NavSection {
-  const _NavSection({required this.label, required this.pages});
+class _UtilityLauncher extends StatelessWidget {
+  const _UtilityLauncher({
+    required this.active,
+    required this.label,
+    required this.onTap,
+  });
 
+  final bool active;
   final String label;
-  final List<AppPage> pages;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: OutlinedButton.icon(
+        onPressed: onTap,
+        icon: const Icon(Icons.tune_rounded, size: 18),
+        label: Text(active ? '$label open' : label),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: active ? AppTheme.white : AppTheme.surfaceContainer,
+          backgroundColor: active
+              ? AppTheme.surfaceContainer.withValues(alpha: 0.12)
+              : AppTheme.surfaceContainer.withValues(alpha: 0.03),
+          side: BorderSide(
+            color: active
+                ? AppTheme.secondary
+                : AppTheme.surfaceContainer.withValues(alpha: 0.16),
+          ),
+          minimumSize: const Size(0, 48),
+        ),
+      ),
+    );
+  }
 }
 
-const List<_NavSection> _navSections = <_NavSection>[
-  _NavSection(
-    label: 'Overview',
-    pages: <AppPage>[
-      AppPage.dashboard,
-      AppPage.progress,
-      AppPage.results,
-      AppPage.history,
-    ],
-  ),
-  _NavSection(
-    label: 'Workflow',
-    pages: <AppPage>[
-      AppPage.upload,
-      AppPage.taskBuilder,
-    ],
-  ),
-  _NavSection(
-    label: 'System',
-    pages: <AppPage>[
-      AppPage.nodes,
-      AppPage.logs,
-      AppPage.settings,
-    ],
-  ),
+class _UtilitySheetTile extends StatelessWidget {
+  const _UtilitySheetTile({required this.page, required this.onTap});
+
+  final AppPage page;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(18),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        decoration: BoxDecoration(
+          color: AppTheme.surfaceRaised,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: AppTheme.outlineVariant),
+        ),
+        child: Row(
+          children: <Widget>[
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: AppTheme.surfaceContainer,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(page.icon, size: 18, color: AppTheme.navy),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                page.label,
+                style: Theme.of(context).textTheme.labelLarge,
+              ),
+            ),
+            const Icon(Icons.arrow_forward_ios_rounded, size: 14),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _RestrictedPage extends StatelessWidget {
+  const _RestrictedPage({required this.title, required this.description});
+
+  final String title;
+  final String description;
+
+  @override
+  Widget build(BuildContext context) {
+    return AppSurface(
+      radius: 28,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          const StatusChip(
+            label: 'Restricted',
+            color: AppTheme.red,
+            background: AppTheme.dangerSoft,
+            icon: Icons.lock_outline_rounded,
+          ),
+          const SizedBox(height: 16),
+          Text(title, style: AppTheme.displayStyle(context, size: 28)),
+          const SizedBox(height: 10),
+          Text(
+            description,
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(color: AppTheme.slate, height: 1.6),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+const List<AppPage> _adminPrimaryPages = <AppPage>[
+  AppPage.admin,
 ];
+
+const List<AppPage> _userPrimaryPages = <AppPage>[
+  AppPage.dashboard,
+  AppPage.upload,
+  AppPage.progress,
+  AppPage.results,
+  AppPage.history,
+];
+
+const List<AppPage> _adminUtilityPages = <AppPage>[
+  AppPage.nodes,
+  AppPage.logs,
+  AppPage.settings,
+];
+
+const List<AppPage> _userUtilityPages = <AppPage>[AppPage.settings];
 
 String _monthName(int month) {
   const List<String> months = <String>[
@@ -709,13 +944,15 @@ String _monthName(int month) {
 }
 
 String _pageHeadline(AppPage page) {
-  switch (page) {
-    case AppPage.dashboard:
-      return 'Workspace at a glance';
+    switch (page) {
+      case AppPage.admin:
+        return 'Admin command center';
+      case AppPage.dashboard:
+        return 'Workspace at a glance';
     case AppPage.upload:
       return 'Bring new work in';
     case AppPage.taskBuilder:
-      return 'Build a cleaner flow';
+      return 'Bring new work in';
     case AppPage.progress:
       return 'Follow active work';
     case AppPage.results:
@@ -735,12 +972,14 @@ String _pageHeadline(AppPage page) {
 
 String _pageSummary(AppPage page) {
   switch (page) {
+      case AppPage.admin:
+      return 'Review logs, worker pressure and operational signals reserved for admin accounts.';
     case AppPage.dashboard:
       return 'A simpler read on activity, queue pressure and the work that needs attention.';
     case AppPage.upload:
       return 'Stage new assets and validate them before they move into review.';
     case AppPage.taskBuilder:
-      return 'Set rules, presets and handoff steps without adding visual clutter.';
+      return 'Stage new assets and configure them inside the upload modal.';
     case AppPage.progress:
       return 'Track active work, timing and blockers in one clear view.';
     case AppPage.results:

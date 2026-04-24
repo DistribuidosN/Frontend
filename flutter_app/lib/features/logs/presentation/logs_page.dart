@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:imageflow_flutter/core/theme/app_theme.dart';
 import 'package:imageflow_flutter/core/workspace/workspace_scope.dart';
-import 'package:imageflow_flutter/features/logs/domain/log_entry.dart';
+import 'package:imageflow_flutter/features/admin/domain/admin_audit_log.dart';
 import 'package:imageflow_flutter/features/logs/presentation/log_level_visuals.dart';
 import 'package:imageflow_flutter/shared/widgets/shared_widgets.dart';
 
@@ -10,7 +10,9 @@ class LogsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<LogEntry> systemLogs = WorkspaceScope.of(context).logs;
+    final workspace = WorkspaceScope.of(context);
+    final List<AdminAuditLog> systemLogs = workspace.adminLogs;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -18,57 +20,39 @@ class LogsPage extends StatelessWidget {
           kicker: 'Observability',
           title: 'System logs',
           description:
-              'Filter runtime activity, isolate issues faster and keep operational events readable under load.',
+              'Read the backend admin log feed without exposing user-owned media.',
           actions: OutlinedButton.icon(
-            onPressed: () {},
-            icon: const Icon(Icons.download_rounded, size: 18),
-            label: const Text('Export Logs'),
+            onPressed: () => workspace.refreshAdminLogs(),
+            icon: const Icon(Icons.refresh_rounded, size: 18),
+            label: const Text('Refresh Logs'),
           ),
         ),
         const SizedBox(height: 20),
         AppSurface(
           radius: AppTheme.radii.xl,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Wrap(
+            spacing: 10,
+            runSpacing: 10,
             children: <Widget>[
-              Wrap(
-                spacing: 12,
-                runSpacing: 12,
-                children: const <Widget>[
-                  FilterField(
-                    icon: Icons.search_rounded,
-                    label: 'Search logs...',
-                  ),
-                  ChipFilter(
-                    icon: Icons.filter_alt_outlined,
-                    label: 'All Levels',
-                  ),
-                  ChipFilter(icon: Icons.hub_outlined, label: 'All Sources'),
-                  ChipFilter(icon: Icons.schedule_outlined, label: 'Last Hour'),
-                ],
+              StatusChip(
+                label: 'Backend endpoint',
+                color: AppTheme.goldDeep,
+                background: AppTheme.sand,
+                icon: Icons.link_rounded,
               ),
-              const SizedBox(height: 16),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: <Widget>[
-                  TogglePill(
-                    label: 'All (${systemLogs.length})',
-                    selected: true,
-                    onTap: () {},
-                  ),
-                  TogglePill(
-                    label: 'Errors (1)',
-                    selected: false,
-                    onTap: () {},
-                  ),
-                  TogglePill(
-                    label: 'Warnings (1)',
-                    selected: false,
-                    onTap: () {},
-                  ),
-                ],
+              StatusChip(
+                label: '${systemLogs.length} events',
+                color: AppTheme.navy,
+                background: AppTheme.surfaceContainer,
+                icon: Icons.description_outlined,
               ),
+              if ((workspace.adminLogImageUuid ?? '').isNotEmpty)
+                StatusChip(
+                  label: 'Image log lookup active',
+                  color: AppTheme.slate,
+                  background: AppTheme.surfaceContainer,
+                  icon: Icons.image_search_outlined,
+                ),
             ],
           ),
         ),
@@ -76,16 +60,16 @@ class LogsPage extends StatelessWidget {
         if (systemLogs.isEmpty)
           const AppSurface(
             child: Text(
-              'No logs yet. Sign in or submit a batch to generate workspace events.',
+              'The backend did not return admin logs for the current image lookup.',
             ),
           )
         else
           SectionPanel(
             title: 'Recent Logs',
             description:
-                'Live events organized for faster scanning and triage.',
+                'Live events returned by the admin log endpoint.',
             child: Column(
-              children: systemLogs.map((LogEntry log) {
+              children: systemLogs.map((AdminAuditLog log) {
                 return Container(
                   margin: const EdgeInsets.only(bottom: 12),
                   padding: const EdgeInsets.all(18),
@@ -113,7 +97,7 @@ class LogsPage extends StatelessWidget {
                               crossAxisAlignment: WrapCrossAlignment.center,
                               children: <Widget>[
                                 Text(
-                                  log.time,
+                                  _logTimestamp(log),
                                   style: Theme.of(context).textTheme.bodySmall
                                       ?.copyWith(
                                         color: AppTheme.onSurfaceVariant,
@@ -124,17 +108,11 @@ class LogsPage extends StatelessWidget {
                                   color: logLevelColor(log.level),
                                   background: logLevelBackground(log.level),
                                 ),
-                                StatusChip(
-                                  label: log.source,
+                                const StatusChip(
+                                  label: 'admin',
                                   color: AppTheme.slate,
                                   background: AppTheme.surfaceContainer,
                                 ),
-                                if (log.job != '-')
-                                  StatusChip(
-                                    label: log.job,
-                                    color: AppTheme.ink,
-                                    background: AppTheme.surfaceMuted,
-                                  ),
                               ],
                             ),
                             const SizedBox(height: 8),
@@ -154,4 +132,12 @@ class LogsPage extends StatelessWidget {
       ],
     );
   }
+}
+
+String _logTimestamp(AdminAuditLog log) {
+  final String createdAt = log.createdAt.trim();
+  if (createdAt.isEmpty || createdAt == '0001-01-01T00:00:00Z') {
+    return 'No timestamp';
+  }
+  return createdAt;
 }

@@ -2,8 +2,14 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:imageflow_flutter/core/theme/app_theme.dart';
+import 'package:imageflow_flutter/core/workspace/workspace_scope.dart';
 import 'package:imageflow_flutter/features/dashboard/data/dashboard_mock_data.dart';
 import 'package:imageflow_flutter/features/dashboard/domain/dashboard_models.dart';
+import 'package:imageflow_flutter/features/history/domain/history_request.dart';
+import 'package:imageflow_flutter/features/logs/domain/log_entry.dart';
+import 'package:imageflow_flutter/features/nodes/domain/worker_node.dart';
+import 'package:imageflow_flutter/features/user/domain/user_activity_event.dart';
+import 'package:imageflow_flutter/features/user/domain/user_statistics.dart';
 import 'package:imageflow_flutter/shared/widgets/shared_widgets.dart';
 
 class DashboardPage extends StatefulWidget {
@@ -18,8 +24,45 @@ class _DashboardPageState extends State<DashboardPage> {
 
   @override
   Widget build(BuildContext context) {
+    final workspace = WorkspaceScope.of(context);
+    if (workspace.isAdmin) {
+      return _AdminDashboard(window: _window, onWindowChanged: (DashboardWindow value) {
+        setState(() => _window = value);
+      });
+    }
+
     final DashboardView current = dashboardViews[_window]!;
-    final int totalProcessed = current.chart.fold<int>(
+    final UserStatistics stats = workspace.userStatistics;
+    final List<UserActivityEvent> activityEvents = workspace.userActivity;
+    final List<HistoryRequest> history = workspace.historyRequests;
+
+    // Build operator summary metrics using real backend telemetry with graceful fallbacks.
+    final OverviewMetric processedCard = OverviewMetric(
+      label: 'Processed images',
+      value: '${stats.successfulImages}',
+      note: stats.totalImages > 0
+          ? 'Success rate ${stats.successRateLabel}'
+          : 'No images processed yet',
+      icon: Icons.check_circle_outline,
+    );
+    final OverviewMetric batchesCard = OverviewMetric(
+      label: 'Total batches',
+      value: '${stats.totalBatches}',
+      note: history.isNotEmpty
+          ? '${history.length} visible in history'
+          : 'Submit a batch to populate history',
+      icon: Icons.layers_outlined,
+    );
+    final OverviewMetric failuresCard = OverviewMetric(
+      label: 'Failed images',
+      value: '${stats.failedImages}',
+      note: stats.failedImages == 0
+          ? 'No failures recorded'
+          : 'Check the activity feed for details',
+      icon: Icons.error_outline,
+    );
+
+    final int chartProcessed = current.chart.fold<int>(
       0,
       (int sum, ThroughputPoint item) => sum + item.processed,
     );
@@ -43,9 +86,9 @@ class _DashboardPageState extends State<DashboardPage> {
           minItemWidth: 240,
           childAspectRatio: 1.35,
           children: <Widget>[
-            _SummaryCard(metric: current.cards[0], tone: _SummaryTone.primary),
-            _SummaryCard(metric: current.cards[1], tone: _SummaryTone.neutral),
-            _SummaryCard(metric: current.cards[2], tone: _SummaryTone.alert),
+            _SummaryCard(metric: processedCard, tone: _SummaryTone.primary),
+            _SummaryCard(metric: batchesCard, tone: _SummaryTone.neutral),
+            _SummaryCard(metric: failuresCard, tone: _SummaryTone.alert),
           ],
         ),
         const SizedBox(height: 20),
@@ -59,12 +102,23 @@ class _DashboardPageState extends State<DashboardPage> {
               spacing: 24,
               runSpacing: 16,
               children: <Widget>[
-                MiniLabel(label: 'Processed in window', value: '$totalProcessed'),
-                MiniLabel(label: 'Queue peak', value: '$queuePeak'),
                 MiniLabel(
-                  label: 'Live throughput',
-                  value: current.support.first.value,
+                  label: 'Total images',
+                  value: '${stats.totalImages}',
                 ),
+                MiniLabel(
+                  label: 'Success rate',
+                  value: stats.successRateLabel,
+                ),
+                MiniLabel(
+                  label: 'Window throughput',
+                  value: '$chartProcessed',
+                ),
+                if (stats.lastActivity != null)
+                  MiniLabel(
+                    label: 'Last activity',
+                    value: stats.lastActivity!,
+                  ),
               ],
             ),
           ),
@@ -169,14 +223,389 @@ class _DashboardPageState extends State<DashboardPage> {
         ),
         const SizedBox(height: 20),
         SectionPanel(
-          title: 'Recent work',
+          title: 'Your recent activity',
+          description: activityEvents.isEmpty
+              ? 'Once you submit batches, the backend activity feed will appear here.'
+              : 'The latest events the backend has recorded for your account.',
+          child: activityEvents.isEmpty
+              ? _EmptyActivityState()
+              : Column(
+                  children: activityEvents.take(8).map((UserActivityEvent event) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: _UserActivityCard(event: event),
+                    );
+                  }).toList(),
+                ),
+        ),
+      ],
+    );
+  }
+}
+
+class _UserActivityCard extends StatelessWidget {
+  const _UserActivityCard({required this.event});
+
+  final UserActivityEvent event;
+
+  @override
+  Widget build(BuildContext context) {
+    final String actionLower = event.action.toLowerCase();
+    final Color accent = actionLower.contains('error') || actionLower.contains('fail')
+        ? AppTheme.red
+        : actionLower.contains('complete') || actionLower.contains('success')
+            ? AppTheme.statusGreen
+            : AppTheme.navy;
+    final Color background = actionLower.contains('error') || actionLower.contains('fail')
+        ? AppTheme.dangerSoft
+        : AppTheme.sand;
+
+    return AppSurface(
+      radius: 20,
+      color: AppTheme.white,
+      padding: const EdgeInsets.all(18),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          StatusChip(
+            label: event.action,
+            color: accent,
+            background: background,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  event.description,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  <String>[
+                    if (event.timestamp.isNotEmpty) event.timestamp,
+                    if (event.batchUuid != null) 'batch ${event.batchUuid}',
+                    if (event.status != null) 'status ${event.status}',
+                  ].join(' | '),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppTheme.slate,
+                      ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _EmptyActivityState extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return AppSurface(
+      radius: 20,
+      color: AppTheme.surfaceContainer,
+      padding: const EdgeInsets.all(22),
+      child: Row(
+        children: <Widget>[
+          const Icon(Icons.timeline_outlined, color: AppTheme.slate),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              'No activity yet. Your processed batches and pipeline events will show up here.',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: AppTheme.slate,
+                  ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AdminDashboard extends StatelessWidget {
+  const _AdminDashboard({
+    required this.window,
+    required this.onWindowChanged,
+  });
+
+  final DashboardWindow window;
+  final ValueChanged<DashboardWindow> onWindowChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final workspace = WorkspaceScope.of(context);
+    final List<WorkerNode> nodes = workspace.workerNodes;
+    final List<LogEntry> logs = workspace.logs;
+    final int activeNodes = nodes.where((WorkerNode node) => node.active).length;
+    final int warningCount = logs
+        .where((LogEntry log) => log.level == LogLevel.warning)
+        .length;
+    final int successCount = logs
+        .where((LogEntry log) => log.level == LogLevel.success)
+        .length;
+    final int errorCount = logs
+        .where((LogEntry log) => log.level == LogLevel.error)
+        .length;
+    final int avgLoad = nodes.isEmpty
+        ? 0
+        : (nodes.fold<int>(0, (int acc, WorkerNode node) => acc + node.load) /
+                  nodes.length)
+              .round();
+    final List<ThroughputPoint> chart = _buildAdminChart(nodes, logs, window);
+    final int totalProcessed = chart.fold<int>(
+      0,
+      (int sum, ThroughputPoint point) => sum + point.processed,
+    );
+    final int queuePeak = chart.fold<int>(
+      0,
+      (int maxValue, ThroughputPoint point) => math.max(maxValue, point.queued),
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        _AdminDashboardIntro(
+          window: window,
+          onWindowChanged: onWindowChanged,
+          activeNodes: activeNodes,
+          totalNodes: nodes.length,
+          warnings: warningCount,
+        ),
+        const SizedBox(height: 20),
+        AdaptiveGrid(
+          minItemWidth: 240,
+          childAspectRatio: 1.35,
+          children: <Widget>[
+            _SummaryCard(
+              metric: OverviewMetric(
+                label: 'Admin logs',
+                value: '${logs.length}',
+                note: '$successCount success events captured',
+                icon: Icons.description_outlined,
+              ),
+              tone: _SummaryTone.primary,
+            ),
+            _SummaryCard(
+              metric: OverviewMetric(
+                label: 'Worker nodes',
+                value: '$activeNodes/${nodes.length}',
+                note: 'Average load $avgLoad%',
+                icon: Icons.dns_outlined,
+              ),
+              tone: _SummaryTone.neutral,
+            ),
+            _SummaryCard(
+              metric: OverviewMetric(
+                label: 'Error signals',
+                value: '$errorCount',
+                note: 'Admin sees operational noise, not user media',
+                icon: Icons.shield_outlined,
+              ),
+              tone: _SummaryTone.alert,
+            ),
+          ],
+        ),
+        const SizedBox(height: 20),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: AppSurface(
+            radius: 24,
+            color: AppTheme.sand,
+            padding: const EdgeInsets.all(18),
+            child: Wrap(
+              spacing: 24,
+              runSpacing: 16,
+              children: <Widget>[
+                MiniLabel(label: 'Events in window', value: '$totalProcessed'),
+                MiniLabel(label: 'Peak pressure', value: '$queuePeak'),
+                MiniLabel(
+                  label: 'Success signals',
+                  value: '$successCount',
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 20),
+        LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) {
+            final bool stacked = constraints.maxWidth < 1040;
+            final Widget activityPanel = SectionPanel(
+              title: 'Admin performance',
+              description:
+                  'A live operational read built from worker load and recent system events, without exposing user galleries.',
+              action: StatusChip(
+                label: 'Peak pressure $queuePeak',
+                color: AppTheme.goldDeep,
+                background: AppTheme.sand,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Wrap(
+                    spacing: 10,
+                    runSpacing: 10,
+                    children: <Widget>[
+                      _SupportPill(
+                        label: 'Active nodes',
+                        value: '$activeNodes/${nodes.length}',
+                      ),
+                      _SupportPill(
+                        label: 'Warnings',
+                        value: '$warningCount',
+                      ),
+                      _SupportPill(
+                        label: 'Errors',
+                        value: '$errorCount',
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 22),
+                  ThroughputChart(
+                    data: chart,
+                    height: stacked ? 320 : 360,
+                  ),
+                ],
+              ),
+            );
+
+            final Widget sidePanel = SectionPanel(
+              title: 'Admin lanes',
+              description:
+                  'Logs and capacity summarized so the admin can spot pressure without leaving the dashboard.',
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  AppSurface(
+                    radius: 22,
+                    color: AppTheme.surfaceRaised,
+                    padding: const EdgeInsets.all(18),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          'Current focus',
+                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            color: AppTheme.slate,
+                            letterSpacing: 1.4,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          _adminFocusCopy(
+                            activeNodes: activeNodes,
+                            warnings: warningCount,
+                            errorCount: errorCount,
+                          ),
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: AppTheme.inkSoft,
+                            height: 1.6,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  ...nodes.map(
+                    (WorkerNode node) => Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: _NodeHealthCard(
+                        node: NodeHealth(
+                          id: node.id,
+                          zone: node.address,
+                          load: node.load,
+                          throughput: '${node.currentJobs} job(s)',
+                          tone: node.load >= 75
+                              ? NodeTone.warm
+                              : node.load >= 55
+                              ? NodeTone.balancing
+                              : NodeTone.stable,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+
+            if (stacked) {
+              return Column(
+                children: <Widget>[
+                  activityPanel,
+                  const SizedBox(height: 20),
+                  sidePanel,
+                ],
+              );
+            }
+
+            return Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Expanded(flex: 8, child: activityPanel),
+                const SizedBox(width: 20),
+                Expanded(flex: 5, child: sidePanel),
+              ],
+            );
+          },
+        ),
+        const SizedBox(height: 20),
+        SectionPanel(
+          title: 'Admin activity feed',
           description:
-              'Only the batches that matter right now, with status, owner and completion.',
+              'The latest backend-visible events that matter for operations and support.',
           child: Column(
-            children: recentBatches.map((BatchActivity batch) {
+            children: logs.take(6).map((LogEntry log) {
+              final Color color = switch (log.level) {
+                LogLevel.success => AppTheme.success,
+                LogLevel.warning => AppTheme.goldDeep,
+                LogLevel.error => AppTheme.red,
+                LogLevel.info => AppTheme.navy,
+              };
+              final Color background = switch (log.level) {
+                LogLevel.success => AppTheme.successSoft,
+                LogLevel.warning => AppTheme.sand,
+                LogLevel.error => AppTheme.dangerSoft,
+                LogLevel.info => AppTheme.surfaceContainer,
+              };
               return Padding(
                 padding: const EdgeInsets.only(bottom: 12),
-                child: _RecentBatchCard(batch: batch),
+                child: AppSurface(
+                  radius: 20,
+                  color: AppTheme.white,
+                  padding: const EdgeInsets.all(18),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      StatusChip(
+                        label: log.level.name,
+                        color: color,
+                        background: background,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Text(
+                              log.message,
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              '${log.source} - ${log.time}',
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(color: AppTheme.slate),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               );
             }).toList(),
           ),
@@ -184,6 +613,203 @@ class _DashboardPageState extends State<DashboardPage> {
       ],
     );
   }
+}
+
+class _AdminDashboardIntro extends StatelessWidget {
+  const _AdminDashboardIntro({
+    required this.window,
+    required this.onWindowChanged,
+    required this.activeNodes,
+    required this.totalNodes,
+    required this.warnings,
+  });
+
+  final DashboardWindow window;
+  final ValueChanged<DashboardWindow> onWindowChanged;
+  final int activeNodes;
+  final int totalNodes;
+  final int warnings;
+
+  @override
+  Widget build(BuildContext context) {
+    return AppSurface(
+      radius: 30,
+      color: AppTheme.white,
+      padding: const EdgeInsets.all(24),
+      child: LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          final bool stacked = constraints.maxWidth < 980;
+
+          final Widget copy = Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: AppTheme.sand,
+                  borderRadius: BorderRadius.circular(999),
+                  border: Border.all(color: AppTheme.gold.withValues(alpha: 0.5)),
+                ),
+                child: Text(
+                  'ADMIN VIEW',
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: AppTheme.navy,
+                    letterSpacing: 1.8,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: <Widget>[
+                  const StatusChip(
+                    label: 'Observability lane',
+                    color: AppTheme.goldDeep,
+                    background: AppTheme.sand,
+                    icon: Icons.admin_panel_settings_outlined,
+                  ),
+                  StatusChip(
+                    label: '$activeNodes/$totalNodes nodes active',
+                    color: AppTheme.navy,
+                    background: AppTheme.surfaceContainer,
+                    icon: Icons.dns_outlined,
+                  ),
+                  StatusChip(
+                    label: '$warnings warnings',
+                    color: AppTheme.red,
+                    background: AppTheme.dangerSoft,
+                    icon: Icons.notification_important_outlined,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Admin command center',
+                style: AppTheme.displayStyle(context, size: 30),
+              ),
+              const SizedBox(height: 10),
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 760),
+                child: Text(
+                  'This lane exposes operational logs and performance graphics for admin accounts. It appears only when the backend sends role 1.',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: AppTheme.slate,
+                    height: 1.65,
+                  ),
+                ),
+              ),
+            ],
+          );
+
+          final Widget controls = Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppTheme.surfaceRaised,
+              borderRadius: BorderRadius.circular(22),
+              border: Border.all(color: AppTheme.outlineVariant),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  'Window',
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: AppTheme.slate,
+                    letterSpacing: 1.4,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: DashboardWindow.values.map((DashboardWindow item) {
+                    return TogglePill(
+                      label: item.label,
+                      selected: window == item,
+                      onTap: () => onWindowChanged(item),
+                    );
+                  }).toList(),
+                ),
+              ],
+            ),
+          );
+
+          if (stacked) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                copy,
+                const SizedBox(height: 18),
+                controls,
+              ],
+            );
+          }
+
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Expanded(child: copy),
+              const SizedBox(width: 20),
+              SizedBox(width: 280, child: controls),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+List<ThroughputPoint> _buildAdminChart(
+  List<WorkerNode> nodes,
+  List<LogEntry> logs,
+  DashboardWindow window,
+) {
+  final List<String> labels = switch (window) {
+    DashboardWindow.day => const <String>['08', '10', '12', '14', '16', '18'],
+    DashboardWindow.week => const <String>['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+    DashboardWindow.month => const <String>['W1', 'W2', 'W3', 'W4'],
+  };
+  final int baseProcessed = nodes.isEmpty
+      ? 0
+      : math.max(
+          1,
+          nodes.fold<int>(0, (int acc, WorkerNode node) => acc + node.currentJobs),
+        );
+  final int baseQueued = logs.isEmpty ? 0 : math.max(1, logs.length ~/ 2);
+
+  return labels.asMap().entries.map((entry) {
+    final int index = entry.key;
+    final String label = entry.value;
+    final int processed = nodes.isEmpty
+        ? 0
+        : baseProcessed * (index + 1);
+    final int queued = logs.isEmpty
+        ? 0
+        : baseQueued + ((index + 1) * math.max(1, logs.length ~/ labels.length));
+    return ThroughputPoint(
+      label: label,
+      processed: processed,
+      queued: queued,
+    );
+  }).toList();
+}
+
+String _adminFocusCopy({
+  required int activeNodes,
+  required int warnings,
+  required int errorCount,
+}) {
+  if (errorCount > 0) {
+    return 'Error signals are visible. Review logs first, then verify whether one of the active nodes is carrying too much load.';
+  }
+  if (warnings > 0) {
+    return 'The backend is processing, but warnings are visible. The healthiest move is to check logs before queue pressure turns into support noise.';
+  }
+  if (activeNodes <= 1) {
+    return 'Only one lane is carrying visible activity. Capacity is still narrow, so admin attention should stay on node availability.';
+  }
+  return 'The workspace is stable. Logs look clean and load is spread well enough to keep the batch flow readable.';
 }
 
 class _DashboardIntro extends StatelessWidget {
@@ -226,6 +852,19 @@ class _DashboardIntro extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: const <Widget>[
+                  StatusChip(
+                    label: 'UI metrics preview',
+                    color: AppTheme.goldDeep,
+                    background: AppTheme.sand,
+                    icon: Icons.info_outline_rounded,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
               Text(
                 'A simpler operational view',
                 style: AppTheme.displayStyle(context, size: 30),

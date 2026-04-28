@@ -669,11 +669,15 @@ class WorkspaceController extends ChangeNotifier {
           if (coverUrl != null && coverUrl.isNotEmpty) {
             if (!coverUrl.startsWith('http') && !coverUrl.startsWith('data:')) {
               coverUrl = _resolveRelativeUrl(coverUrl);
-            } else if (coverUrl.contains('.ngrok-free.app')) {
-              // Patch for backend sending old ngrok domains in pre-signed URLs
+            } else if (coverUrl.contains('.ngrok-free.app') || coverUrl.contains('localhost')) {
+              // Patch for backend sending old ngrok domains or localhost in pre-signed URLs
               final Uri currentUri = Uri.parse(_apiClient.config.baseUrl);
               final Uri badUri = Uri.parse(coverUrl);
-              coverUrl = coverUrl.replaceFirst(badUri.host, currentUri.host);
+              String patched = coverUrl.replaceFirst(badUri.host, currentUri.host);
+              if (badUri.hasPort && !currentUri.hasPort) {
+                patched = patched.replaceFirst(':${badUri.port}', '');
+              }
+              coverUrl = patched;
             }
           }
 

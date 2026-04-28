@@ -38,13 +38,19 @@ class BatchGalleryImage {
     if (rawUrl.isNotEmpty) {
       if (!rawUrl.startsWith('http') && !rawUrl.startsWith('data:')) {
         rawUrl = resolveUrl(rawUrl);
-      } else if (rawUrl.contains('.ngrok-free.app')) {
-        // Resolve backend returning old ngrok urls
+      } else if (rawUrl.contains('.ngrok-free.app') || rawUrl.contains('localhost')) {
+        // Resolve backend returning old ngrok urls or localhost
         final Uri badUri = Uri.parse(rawUrl);
         // resolveUrl takes relative paths, so we cheat by asking it to resolve / and taking the host
         final String origin = resolveUrl('/');
         final Uri currentUri = Uri.parse(origin);
-        rawUrl = rawUrl.replaceFirst(badUri.host, currentUri.host);
+        
+        // Also replace the port if the bad URI has one and the current one doesn't
+        String patched = rawUrl.replaceFirst(badUri.host, currentUri.host);
+        if (badUri.hasPort && !currentUri.hasPort) {
+          patched = patched.replaceFirst(':${badUri.port}', '');
+        }
+        rawUrl = patched;
       }
     }
 

@@ -73,12 +73,26 @@ class _SettingsPageState extends State<SettingsPage> {
       setState(() => _profileError = 'Username cannot be empty.');
       return;
     }
-    setState(() { _savingProfile = true; _profileError = null; _profileSuccess = null; });
+    setState(() {
+      _savingProfile = true;
+      _profileError = null;
+      _profileSuccess = null;
+    });
     try {
       await workspace.updateProfile(username: name);
-      if (mounted) setState(() { _profileSuccess = 'Profile updated successfully.'; _savingProfile = false; });
+      if (mounted) {
+        setState(() {
+          _profileSuccess = 'Profile updated successfully.';
+          _savingProfile = false;
+        });
+      }
     } catch (e) {
-      if (mounted) setState(() { _profileError = e.toString(); _savingProfile = false; });
+      if (mounted) {
+        setState(() {
+          _profileError = e.toString();
+          _savingProfile = false;
+        });
+      }
     }
   }
 
@@ -94,16 +108,28 @@ class _SettingsPageState extends State<SettingsPage> {
       setState(() => _passwordError = 'Passwords do not match.');
       return;
     }
-    setState(() { _savingPassword = true; _passwordError = null; _passwordSuccess = null; });
+    setState(() {
+      _savingPassword = true;
+      _passwordError = null;
+      _passwordSuccess = null;
+    });
     try {
       await workspace.resetPassword(newPassword: newPwd);
       if (mounted) {
         _newPasswordCtrl.clear();
         _confirmPasswordCtrl.clear();
-        setState(() { _passwordSuccess = 'Password updated successfully.'; _savingPassword = false; });
+        setState(() {
+          _passwordSuccess = 'Password updated successfully.';
+          _savingPassword = false;
+        });
       }
     } catch (e) {
-      if (mounted) setState(() { _passwordError = e.toString(); _savingPassword = false; });
+      if (mounted) {
+        setState(() {
+          _passwordError = e.toString();
+          _savingPassword = false;
+        });
+      }
     }
   }
 
@@ -147,11 +173,23 @@ class _SettingsPageState extends State<SettingsPage> {
                       ),
                       if (_profileError != null) ...<Widget>[
                         const SizedBox(height: 10),
-                        Text(_profileError!, style: const TextStyle(color: Colors.red, fontSize: 13)),
+                        Text(
+                          _profileError!,
+                          style: const TextStyle(
+                            color: Colors.red,
+                            fontSize: 13,
+                          ),
+                        ),
                       ],
                       if (_profileSuccess != null) ...<Widget>[
                         const SizedBox(height: 10),
-                        Text(_profileSuccess!, style: TextStyle(color: AppTheme.statusGreen, fontSize: 13)),
+                        Text(
+                          _profileSuccess!,
+                          style: TextStyle(
+                            color: AppTheme.statusGreen,
+                            fontSize: 13,
+                          ),
+                        ),
                       ],
                       const SizedBox(height: 20),
                       Align(
@@ -159,7 +197,14 @@ class _SettingsPageState extends State<SettingsPage> {
                         child: FilledButton(
                           onPressed: _savingProfile ? null : _saveProfile,
                           child: _savingProfile
-                              ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                              ? const SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
                               : const Text('Save Changes'),
                         ),
                       ),
@@ -190,11 +235,23 @@ class _SettingsPageState extends State<SettingsPage> {
                       ),
                       if (_passwordError != null) ...<Widget>[
                         const SizedBox(height: 10),
-                        Text(_passwordError!, style: const TextStyle(color: Colors.red, fontSize: 13)),
+                        Text(
+                          _passwordError!,
+                          style: const TextStyle(
+                            color: Colors.red,
+                            fontSize: 13,
+                          ),
+                        ),
                       ],
                       if (_passwordSuccess != null) ...<Widget>[
                         const SizedBox(height: 10),
-                        Text(_passwordSuccess!, style: TextStyle(color: AppTheme.statusGreen, fontSize: 13)),
+                        Text(
+                          _passwordSuccess!,
+                          style: TextStyle(
+                            color: AppTheme.statusGreen,
+                            fontSize: 13,
+                          ),
+                        ),
                       ],
                       const SizedBox(height: 20),
                       Align(
@@ -202,7 +259,14 @@ class _SettingsPageState extends State<SettingsPage> {
                         child: FilledButton(
                           onPressed: _savingPassword ? null : _updatePassword,
                           child: _savingPassword
-                              ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                              ? const SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
                               : const Text('Update Password'),
                         ),
                       ),
@@ -576,17 +640,13 @@ class _SettingsLabeledField extends StatelessWidget {
   const _SettingsLabeledField({
     required this.label,
     this.initialValue,
-    this.hintText,
     this.keyboardType,
-    this.obscureText = false,
     this.readOnly = false,
   });
 
   final String label;
   final String? initialValue;
-  final String? hintText;
   final TextInputType? keyboardType;
-  final bool obscureText;
   final bool readOnly;
 
   @override
@@ -599,9 +659,8 @@ class _SettingsLabeledField extends StatelessWidget {
         TextFormField(
           initialValue: initialValue,
           readOnly: readOnly,
-          obscureText: obscureText,
           keyboardType: keyboardType,
-          decoration: _settingsInputDecoration(hintText),
+          decoration: _settingsInputDecoration(null),
         ),
       ],
     );
@@ -712,14 +771,12 @@ class _SettingsLabeledFieldController extends StatelessWidget {
     required this.controller,
     this.hintText,
     this.obscureText = false,
-    this.keyboardType,
   });
 
   final String label;
   final TextEditingController controller;
   final String? hintText;
   final bool obscureText;
-  final TextInputType? keyboardType;
 
   @override
   Widget build(BuildContext context) {
@@ -731,7 +788,6 @@ class _SettingsLabeledFieldController extends StatelessWidget {
         TextField(
           controller: controller,
           obscureText: obscureText,
-          keyboardType: keyboardType,
           decoration: _settingsInputDecoration(hintText),
         ),
       ],

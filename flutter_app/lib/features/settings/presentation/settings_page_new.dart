@@ -25,7 +25,7 @@ class _SettingsPageState extends State<SettingsPage> {
   // Profile controllers
   late TextEditingController _usernameController;
   late TextEditingController _emailController;
-  
+
   // Password controllers
   late TextEditingController _currentPasswordController;
   late TextEditingController _newPasswordController;
@@ -76,7 +76,7 @@ class _SettingsPageState extends State<SettingsPage> {
   Future<void> _saveProfile() async {
     final workspace = WorkspaceScope.of(context);
     final messenger = ScaffoldMessenger.of(context);
-    
+
     if (!mounted) return;
     setState(() => _isSavingProfile = true);
 
@@ -88,9 +88,7 @@ class _SettingsPageState extends State<SettingsPage> {
       );
     } catch (e) {
       if (!mounted) return;
-      messenger.showSnackBar(
-        SnackBar(content: Text('Error: $e')),
-      );
+      messenger.showSnackBar(SnackBar(content: Text('Error: $e')));
     } finally {
       if (mounted) {
         setState(() => _isSavingProfile = false);
@@ -130,9 +128,7 @@ class _SettingsPageState extends State<SettingsPage> {
       _confirmPasswordController.clear();
     } catch (e) {
       if (!mounted) return;
-      messenger.showSnackBar(
-        SnackBar(content: Text('Error: $e')),
-      );
+      messenger.showSnackBar(SnackBar(content: Text('Error: $e')));
     } finally {
       if (mounted) {
         setState(() => _isUpdatingPassword = false);
@@ -143,7 +139,7 @@ class _SettingsPageState extends State<SettingsPage> {
   Future<void> _copyUrl() async {
     final workspace = WorkspaceScope.of(context);
     final messenger = ScaffoldMessenger.of(context);
-    
+
     await Clipboard.setData(ClipboardData(text: workspace.apiBaseUrl));
     if (!mounted) return;
     messenger.showSnackBar(
@@ -241,7 +237,9 @@ class _SettingsPageState extends State<SettingsPage> {
                       Align(
                         alignment: Alignment.centerRight,
                         child: FilledButton(
-                          onPressed: _isUpdatingPassword ? null : _updatePassword,
+                          onPressed: _isUpdatingPassword
+                              ? null
+                              : _updatePassword,
                           child: _isUpdatingPassword
                               ? const SizedBox(
                                   height: 18,
@@ -297,7 +295,8 @@ class _SettingsPageState extends State<SettingsPage> {
                             setState(() => _autoOptimize = value),
                       ),
                       _SettingsCheckboxRow(
-                        label: 'Automatically download results after processing',
+                        label:
+                            'Automatically download results after processing',
                         value: _autoDownload,
                         alignment: _CheckboxAlignment.leading,
                         onChanged: (bool value) =>
@@ -380,58 +379,59 @@ class _SettingsPageState extends State<SettingsPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       LayoutBuilder(
-                        builder: (
-                          BuildContext context,
-                          BoxConstraints fieldConstraints,
-                        ) {
-                          final bool fieldStacked =
-                              fieldConstraints.maxWidth < 420;
+                        builder:
+                            (
+                              BuildContext context,
+                              BoxConstraints fieldConstraints,
+                            ) {
+                              final bool fieldStacked =
+                                  fieldConstraints.maxWidth < 420;
 
-                          final Widget apiField = Expanded(
-                            child: _SettingsLabeledField(
-                              label: 'Backend Base URL',
-                              initialValue: workspace.apiBaseUrl,
-                              readOnly: true,
-                            ),
-                          );
-
-                          final Widget copyButton = OutlinedButton(
-                            onPressed: _copyUrl,
-                            style: OutlinedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 15,
-                              ),
-                            ),
-                            child: const Text('Copy'),
-                          );
-
-                          if (fieldStacked) {
-                            return Column(
-                              children: <Widget>[
-                                _SettingsLabeledField(
+                              final Widget apiField = Expanded(
+                                child: _SettingsLabeledField(
                                   label: 'Backend Base URL',
                                   initialValue: workspace.apiBaseUrl,
                                   readOnly: true,
                                 ),
-                                const SizedBox(height: 12),
-                                SizedBox(
-                                  width: double.infinity,
-                                  child: copyButton,
-                                ),
-                              ],
-                            );
-                          }
+                              );
 
-                          return Row(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: <Widget>[
-                              apiField,
-                              const SizedBox(width: 12),
-                              copyButton,
-                            ],
-                          );
-                        },
+                              final Widget copyButton = OutlinedButton(
+                                onPressed: _copyUrl,
+                                style: OutlinedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 15,
+                                  ),
+                                ),
+                                child: const Text('Copy'),
+                              );
+
+                              if (fieldStacked) {
+                                return Column(
+                                  children: <Widget>[
+                                    _SettingsLabeledField(
+                                      label: 'Backend Base URL',
+                                      initialValue: workspace.apiBaseUrl,
+                                      readOnly: true,
+                                    ),
+                                    const SizedBox(height: 12),
+                                    SizedBox(
+                                      width: double.infinity,
+                                      child: copyButton,
+                                    ),
+                                  ],
+                                );
+                              }
+
+                              return Row(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: <Widget>[
+                                  apiField,
+                                  const SizedBox(width: 12),
+                                  copyButton,
+                                ],
+                              );
+                            },
                       ),
                       const SizedBox(height: 14),
                       SizedBox(
@@ -455,9 +455,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           children: <Widget>[
                             Text(
                               'Connected endpoint',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
+                              style: Theme.of(context).textTheme.bodySmall
                                   ?.copyWith(color: AppTheme.slate),
                             ),
                             const SizedBox(height: 8),
@@ -468,9 +466,7 @@ class _SettingsPageState extends State<SettingsPage> {
                             const SizedBox(height: 4),
                             Text(
                               'Backend proxy target',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
+                              style: Theme.of(context).textTheme.bodySmall
                                   ?.copyWith(color: AppTheme.slate),
                             ),
                           ],
@@ -505,10 +501,9 @@ class _SettingsPageState extends State<SettingsPage> {
                       const SizedBox(height: 8),
                       Text(
                         'Check out our documentation or contact support.',
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodySmall
-                            ?.copyWith(color: AppTheme.slate),
+                        style: Theme.of(
+                          context,
+                        ).textTheme.bodySmall?.copyWith(color: AppTheme.slate),
                       ),
                       const SizedBox(height: 18),
                       SizedBox(
@@ -703,7 +698,7 @@ class _SettingsLabeledDropdownState extends State<_SettingsLabeledDropdown> {
         Text(widget.label, style: Theme.of(context).textTheme.labelLarge),
         const SizedBox(height: 8),
         DropdownButtonFormField<String>(
-          value: _selectedValue,
+          initialValue: _selectedValue,
           isExpanded: true,
           decoration: _settingsInputDecoration(null),
           items: widget.items
@@ -760,10 +755,9 @@ class _SettingsCheckboxRow extends StatelessWidget {
                   Expanded(
                     child: Text(
                       label,
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodyMedium
-                          ?.copyWith(color: AppTheme.slate),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodyMedium?.copyWith(color: AppTheme.slate),
                     ),
                   ),
                 ]
@@ -771,10 +765,9 @@ class _SettingsCheckboxRow extends StatelessWidget {
                   Expanded(
                     child: Text(
                       label,
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodyMedium
-                          ?.copyWith(color: AppTheme.slate),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodyMedium?.copyWith(color: AppTheme.slate),
                     ),
                   ),
                   const SizedBox(width: 8),

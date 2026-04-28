@@ -256,19 +256,17 @@ class AdaptiveGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
-        final double maxWidth = constraints.maxWidth.isFinite ? constraints.maxWidth : MediaQuery.of(context).size.width;
+        final double maxWidth = constraints.maxWidth.isFinite
+            ? constraints.maxWidth
+            : MediaQuery.of(context).size.width;
         final int count = math.max(1, (maxWidth / minItemWidth).floor());
-                final double itemWidth = (maxWidth - (spacing * (count - 1))) / count;
+        final double itemWidth = (maxWidth - (spacing * (count - 1))) / count;
         final double itemHeight = itemWidth / childAspectRatio;
         return Wrap(
           spacing: spacing,
           runSpacing: spacing,
           children: children.map((Widget child) {
-            return SizedBox(
-              width: itemWidth,
-              height: itemHeight,
-              child: child,
-            );
+            return SizedBox(width: itemWidth, height: itemHeight, child: child);
           }).toList(),
         );
       },
@@ -544,12 +542,18 @@ class ImageComparisonCard extends StatelessWidget {
     required this.label,
     required this.grayscale,
     this.previewBytes,
+    this.previewUrl,
+    this.networkHeaders,
+    this.applyPreviewFilter = true,
     this.caption,
   });
 
   final String label;
   final bool grayscale;
   final Uint8List? previewBytes;
+  final String? previewUrl;
+  final Map<String, String>? networkHeaders;
+  final bool applyPreviewFilter;
   final String? caption;
 
   @override
@@ -601,30 +605,65 @@ class ImageComparisonCard extends StatelessWidget {
               child: Stack(
                 fit: StackFit.expand,
                 children: <Widget>[
-                  if (previewBytes != null)
+                  if (previewBytes != null || (previewUrl?.isNotEmpty ?? false))
                     ColorFiltered(
-                      colorFilter: grayscale
+                      colorFilter: grayscale && applyPreviewFilter
                           ? const ColorFilter.matrix(<double>[
-                              0.2126, 0.7152, 0.0722, 0, 0,
-                              0.2126, 0.7152, 0.0722, 0, 0,
-                              0.2126, 0.7152, 0.0722, 0, 0,
-                              0, 0, 0, 1, 0,
+                              0.2126,
+                              0.7152,
+                              0.0722,
+                              0,
+                              0,
+                              0.2126,
+                              0.7152,
+                              0.0722,
+                              0,
+                              0,
+                              0.2126,
+                              0.7152,
+                              0.0722,
+                              0,
+                              0,
+                              0,
+                              0,
+                              0,
+                              1,
+                              0,
                             ])
                           : const ColorFilter.mode(
                               Colors.transparent,
                               BlendMode.srcOver,
                             ),
-                      child: Image.memory(
-                        previewBytes!,
-                        fit: BoxFit.cover,
-                        errorBuilder: (
-                          BuildContext context,
-                          Object error,
-                          StackTrace? stackTrace,
-                        ) {
-                          return _ComparisonPlaceholder(grayscale: grayscale);
-                        },
-                      ),
+                      child: previewBytes != null
+                          ? Image.memory(
+                              previewBytes!,
+                              fit: BoxFit.cover,
+                              errorBuilder:
+                                  (
+                                    BuildContext context,
+                                    Object error,
+                                    StackTrace? stackTrace,
+                                  ) {
+                                    return _ComparisonPlaceholder(
+                                      grayscale: grayscale,
+                                    );
+                                  },
+                            )
+                          : Image.network(
+                              previewUrl!,
+                              fit: BoxFit.cover,
+                              headers: networkHeaders,
+                              errorBuilder:
+                                  (
+                                    BuildContext context,
+                                    Object error,
+                                    StackTrace? stackTrace,
+                                  ) {
+                                    return _ComparisonPlaceholder(
+                                      grayscale: grayscale,
+                                    );
+                                  },
+                            ),
                     )
                   else
                     _ComparisonPlaceholder(grayscale: grayscale),

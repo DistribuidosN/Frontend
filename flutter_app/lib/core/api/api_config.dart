@@ -1,12 +1,10 @@
 import 'package:flutter/foundation.dart';
 
-const String _defaultBaseUrl = 'http://localhost:50021/api/v1';
+const String _defaultLocalBaseUrl = 'http://localhost:50021/api/v1';
+const String _defaultWebBaseUrl = 'http://172.24.14.205:50021/api/v1';
 
 class ApiConfig {
-  const ApiConfig({
-    required this.baseUrl,
-    required this.adminProxyBaseUrl,
-  });
+  const ApiConfig({required this.baseUrl, required this.adminProxyBaseUrl});
 
   final String baseUrl;
   final String adminProxyBaseUrl;
@@ -21,20 +19,24 @@ class ApiConfig {
         baseUrl: fromEnvironment,
         adminProxyBaseUrl: proxyFromEnvironment.isNotEmpty
             ? proxyFromEnvironment
-            : _defaultBaseUrl,
+            : (kIsWeb ? _defaultWebBaseUrl : _defaultLocalBaseUrl),
       );
     }
+
+    final String resolvedDefaultBaseUrl = kIsWeb
+        ? _defaultWebBaseUrl
+        : _defaultLocalBaseUrl;
 
     if (defaultTargetPlatform == TargetPlatform.android) {
-      return const ApiConfig(
-        baseUrl: _defaultBaseUrl,
-        adminProxyBaseUrl: _defaultBaseUrl,
+      return ApiConfig(
+        baseUrl: resolvedDefaultBaseUrl,
+        adminProxyBaseUrl: resolvedDefaultBaseUrl,
       );
     }
 
-    return const ApiConfig(
-      baseUrl: _defaultBaseUrl,
-      adminProxyBaseUrl: _defaultBaseUrl,
+    return ApiConfig(
+      baseUrl: resolvedDefaultBaseUrl,
+      adminProxyBaseUrl: resolvedDefaultBaseUrl,
     );
   }
 }

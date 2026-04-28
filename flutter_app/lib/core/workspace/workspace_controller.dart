@@ -20,10 +20,12 @@ import 'package:imageflow_flutter/features/user/domain/user_statistics.dart';
 
 class WorkspaceController extends ChangeNotifier {
   WorkspaceController({ApiClient? apiClient}) {
-    _apiClient = apiClient ?? ApiClient(
-      ApiConfig.resolve(),
-      onUnauthenticated: _handleUnauthenticated,
-    );
+    _apiClient =
+        apiClient ??
+        ApiClient(
+          ApiConfig.resolve(),
+          onUnauthenticated: _handleUnauthenticated,
+        );
   }
 
   static const String _defaultAdminNodeId = 'node-1';
@@ -47,7 +49,7 @@ class WorkspaceController extends ChangeNotifier {
     final identity = prefs.getString('auth_identity');
     final userUuid = prefs.getString('auth_uuid');
     final username = prefs.getString('auth_username');
-    
+
     if (token != null && identity != null && roleId != null) {
       _session = AuthSession(
         token: token,
@@ -68,8 +70,12 @@ class WorkspaceController extends ChangeNotifier {
     await prefs.setString('auth_token', session.token);
     await prefs.setInt('auth_role', session.roleId);
     await prefs.setString('auth_identity', session.identity);
-    if (session.userUuid != null) await prefs.setString('auth_uuid', session.userUuid!);
-    if (session.username != null) await prefs.setString('auth_username', session.username!);
+    if (session.userUuid != null) {
+      await prefs.setString('auth_uuid', session.userUuid!);
+    }
+    if (session.username != null) {
+      await prefs.setString('auth_username', session.username!);
+    }
   }
 
   Future<void> _clearSessionLocally() async {
@@ -125,9 +131,7 @@ class WorkspaceController extends ChangeNotifier {
   Map<String, String> get authHeaders {
     final String? token = _session?.token;
     if (token == null || token.isEmpty) {
-      return const <String, String>{
-        'ngrok-skip-browser-warning': 'true',
-      };
+      return const <String, String>{'ngrok-skip-browser-warning': 'true'};
     }
     return <String, String>{
       'Authorization': 'Bearer $token',
@@ -159,7 +163,6 @@ class WorkspaceController extends ChangeNotifier {
     return const <WorkerNode>[];
   }
 
-
   Future<void> login({required String email, required String password}) async {
     final Map<String, dynamic> json = await _apiClient.postJson(
       '/auth/login',
@@ -168,7 +171,8 @@ class WorkspaceController extends ChangeNotifier {
 
     final String token = json['token'] as String? ?? '';
     final int roleId = (json['role_id'] as num?)?.toInt() ?? 0;
-    final String? userUuid = (json['user_uuid'] as String?) ?? (json['uuid'] as String?);
+    final String? userUuid =
+        (json['user_uuid'] as String?) ?? (json['uuid'] as String?);
     final String? username = json['username'] as String?;
 
     _session = AuthSession(
@@ -181,22 +185,31 @@ class WorkspaceController extends ChangeNotifier {
     await _saveSession(_session!);
 
     // Si faltan datos en el login, intentar obtenerlos de validate
-    if (_session!.userUuid == null || _session!.userUuid!.isEmpty || _session!.username == null) {
+    if (_session!.userUuid == null ||
+        _session!.userUuid!.isEmpty ||
+        _session!.username == null) {
       try {
         final Map<String, dynamic> validation = await _apiClient.getJson(
           '/auth/validate',
           token: _session!.token,
         );
-                int? valRole = (validation['role'] as num?)?.toInt();
+        int? valRole = (validation['role'] as num?)?.toInt();
         if (valRole == null && validation['role'] is String) {
           valRole = int.tryParse(validation['role'] as String);
         }
-        valRole ??= (validation['role_id'] as num?)?.toInt() ?? (validation['user']?['role_id'] as num?)?.toInt();
+        valRole ??=
+            (validation['role_id'] as num?)?.toInt() ??
+            (validation['user']?['role_id'] as num?)?.toInt();
         if (valRole == 0) valRole = null;
 
         _session = _session!.copyWith(
-          userUuid: (validation['user_uuid'] as String?) ?? (validation['uuid'] as String?) ?? (validation['user']?['uuid'] as String?),
-          username: (validation['username'] as String?) ?? (validation['user']?['username'] as String?),
+          userUuid:
+              (validation['user_uuid'] as String?) ??
+              (validation['uuid'] as String?) ??
+              (validation['user']?['uuid'] as String?),
+          username:
+              (validation['username'] as String?) ??
+              (validation['user']?['username'] as String?),
           roleId: valRole,
         );
         await _saveSession(_session!);
@@ -204,7 +217,8 @@ class WorkspaceController extends ChangeNotifier {
         _appendLog(
           level: LogLevel.warning,
           source: 'auth',
-          message: 'Token validated, but identity info could not be fully resolved.',
+          message:
+              'Token validated, but identity info could not be fully resolved.',
           job: '-',
         );
       }
@@ -242,7 +256,8 @@ class WorkspaceController extends ChangeNotifier {
       _appendLog(
         level: LogLevel.warning,
         source: 'telemetry',
-        message: 'Signed in, but user statistics endpoint is not reachable yet.',
+        message:
+            'Signed in, but user statistics endpoint is not reachable yet.',
         job: '-',
       );
     }
@@ -299,7 +314,8 @@ class WorkspaceController extends ChangeNotifier {
     _appendLog(
       level: LogLevel.success,
       source: 'auth',
-      message: 'Created ${roleId == 1 ? 'admin' : 'operator'} account for $email.',
+      message:
+          'Created ${roleId == 1 ? 'admin' : 'operator'} account for $email.',
       job: '-',
     );
   }
@@ -340,7 +356,11 @@ class WorkspaceController extends ChangeNotifier {
   Future<void> logout() async {
     if (_session != null && _session!.token.isNotEmpty) {
       try {
-        await _apiClient.postJson('/auth/logout', body: <String, dynamic>{}, token: _session!.token);
+        await _apiClient.postJson(
+          '/auth/logout',
+          body: <String, dynamic>{},
+          token: _session!.token,
+        );
       } catch (e) {
         _appendLog(
           level: LogLevel.warning,
@@ -378,7 +398,8 @@ class WorkspaceController extends ChangeNotifier {
       return false;
     }
 
-    int remainingBytes = kMaxBatchUploadBytes -
+    int remainingBytes =
+        kMaxBatchUploadBytes -
         _selectedFiles.fold<int>(
           0,
           (int sum, UploadFileItem file) => sum + file.sizeBytes,
@@ -426,7 +447,9 @@ class WorkspaceController extends ChangeNotifier {
       parts.add('$optimizedCount optimized to avoid server size limits.');
     }
     if (skippedCount > 0) {
-      parts.add('$skippedCount skipped because the batch would exceed ${_formatBytes(kMaxBatchUploadBytes)}.');
+      parts.add(
+        '$skippedCount skipped because the batch would exceed ${_formatBytes(kMaxBatchUploadBytes)}.',
+      );
     }
     _lastSelectionMessage = parts.join(' ');
     _appendLog(
@@ -490,7 +513,8 @@ class WorkspaceController extends ChangeNotifier {
     _appendLog(
       level: LogLevel.success,
       source: 'node',
-      message: 'Image $fileName uploaded successfully for synchronous processing.',
+      message:
+          'Image $fileName uploaded successfully for synchronous processing.',
       job: '-',
     );
   }
@@ -529,9 +553,12 @@ class WorkspaceController extends ChangeNotifier {
             (json['batch_uuid'] as String?) ??
             (json['batchId'] as String?) ??
             (json['jobId'] as String?) ??
+            (json['id'] as String?) ??
+            (json['requestId'] as String?) ??
             _buildRequestId(),
         status: (json['status'] as String?) ?? 'accepted',
-        message: (json['message'] as String?) ?? 'Batch submitted successfully.',
+        message:
+            (json['message'] as String?) ?? 'Batch submitted successfully.',
         fileCount: _selectedFiles.length,
         filters: _selectedFilters.toList(),
         fileNames: _selectedFiles.map((file) => file.name).toList(),
@@ -540,7 +567,7 @@ class WorkspaceController extends ChangeNotifier {
       _latestBatch = result;
       _latestBatchImages.clear();
       _lastSelectionMessage = 'Batch submitted: ${result.requestId}';
-      
+
       _appendLog(
         level: LogLevel.success,
         source: 'api',
@@ -550,7 +577,6 @@ class WorkspaceController extends ChangeNotifier {
       );
 
       try {
-        await refreshHistory(notify: false);
         await refreshLatestBatchImages(notify: false);
       } catch (_) {}
 
@@ -585,7 +611,7 @@ class WorkspaceController extends ChangeNotifier {
           filters: batch.filters,
           fileNames: batch.fileNames,
         );
-        
+
         _appendLog(
           level: LogLevel.info,
           source: 'api',
@@ -631,21 +657,23 @@ class WorkspaceController extends ChangeNotifier {
 
     final List<dynamic> rows = payload is List<dynamic>
         ? payload
-        : (payload is Map<String, dynamic> && payload['batches'] is List<dynamic>)
-            ? payload['batches'] as List<dynamic>
-            : <dynamic>[];
+        : (payload is Map<String, dynamic> &&
+              payload['batches'] is List<dynamic>)
+        ? payload['batches'] as List<dynamic>
+        : <dynamic>[];
 
     _historyRequests
       ..clear()
       ..addAll(
         rows.map((dynamic row) {
-          final Map<String, dynamic> item =
-              row is Map<String, dynamic> ? row : <String, dynamic>{};
+          final Map<String, dynamic> item = row is Map<String, dynamic>
+              ? row
+              : <String, dynamic>{};
 
           final Map<String, dynamic> batch =
               (item['batch'] is Map<String, dynamic>)
-                  ? item['batch'] as Map<String, dynamic>
-                  : item;
+              ? item['batch'] as Map<String, dynamic>
+              : item;
 
           final String batchUuid =
               (batch['batch_uuid'] as String?) ??
@@ -653,27 +681,35 @@ class WorkspaceController extends ChangeNotifier {
               (batch['id'] as String?) ??
               _buildRequestId();
 
-          final String rawStatus =
-              ((batch['status'] as String?) ?? 'PENDING').toUpperCase();
+          final String rawStatus = ((batch['status'] as String?) ?? 'PENDING')
+              .toUpperCase();
 
-          final String date = ((batch['request_time'] as String?) ??
-                               (batch['created_at'] as String?) ??
-                               '').trim();
+          final String date =
+              ((batch['request_time'] as String?) ??
+                      (batch['created_at'] as String?) ??
+                      '')
+                  .trim();
 
-          final int images = (batch['image_count'] as num?)?.toInt() ??
+          final int images =
+              (batch['image_count'] as num?)?.toInt() ??
               (batch['total_images'] as num?)?.toInt() ??
               0;
 
           String? coverUrl =
-              (item['cover_image_url'] as String?) ?? (batch['cover_url'] as String?);
+              (item['cover_image_url'] as String?) ??
+              (batch['cover_url'] as String?);
           if (coverUrl != null && coverUrl.isNotEmpty) {
             if (!coverUrl.startsWith('http') && !coverUrl.startsWith('data:')) {
               coverUrl = _resolveRelativeUrl(coverUrl);
-            } else if (coverUrl.contains('.ngrok-free.app') || coverUrl.contains('localhost')) {
+            } else if (coverUrl.contains('.ngrok-free.app') ||
+                coverUrl.contains('localhost')) {
               // Patch for backend sending old ngrok domains or localhost in pre-signed URLs
               final Uri currentUri = Uri.parse(_apiClient.config.baseUrl);
               final Uri badUri = Uri.parse(coverUrl);
-              String patched = coverUrl.replaceFirst(badUri.host, currentUri.host);
+              String patched = coverUrl.replaceFirst(
+                badUri.host,
+                currentUri.host,
+              );
               if (badUri.hasPort && !currentUri.hasPort) {
                 patched = patched.replaceFirst(':${badUri.port}', '');
               }
@@ -739,7 +775,10 @@ class WorkspaceController extends ChangeNotifier {
     await _loadGalleryForBatch(batch.requestId, notify: notify);
   }
 
-  Future<void> _loadGalleryForBatch(String batchId, {bool notify = true}) async {
+  Future<void> _loadGalleryForBatch(
+    String batchId, {
+    bool notify = true,
+  }) async {
     if (_session == null || _session!.token.isEmpty) return;
 
     dynamic payload;
@@ -776,11 +815,13 @@ class WorkspaceController extends ChangeNotifier {
     if (payload is List<dynamic>) {
       images = payload;
     } else if (isFallback) {
-      images = json['images'] as List<dynamic>? ??
+      images =
+          json['images'] as List<dynamic>? ??
           json['results'] as List<dynamic>? ??
           <dynamic>[];
     } else {
-      images = json['images'] as List<dynamic>? ??
+      images =
+          json['images'] as List<dynamic>? ??
           json['data'] as List<dynamic>? ??
           json['results'] as List<dynamic>? ??
           json['items'] as List<dynamic>? ??
@@ -793,17 +834,23 @@ class WorkspaceController extends ChangeNotifier {
       ..clear()
       ..addAll(
         images.map((dynamic row) {
-          final Map<String, dynamic> item =
-              row is Map<String, dynamic> ? row : <String, dynamic>{};
+          final Map<String, dynamic> item = row is Map<String, dynamic>
+              ? row
+              : <String, dynamic>{};
 
           if (isFallback) {
             final String base64Data =
-                (item['base64'] as String?) ?? (item['imageData'] as String?) ?? '';
+                (item['base64'] as String?) ??
+                (item['imageData'] as String?) ??
+                '';
             return BatchGalleryImage(
-              imageUuid: (item['id'] as String?) ?? (item['uuid'] as String?) ?? '',
+              imageUuid:
+                  (item['id'] as String?) ?? (item['uuid'] as String?) ?? '',
               batchUuid: batchId,
               originalName:
-                  (item['name'] as String?) ?? (item['fileName'] as String?) ?? 'result',
+                  (item['name'] as String?) ??
+                  (item['fileName'] as String?) ??
+                  'result',
               resultUrl: base64Data.isNotEmpty
                   ? 'data:image/png;base64,$base64Data'
                   : '',
@@ -832,24 +879,28 @@ class WorkspaceController extends ChangeNotifier {
       final int detectedCount = _latestBatchImages.isNotEmpty
           ? _latestBatchImages.length
           : ((json['total_count'] as num?)?.toInt() ?? 0);
-      final int totalFiles = batch.fileCount > 0 ? batch.fileCount : detectedCount;
+      final int totalFiles = batch.fileCount > 0
+          ? batch.fileCount
+          : detectedCount;
       final bool completed = totalFiles > 0 && detectedCount >= totalFiles;
       _latestBatch = UploadBatchResult(
         requestId: batch.requestId,
         status: completed
             ? 'completed'
             : detectedCount > 0
-                ? 'processing'
-                : batch.status,
+            ? 'processing'
+            : batch.status,
         message: completed
             ? 'Batch outputs are ready.'
             : detectedCount > 0
-                ? 'Batch is generating outputs.'
-                : batch.message,
+            ? 'Batch is generating outputs.'
+            : batch.message,
         fileCount: totalFiles,
         filters: batch.filters,
         fileNames: _latestBatchImages.isNotEmpty
-            ? _latestBatchImages.map((BatchGalleryImage img) => img.originalName).toList()
+            ? _latestBatchImages
+                  .map((BatchGalleryImage img) => img.originalName)
+                  .toList()
             : batch.fileNames,
       );
     }
@@ -878,14 +929,16 @@ class WorkspaceController extends ChangeNotifier {
       '/user/profile',
       token: _session!.token,
     );
-    final Map<String, dynamic> json =
-        payload is Map<String, dynamic> ? payload : <String, dynamic>{};
+    final Map<String, dynamic> json = payload is Map<String, dynamic>
+        ? payload
+        : <String, dynamic>{};
 
     final Map<String, dynamic> user = json['user'] is Map<String, dynamic>
         ? json['user'] as Map<String, dynamic>
         : json;
 
-    final String? uuid = (user['user_uuid'] as String?) ??
+    final String? uuid =
+        (user['user_uuid'] as String?) ??
         (user['uuid'] as String?) ??
         (user['id'] as String?);
     final String? username = user['username'] as String?;
@@ -930,10 +983,7 @@ class WorkspaceController extends ChangeNotifier {
       throw StateError('You need to sign in to delete your account.');
     }
 
-    await _apiClient.deleteJson(
-      '/user/account',
-      token: _session!.token,
-    );
+    await _apiClient.deleteJson('/user/account', token: _session!.token);
 
     await logout();
     _appendLog(
@@ -962,7 +1012,10 @@ class WorkspaceController extends ChangeNotifier {
     );
   }
 
-  Future<void> refreshUserStatisticsByUuid(String uuid, {bool notify = true}) async {
+  Future<void> refreshUserStatisticsByUuid(
+    String uuid, {
+    bool notify = true,
+  }) async {
     if (_session == null || _session!.token.isEmpty) {
       return;
     }
@@ -979,7 +1032,10 @@ class WorkspaceController extends ChangeNotifier {
     }
   }
 
-  Future<void> refreshUserActivityByUuid(String uuid, {bool notify = true}) async {
+  Future<void> refreshUserActivityByUuid(
+    String uuid, {
+    bool notify = true,
+  }) async {
     if (_session == null || _session!.token.isEmpty) {
       return;
     }
@@ -993,8 +1049,9 @@ class WorkspaceController extends ChangeNotifier {
       ..clear()
       ..addAll(
         json.map((dynamic item) {
-          final Map<String, dynamic> map =
-              item is Map<String, dynamic> ? item : <String, dynamic>{};
+          final Map<String, dynamic> map = item is Map<String, dynamic>
+              ? item
+              : <String, dynamic>{};
           return UserActivityEvent.fromJson(map);
         }),
       );
@@ -1022,7 +1079,10 @@ class WorkspaceController extends ChangeNotifier {
       // Fallback to generic endpoint if UUID variant is not supported by proxy
       if (path != '/user/statistics') {
         try {
-          payload = await _apiClient.getDecoded('/user/statistics', token: _session!.token);
+          payload = await _apiClient.getDecoded(
+            '/user/statistics',
+            token: _session!.token,
+          );
         } catch (_) {
           _appendLog(
             level: LogLevel.warning,
@@ -1045,8 +1105,9 @@ class WorkspaceController extends ChangeNotifier {
       }
     }
 
-    final Map<String, dynamic> json =
-        payload is Map<String, dynamic> ? payload : <String, dynamic>{};
+    final Map<String, dynamic> json = payload is Map<String, dynamic>
+        ? payload
+        : <String, dynamic>{};
     _userStatistics = UserStatistics.fromJson(json);
 
     if (notify) {
@@ -1072,7 +1133,10 @@ class WorkspaceController extends ChangeNotifier {
       // Fallback to generic endpoint if UUID variant is not supported by proxy
       if (path != '/user/activity') {
         try {
-          payload = await _apiClient.getDecoded('/user/activity', token: _session!.token);
+          payload = await _apiClient.getDecoded(
+            '/user/activity',
+            token: _session!.token,
+          );
         } catch (_) {
           _appendLog(
             level: LogLevel.warning,
@@ -1095,18 +1159,18 @@ class WorkspaceController extends ChangeNotifier {
       }
     }
 
-
     final List<dynamic> rows = switch (payload) {
       final List<dynamic> list => list,
-      final Map<String, dynamic> map => map['activity'] is List<dynamic>
-          ? map['activity'] as List<dynamic>
-          : map['activities'] is List<dynamic>
-              ? map['activities'] as List<dynamic>
-              : map['events'] is List<dynamic>
-                  ? map['events'] as List<dynamic>
-                  : map['data'] is List<dynamic>
-                      ? map['data'] as List<dynamic>
-                      : <dynamic>[],
+      final Map<String, dynamic> map =>
+        map['activity'] is List<dynamic>
+            ? map['activity'] as List<dynamic>
+            : map['activities'] is List<dynamic>
+            ? map['activities'] as List<dynamic>
+            : map['events'] is List<dynamic>
+            ? map['events'] as List<dynamic>
+            : map['data'] is List<dynamic>
+            ? map['data'] as List<dynamic>
+            : <dynamic>[],
       _ => <dynamic>[],
     };
 
@@ -1114,8 +1178,9 @@ class WorkspaceController extends ChangeNotifier {
       ..clear()
       ..addAll(
         rows.map((dynamic row) {
-          final Map<String, dynamic> item =
-              row is Map<String, dynamic> ? row : <String, dynamic>{};
+          final Map<String, dynamic> item = row is Map<String, dynamic>
+              ? row
+              : <String, dynamic>{};
           return UserActivityEvent.fromJson(item);
         }),
       );
@@ -1125,10 +1190,7 @@ class WorkspaceController extends ChangeNotifier {
     }
   }
 
-  Future<void> refreshAdminMetrics({
-    String? nodeId,
-    bool notify = true,
-  }) async {
+  Future<void> refreshAdminMetrics({String? nodeId, bool notify = true}) async {
     if (_session == null || _session!.token.isEmpty || !isAdmin) {
       return;
     }
@@ -1145,9 +1207,9 @@ class WorkspaceController extends ChangeNotifier {
     _adminMetricNodeId = targetNodeId;
     _adminNodeMetrics
       ..clear()
-      ..addAll(
-        switch (payload) {
-          final List<dynamic> rows => rows
+      ..addAll(switch (payload) {
+        final List<dynamic> rows =>
+          rows
               .map(
                 (dynamic row) => AdminNodeMetric.maybeFromJson(
                   row,
@@ -1155,29 +1217,25 @@ class WorkspaceController extends ChangeNotifier {
                 ),
               )
               .whereType<AdminNodeMetric>(),
-          _ => <AdminNodeMetric>[
-              if (AdminNodeMetric.maybeFromJson(
-                    payload,
-                    fallbackNodeId: targetNodeId,
-                  ) !=
-                  null)
-                AdminNodeMetric.maybeFromJson(
-                  payload,
-                  fallbackNodeId: targetNodeId,
-                )!,
-            ],
-        },
-      );
+        _ => <AdminNodeMetric>[
+          if (AdminNodeMetric.maybeFromJson(
+                payload,
+                fallbackNodeId: targetNodeId,
+              ) !=
+              null)
+            AdminNodeMetric.maybeFromJson(
+              payload,
+              fallbackNodeId: targetNodeId,
+            )!,
+        ],
+      });
 
     if (notify) {
       notifyListeners();
     }
   }
 
-  Future<void> refreshAdminLogs({
-    String? imageUuid,
-    bool notify = true,
-  }) async {
+  Future<void> refreshAdminLogs({String? imageUuid, bool notify = true}) async {
     if (_session == null || _session!.token.isEmpty || !isAdmin) {
       return;
     }
@@ -1194,8 +1252,9 @@ class WorkspaceController extends ChangeNotifier {
       ..clear()
       ..addAll(
         rows.map((dynamic row) {
-          final Map<String, dynamic> item =
-              row is Map<String, dynamic> ? row : <String, dynamic>{};
+          final Map<String, dynamic> item = row is Map<String, dynamic>
+              ? row
+              : <String, dynamic>{};
           return AdminAuditLog.fromJson(item);
         }),
       );
@@ -1251,37 +1310,26 @@ class WorkspaceController extends ChangeNotifier {
   }
 
   Future<String> downloadResultImage(String fileName) async {
-    final UploadFileItem? localFile = _selectedFiles.cast<UploadFileItem?>().firstWhere(
-      (UploadFileItem? item) => item?.name == fileName,
-      orElse: () => null,
-    );
-
-    if (localFile != null) {
-      final SavedFile saved = await saveBytes(
-        suggestedName: localFile.name,
-        bytes: localFile.bytes,
-        mimeType: _mimeTypeForFile(localFile.name),
+    final BatchGalleryImage? remoteImage = _latestBatchImages
+        .cast<BatchGalleryImage?>()
+        .firstWhere(
+          (BatchGalleryImage? item) => item?.originalName == fileName,
+          orElse: () => null,
+        );
+    if (remoteImage == null) {
+      throw StateError(
+        'The selected file is not present in the backend gallery for the current batch.',
       );
-      _appendLog(
-        level: LogLevel.info,
-        source: 'demo',
-        message: 'Saved demo asset $fileName to ${saved.location}.',
-        job: _latestBatch?.requestId ?? '-',
-      );
-      notifyListeners();
-      return saved.location;
     }
-
-    final BatchGalleryImage? remoteImage = _latestBatchImages.cast<BatchGalleryImage?>().firstWhere(
-      (BatchGalleryImage? item) => item?.originalName == fileName,
-      orElse: () => null,
-    );
-    if (remoteImage == null || !_isReachablePreviewUrl(remoteImage.resultUrl)) {
-      throw StateError('This image is only available as a remote placeholder right now.');
+    if (!_isReachablePreviewUrl(remoteImage.resultUrl)) {
+      throw StateError(
+        'This image is not downloadable yet because the backend has not published a processed result.',
+      );
     }
 
     final List<int> bytes = await _apiClient.getBytesFromAbsoluteUrl(
       remoteImage.resultUrl,
+      token: _session?.token,
     );
     final SavedFile saved = await saveBytes(
       suggestedName: fileName,
@@ -1297,8 +1345,6 @@ class WorkspaceController extends ChangeNotifier {
     notifyListeners();
     return saved.location;
   }
-
-
 
   void _appendLog({
     required LogLevel level,
@@ -1364,7 +1410,6 @@ class WorkspaceController extends ChangeNotifier {
     }
   }
 
-
   bool _isReachablePreviewUrl(String url) {
     final Uri? uri = Uri.tryParse(url);
     if (uri == null || !uri.hasScheme) {
@@ -1398,7 +1443,8 @@ class WorkspaceController extends ChangeNotifier {
     try {
       final Uri baseUri = Uri.parse(_apiClient.config.baseUrl);
       // Use scheme + host only (strip /api/v1 path prefix for static files)
-      final String origin = '${baseUri.scheme}://${baseUri.host}${baseUri.hasPort ? ':${baseUri.port}' : ''}';
+      final String origin =
+          '${baseUri.scheme}://${baseUri.host}${baseUri.hasPort ? ':${baseUri.port}' : ''}';
       if (path.startsWith('/')) {
         return '$origin$path';
       }
@@ -1454,7 +1500,6 @@ class WorkspaceController extends ChangeNotifier {
   }
 
   @override
-
   void dispose() {
     _apiClient.dispose();
     super.dispose();

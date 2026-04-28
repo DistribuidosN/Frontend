@@ -22,22 +22,82 @@ class _ResultsPageState extends State<ResultsPage> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final workspace = WorkspaceScope.of(context);
-      workspace.refreshHistory().then((_) {
-        if (workspace.latestBatch != null && _selectedBatch == null) {
-          try {
-            final match = workspace.historyRequests.firstWhere(
-              (b) => b.id == workspace.latestBatch!.requestId
-            );
-            _openBatch(match, workspace);
-          } catch (_) {}
-        }
-      });
+      workspace
+          .refreshHistory()
+          .then((_) {
+            if (workspace.latestBatch != null && _selectedBatch == null) {
+              try {
+                final match = workspace.historyRequests.firstWhere(
+                  (HistoryRequest batch) =>
+                      batch.id == workspace.latestBatch!.requestId,
+                );
+                _openBatch(match, workspace);
+                return;
+              } catch (_) {}
+            }
+
+            if (workspace.latestBatch != null &&
+                workspace.latestBatchImages.isEmpty &&
+                _selectedBatch == null) {
+              workspace.refreshLatestBatchImages(notify: false).then((_) {
+                if (mounted) {
+                  setState(() {});
+                }
+              });
+            } else if (mounted) {
+              setState(() {});
+            }
+          })
+          .catchError((_) {
+            if (workspace.latestBatch != null &&
+                workspace.latestBatchImages.isEmpty &&
+                _selectedBatch == null) {
+              workspace.refreshLatestBatchImages(notify: false).then((_) {
+                if (mounted) {
+                  setState(() {});
+                }
+              });
+            } else if (mounted) {
+              setState(() {});
+            }
+          });
     });
   }
 
   void _openBatch(HistoryRequest batch, dynamic workspace) async {
     setState(() => _selectedBatch = batch);
     await workspace.selectHistoryBatch(batch.id);
+  }
+
+  BatchGalleryImage? _matchGalleryImage(
+    List<BatchGalleryImage> images,
+    String fileName,
+  ) {
+    for (final BatchGalleryImage image in images) {
+      if (image.originalName == fileName) {
+        return image;
+      }
+    }
+    return null;
+  }
+
+  Widget _buildBatchResultPreview(
+    BuildContext context, {
+    required dynamic workspace,
+    required BatchGalleryImage? remoteImage,
+    BoxFit fit = BoxFit.cover,
+  }) {
+    if (remoteImage != null &&
+        workspace.isReachablePreviewUrl(remoteImage.resultUrl)) {
+      return Image.network(
+        remoteImage.resultUrl,
+        fit: fit,
+        headers: workspace.authHeaders,
+        errorBuilder: (_, __, ___) =>
+            _ResultPlaceholder(status: remoteImage.status),
+      );
+    }
+    return _ResultPlaceholder(status: remoteImage?.status ?? 'RECEIVED');
   }
 
   @override
@@ -60,22 +120,46 @@ class _ResultsPageState extends State<ResultsPage> {
           PageIntro(
             kicker: 'History',
             title: 'Processed Batches',
-            description: 'No batches found. Process some images to see them here.',
+            description:
+                'No batches found. Process some images to see them here.',
             actions: FilledButton.icon(
               onPressed: () => workspace.refreshHistory(),
               icon: const Icon(Icons.refresh_rounded, size: 18),
               label: const Text('Refresh'),
             ),
           ),
-          const Expanded(
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.history_rounded, size: 64, color: AppTheme.onSurfaceVariant),
-                  SizedBox(height: 16),
-                  Text('No batches found', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppTheme.ink)),
-                ],
+          const SizedBox(height: 24),
+          SizedBox(
+            width: double.infinity,
+            child: AppSurface(
+              color: AppTheme.surfaceRaised,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 56),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: const [
+                    Icon(
+                      Icons.history_rounded,
+                      size: 64,
+                      color: AppTheme.onSurfaceVariant,
+                    ),
+                    SizedBox(height: 16),
+                    Text(
+                      'No batches found',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.ink,
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      'Submit a batch or refresh history to load backend results.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: AppTheme.onSurfaceVariant),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -89,7 +173,8 @@ class _ResultsPageState extends State<ResultsPage> {
         PageIntro(
           kicker: 'Batch History',
           title: 'Processed Batches',
-          description: 'Double-click a batch to view its processed images and details.',
+          description:
+              'Double-click a batch to view its processed images and details.',
           actions: FilledButton.icon(
             onPressed: () => workspace.refreshHistory(),
             icon: const Icon(Icons.refresh_rounded, size: 18),
@@ -106,12 +191,16 @@ class _ResultsPageState extends State<ResultsPage> {
               onDoubleTap: () => _openBatch(batch, workspace),
               onTap: () {
                 final platform = Theme.of(context).platform;
-                if (platform == TargetPlatform.iOS || platform == TargetPlatform.android) {
+                if (platform == TargetPlatform.iOS ||
+                    platform == TargetPlatform.android) {
                   _openBatch(batch, workspace);
                 } else {
                   ScaffoldMessenger.of(context).removeCurrentSnackBar();
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Double-click to open batch details'), duration: Duration(seconds: 1)),
+                    const SnackBar(
+                      content: Text('Double-click to open batch details'),
+                      duration: Duration(seconds: 1),
+                    ),
                   );
                 }
               },
@@ -130,14 +219,30 @@ class _ResultsPageState extends State<ResultsPage> {
                       flex: 3,
                       child: Container(
                         color: AppTheme.surfaceRaised,
-                        child: batch.coverImageUrl != null && workspace.isReachablePreviewUrl(batch.coverImageUrl!)
+                        child:
+                            batch.coverImageUrl != null &&
+                                workspace.isReachablePreviewUrl(
+                                  batch.coverImageUrl!,
+                                )
                             ? Image.network(
                                 batch.coverImageUrl!,
                                 fit: BoxFit.cover,
                                 headers: workspace.authHeaders,
-                                errorBuilder: (_, __, ___) => const Center(child: Icon(Icons.image_outlined, size: 48, color: AppTheme.onSurfaceVariant)),
+                                errorBuilder: (_, __, ___) => const Center(
+                                  child: Icon(
+                                    Icons.image_outlined,
+                                    size: 48,
+                                    color: AppTheme.onSurfaceVariant,
+                                  ),
+                                ),
                               )
-                            : const Center(child: Icon(Icons.image_outlined, size: 48, color: AppTheme.onSurfaceVariant)),
+                            : const Center(
+                                child: Icon(
+                                  Icons.image_outlined,
+                                  size: 48,
+                                  color: AppTheme.onSurfaceVariant,
+                                ),
+                              ),
                       ),
                     ),
                     Expanded(
@@ -147,9 +252,17 @@ class _ResultsPageState extends State<ResultsPage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Batch ${batch.id.substring(0, 8)}...', style: Theme.of(context).textTheme.titleMedium, overflow: TextOverflow.ellipsis),
+                            Text(
+                              'Batch ${batch.id.substring(0, 8)}...',
+                              style: Theme.of(context).textTheme.titleMedium,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                             const SizedBox(height: 4),
-                            Text(batch.date, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppTheme.onSurfaceVariant)),
+                            Text(
+                              batch.date,
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(color: AppTheme.onSurfaceVariant),
+                            ),
                             const Spacer(),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -165,20 +278,31 @@ class _ResultsPageState extends State<ResultsPage> {
                                   color: switch (batch.status) {
                                     RequestStatus.completed => AppTheme.success,
                                     RequestStatus.failed => AppTheme.error,
-                                    RequestStatus.processing => const Color(0xFFE67E22),
-                                    RequestStatus.received => const Color(0xFF3498DB),
-                                    RequestStatus.pending => AppTheme.onSurfaceVariant,
+                                    RequestStatus.processing => const Color(
+                                      0xFFE67E22,
+                                    ),
+                                    RequestStatus.received => const Color(
+                                      0xFF3498DB,
+                                    ),
+                                    RequestStatus.pending =>
+                                      AppTheme.onSurfaceVariant,
                                   },
                                   background: switch (batch.status) {
-                                    RequestStatus.completed => AppTheme.successSoft,
+                                    RequestStatus.completed =>
+                                      AppTheme.successSoft,
                                     RequestStatus.failed => AppTheme.dangerSoft,
-                                    RequestStatus.processing => const Color(0xFFFEF3E2),
-                                    RequestStatus.received => const Color(0xFFEBF5FB),
-                                    RequestStatus.pending => AppTheme.surfaceRaised,
+                                    RequestStatus.processing => const Color(
+                                      0xFFFEF3E2,
+                                    ),
+                                    RequestStatus.received => const Color(
+                                      0xFFEBF5FB,
+                                    ),
+                                    RequestStatus.pending =>
+                                      AppTheme.surfaceRaised,
                                   },
                                 ),
                               ],
-                            )
+                            ),
                           ],
                         ),
                       ),
@@ -201,6 +325,15 @@ class _ResultsPageState extends State<ResultsPage> {
         ? null
         : workspace.selectedFiles.first;
     final List<BatchGalleryImage> galleryImages = workspace.latestBatchImages;
+    final BatchGalleryImage? sampleProcessedImage = galleryImages
+        .cast<BatchGalleryImage?>()
+        .firstWhere(
+          (BatchGalleryImage? image) =>
+              image != null &&
+              image.hasResult &&
+              workspace.isReachablePreviewUrl(image.resultUrl),
+          orElse: () => null,
+        );
 
     final List<ResultAsset> assets = latestBatch == null
         ? const <ResultAsset>[]
@@ -229,7 +362,8 @@ class _ResultsPageState extends State<ResultsPage> {
                           .cast<String?>()
                           .firstWhere(
                             (String? size) => size != null,
-                            orElse: () => galleryImages.isNotEmpty ? 'ready' : 'pending',
+                            orElse: () =>
+                                galleryImages.isNotEmpty ? 'ready' : 'pending',
                           ) ??
                       'pending',
                   transforms: filters,
@@ -262,8 +396,9 @@ class _ResultsPageState extends State<ResultsPage> {
                 : () async {
                     final messenger = ScaffoldMessenger.of(context);
                     try {
-                      final String location =
-                          await workspace.downloadBatchById(_selectedBatch!.id);
+                      final String location = await workspace.downloadBatchById(
+                        _selectedBatch!.id,
+                      );
                       if (!context.mounted) return;
                       messenger.showSnackBar(
                         SnackBar(content: Text('Archive saved to $location')),
@@ -343,7 +478,8 @@ class _ResultsPageState extends State<ResultsPage> {
                   ),
                   SummaryMetricCard(
                     label: 'Outputs',
-                    value: '${galleryImages.isEmpty ? assets.length : galleryImages.length}',
+                    value:
+                        '${galleryImages.isEmpty ? assets.length : galleryImages.length}',
                     color: AppTheme.ink,
                   ),
                 ],
@@ -426,10 +562,14 @@ class _ResultsPageState extends State<ResultsPage> {
                           ImageComparisonCard(
                             label: 'After',
                             grayscale: true,
-                            previewBytes: previewFile?.bytes,
+                            previewUrl: sampleProcessedImage?.resultUrl,
+                            networkHeaders: workspace.authHeaders,
+                            applyPreviewFilter: false,
                             caption: filters.isEmpty
-                                ? 'Processed output preview will reflect the selected batch settings.'
-                                : 'Preview based on ${filters.first} and the rest of the selected transforms.',
+                                ? 'Processed output will appear here as soon as the backend publishes it.'
+                                : sampleProcessedImage == null
+                                ? 'Waiting for the backend gallery to publish the processed file.'
+                                : 'Rendered from the processed asset stored by the backend.',
                           ),
                         ],
                       ),
@@ -467,13 +607,9 @@ class _ResultsPageState extends State<ResultsPage> {
                   childAspectRatio: 0.92,
                   spacing: 16,
                   children: assets.map((ResultAsset result) {
-                    final localFile = workspace.selectedFiles.cast<dynamic>().firstWhere(
-                      (dynamic file) => file.name == result.name,
-                      orElse: () => null,
-                    );
-                    final remoteImage = galleryImages.cast<BatchGalleryImage?>().firstWhere(
-                      (BatchGalleryImage? image) => image?.originalName == result.name,
-                      orElse: () => null,
+                    final BatchGalleryImage? remoteImage = _matchGalleryImage(
+                      galleryImages,
+                      result.name,
                     );
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -485,53 +621,25 @@ class _ResultsPageState extends State<ResultsPage> {
                               borderRadius: BorderRadius.circular(
                                 AppTheme.radii.lg,
                               ),
-                              border: Border.all(color: AppTheme.outlineVariant),
+                              border: Border.all(
+                                color: AppTheme.outlineVariant,
+                              ),
                             ),
                             clipBehavior: Clip.antiAlias,
                             child: Stack(
                               fit: StackFit.expand,
                               children: <Widget>[
-                                // Show processed result first; fall back to
-                                // original local bytes only when no result URL.
-                                if (remoteImage != null &&
-                                    workspace.isReachablePreviewUrl(
-                                      remoteImage.resultUrl,
-                                    ))
-                                  Image.network(
-                                    remoteImage.resultUrl,
-                                    fit: BoxFit.cover,
-                                    headers: workspace.authHeaders,
-                                    errorBuilder: (_, __, ___) =>
-                                        localFile != null
-                                            ? Image.memory(
-                                                localFile.bytes,
-                                                fit: BoxFit.cover,
-                                              )
-                                            : const Center(
-                                                child: Icon(
-                                                  Icons.image_outlined,
-                                                  size: 32,
-                                                  color: AppTheme.onSurfaceVariant,
-                                                ),
-                                              ),
-                                  )
-                                else if (localFile != null)
-                                  Image.memory(localFile.bytes, fit: BoxFit.cover)
-                                else
-                                  const Center(
-                                    child: Icon(
-                                      Icons.image_outlined,
-                                      size: 32,
-                                      color: AppTheme.onSurfaceVariant,
-                                    ),
-                                  ),
+                                _buildBatchResultPreview(
+                                  context,
+                                  workspace: workspace,
+                                  remoteImage: remoteImage,
+                                ),
                                 Positioned(
                                   left: 12,
                                   right: 12,
                                   bottom: 12,
                                   child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.center,
+                                    mainAxisAlignment: MainAxisAlignment.center,
                                     children: <Widget>[
                                       SmallIconButton(
                                         icon: Icons.zoom_in_rounded,
@@ -542,34 +650,14 @@ class _ResultsPageState extends State<ResultsPage> {
                                               return Dialog(
                                                 child: AspectRatio(
                                                   aspectRatio: 1,
-                                                  child: remoteImage != null &&
-                                                          workspace.isReachablePreviewUrl(
-                                                            remoteImage.resultUrl,
-                                                          )
-                                                      ? Image.network(
-                                                          remoteImage.resultUrl,
-                                                          fit: BoxFit.contain,
-                                                          headers: workspace.authHeaders,
-                                                          errorBuilder: (_, __, ___) =>
-                                                              localFile != null
-                                                                  ? Image.memory(
-                                                                      localFile.bytes,
-                                                                      fit: BoxFit.contain,
-                                                                    )
-                                                                  : const Center(
-                                                                      child: Text('Preview unavailable'),
-                                                                    ),
-                                                        )
-                                                      : localFile != null
-                                                          ? Image.memory(
-                                                              localFile.bytes,
-                                                              fit: BoxFit.contain,
-                                                            )
-                                                          : const Center(
-                                                              child: Text(
-                                                                'Preview not available for this image.',
-                                                              ),
-                                                            ),
+                                                  child:
+                                                      _buildBatchResultPreview(
+                                                        dialogContext,
+                                                        workspace: workspace,
+                                                        remoteImage:
+                                                            remoteImage,
+                                                        fit: BoxFit.contain,
+                                                      ),
                                                 ),
                                               );
                                             },
@@ -580,12 +668,14 @@ class _ResultsPageState extends State<ResultsPage> {
                                       SmallIconButton(
                                         icon: Icons.download_rounded,
                                         onTap: () async {
-                                          final messenger = ScaffoldMessenger.of(
-                                            context,
-                                          );
+                                          final messenger =
+                                              ScaffoldMessenger.of(context);
                                           try {
-                                            final String location = await workspace
-                                                .downloadResultImage(result.name);
+                                            final String location =
+                                                await workspace
+                                                    .downloadResultImage(
+                                                      result.name,
+                                                    );
                                             if (!context.mounted) {
                                               return;
                                             }
@@ -602,9 +692,7 @@ class _ResultsPageState extends State<ResultsPage> {
                                             }
                                             messenger.showSnackBar(
                                               SnackBar(
-                                                content: Text(
-                                                  error.toString(),
-                                                ),
+                                                content: Text(error.toString()),
                                               ),
                                             );
                                           }
@@ -634,6 +722,10 @@ class _ResultsPageState extends State<ResultsPage> {
                 )
               : Column(
                   children: assets.map((ResultAsset result) {
+                    final BatchGalleryImage? remoteImage = _matchGalleryImage(
+                      galleryImages,
+                      result.name,
+                    );
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 12),
                       child: AppSurface(
@@ -647,9 +739,13 @@ class _ResultsPageState extends State<ResultsPage> {
                                 color: AppTheme.surfaceContainer,
                                 borderRadius: BorderRadius.circular(16),
                               ),
-                              child: const Icon(
-                                Icons.image_outlined,
-                                color: AppTheme.onSurfaceVariant,
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(16),
+                                child: _buildBatchResultPreview(
+                                  context,
+                                  workspace: workspace,
+                                  remoteImage: remoteImage,
+                                ),
                               ),
                             ),
                             const SizedBox(width: 12),
@@ -661,7 +757,9 @@ class _ResultsPageState extends State<ResultsPage> {
                                   const SizedBox(height: 4),
                                   Text(
                                     result.size,
-                                    style: Theme.of(context).textTheme.bodySmall,
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.bodySmall,
                                   ),
                                 ],
                               ),
@@ -699,6 +797,46 @@ class _ResultsPageState extends State<ResultsPage> {
                 ),
         ),
       ],
+    );
+  }
+}
+
+class _ResultPlaceholder extends StatelessWidget {
+  const _ResultPlaceholder({required this.status});
+
+  final String status;
+
+  @override
+  Widget build(BuildContext context) {
+    final String normalized = status.trim().toUpperCase();
+    final IconData icon = switch (normalized) {
+      'FAILED' => Icons.error_outline_rounded,
+      'COMPLETED' || 'CONVERTED' => Icons.image_outlined,
+      'PROCESSING' => Icons.autorenew_rounded,
+      _ => Icons.hourglass_top_rounded,
+    };
+    final String label = switch (normalized) {
+      'FAILED' => 'Failed',
+      'COMPLETED' || 'CONVERTED' => 'No preview',
+      'PROCESSING' => 'Processing',
+      'RECEIVED' => 'Received',
+      _ => normalized.isEmpty ? 'Pending' : normalized,
+    };
+
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Icon(icon, size: 32, color: AppTheme.onSurfaceVariant),
+          const SizedBox(height: 8),
+          Text(
+            label,
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: AppTheme.onSurfaceVariant),
+          ),
+        ],
+      ),
     );
   }
 }

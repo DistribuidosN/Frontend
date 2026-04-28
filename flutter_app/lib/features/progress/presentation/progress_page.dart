@@ -26,7 +26,10 @@ class _ProgressPageState extends State<ProgressPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await _refresh();
       if (mounted) {
-        _pollTimer = Timer.periodic(const Duration(seconds: 3), (_) => _refresh());
+        _pollTimer = Timer.periodic(
+          const Duration(seconds: 3),
+          (_) => _refresh(),
+        );
       }
     });
   }
@@ -40,9 +43,7 @@ class _ProgressPageState extends State<ProgressPage> {
   Future<void> _refresh() async {
     final workspace = WorkspaceScope.of(context);
     try {
-      await workspace.refreshBatchStatus(notify: false);
       await workspace.refreshLatestBatchImages(notify: false);
-      await workspace.refreshHistory(notify: false);
       if (!mounted) {
         return;
       }
@@ -66,16 +67,37 @@ class _ProgressPageState extends State<ProgressPage> {
     final latestBatch = workspace.latestBatch;
     final List<BatchGalleryImage> images = workspace.latestBatchImages;
     final int totalFiles = latestBatch?.fileCount ?? 0;
-    final int completed = images.length.clamp(
+    final int completed = images
+        .where(
+          (BatchGalleryImage image) => image.isProcessed && image.hasResult,
+        )
+        .length
+        .clamp(0, totalFiles == 0 ? images.length : totalFiles);
+    final int failed = images
+        .where(
+          (BatchGalleryImage image) =>
+              image.status.trim().toUpperCase() == 'FAILED',
+        )
+        .length;
+    final int processing = images
+        .where(
+          (BatchGalleryImage image) =>
+              image.status.trim().toUpperCase() != 'FAILED' &&
+              !(image.isProcessed && image.hasResult),
+        )
+        .length;
+    final int queued = math.max(
       0,
-      totalFiles == 0 ? images.length : totalFiles,
+      totalFiles - completed - failed - processing,
     );
-    final int processing = completed < totalFiles && totalFiles > 0 ? 1 : 0;
-    final int queued = math.max(0, totalFiles - completed - processing);
     final double progress = totalFiles == 0
         ? 0
         : (completed / totalFiles).clamp(0, 1);
-    final bool finished = totalFiles > 0 && completed >= totalFiles;
+    final bool finished =
+        totalFiles > 0 &&
+        completed + failed >= totalFiles &&
+        processing == 0 &&
+        queued == 0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -188,7 +210,7 @@ class _ProgressPageState extends State<ProgressPage> {
                   _StatusStatCard(
                     icon: Icons.cancel_outlined,
                     label: 'Failed',
-                    value: '0',
+                    value: '$failed',
                     color: AppTheme.danger,
                     background: AppTheme.dangerSoft,
                   ),
@@ -200,63 +222,101 @@ class _ProgressPageState extends State<ProgressPage> {
         if (images.isNotEmpty) ...<Widget>[
           const SizedBox(height: 20),
           SectionPanel(
-            title: 'Completed outputs',
+            title: 'Batch gallery',
             description:
-                'Every image that already made it to the gallery appears here while the batch is still running.',
+                'This view reflects the real gallery payload from the backend, including placeholders for files that are still processing.',
             child: AdaptiveGrid(
               minItemWidth: 200,
               childAspectRatio: 0.88,
               spacing: 14,
               children: images.map((BatchGalleryImage image) {
-                    final previewFile = workspace.selectedFiles.cast<dynamic>().firstWhere(
-                      (dynamic file) => file.name == image.originalName,
-                      orElse: () => null,
-                    );
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Expanded(
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: AppTheme.surfaceContainer,
-                              borderRadius: BorderRadius.circular(22),
-                              border: Border.all(color: AppTheme.outlineVariant),
-                            ),
-                            clipBehavior: Clip.antiAlias,
-                            child: previewFile == null
-                                ? const Center(
-                                    child: Icon(
-                                      Icons.image_outlined,
-                                      size: 32,
-                                      color: AppTheme.onSurfaceVariant,
+                final bool hasPreview =
+                    image.hasResult &&
+                    workspace.isReachablePreviewUrl(image.resultUrl);
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: AppTheme.surfaceContainer,
+                          borderRadius: BorderRadius.circular(22),
+                          border: Border.all(color: AppTheme.outlineVariant),
+                        ),
+                        clipBehavior: Clip.antiAlias,
+                        child: hasPreview
+                            ? Image.network(
+                                image.resultUrl,
+                                fit: BoxFit.cover,
+                                width: double.infinity,
+                                height: double.infinity,
+                                headers: workspace.authHeaders,
+                                errorBuilder: (_, __, ___) =>
+                                    _ProgressImagePlaceholder(
+                                      status: image.status,
                                     ),
-                                  )
-                                : Image.memory(
-                                    previewFile.bytes,
-                                    fit: BoxFit.cover,
-                                    width: double.infinity,
-                                    height: double.infinity,
-                                  ),
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          image.originalName,
-                          overflow: TextOverflow.ellipsis,
-                          style: Theme.of(context).textTheme.labelMedium,
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          '${image.status} • ${image.nodeId}',
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                      ],
-                    );
-                  }).toList(),
-                ),
+                              )
+                            : _ProgressImagePlaceholder(status: image.status),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      image.originalName,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.labelMedium,
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '${image.status} • ${image.nodeId.isEmpty ? "-" : image.nodeId}',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ],
+                );
+              }).toList(),
+            ),
           ),
         ],
       ],
+    );
+  }
+}
+
+class _ProgressImagePlaceholder extends StatelessWidget {
+  const _ProgressImagePlaceholder({required this.status});
+
+  final String status;
+
+  @override
+  Widget build(BuildContext context) {
+    final String normalized = status.trim().toUpperCase();
+    final IconData icon = switch (normalized) {
+      'FAILED' => Icons.error_outline_rounded,
+      'PROCESSING' => Icons.autorenew_rounded,
+      'COMPLETED' || 'CONVERTED' => Icons.image_outlined,
+      _ => Icons.hourglass_top_rounded,
+    };
+    final String label = switch (normalized) {
+      'FAILED' => 'Failed',
+      'PROCESSING' => 'Processing',
+      'RECEIVED' => 'Received',
+      'COMPLETED' || 'CONVERTED' => 'No file',
+      _ => normalized.isEmpty ? 'Pending' : normalized,
+    };
+
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Icon(icon, size: 32, color: AppTheme.onSurfaceVariant),
+          const SizedBox(height: 8),
+          Text(
+            label,
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: AppTheme.onSurfaceVariant),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -343,9 +403,9 @@ class _SignalProgressBarState extends State<_SignalProgressBar>
           widget.total == 0
               ? 'Waiting for a batch.'
               : '${widget.completed} of ${widget.total} outputs already visible in gallery.',
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: AppTheme.slate,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodySmall?.copyWith(color: AppTheme.slate),
         ),
       ],
     );

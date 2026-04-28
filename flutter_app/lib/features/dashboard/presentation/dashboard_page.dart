@@ -20,44 +20,25 @@ class DashboardPage extends StatefulWidget {
 
 class _DashboardPageState extends State<DashboardPage> {
   DashboardWindow _window = DashboardWindow.week;
-  bool _isRefreshing = false;
-
-  Future<void> _onRefresh() async {
-    if (_isRefreshing) return;
-    setState(() => _isRefreshing = true);
-    try {
-      final workspace = WorkspaceScope.of(context);
-      await Future.wait([
-        workspace.refreshUserStatistics(notify: false),
-        workspace.refreshUserActivity(notify: false),
-        workspace.refreshHistory(notify: false),
-        if (workspace.isAdmin) workspace.refreshAdminMetrics(notify: false),
-        if (workspace.isAdmin) workspace.refreshAdminLogs(notify: false),
-      ]);
-    } finally {
-      if (mounted) {
-        setState(() => _isRefreshing = false);
-      }
-    }
-  }
+  final bool _isRefreshing = false;
 
   @override
   Widget build(BuildContext context) {
     final workspace = WorkspaceScope.of(context);
-    
-    return workspace.isAdmin 
+
+    return workspace.isAdmin
         ? _AdminDashboard(
-            window: _window, 
+            window: _window,
             isRefreshing: _isRefreshing,
             onWindowChanged: (DashboardWindow value) {
-                setState(() => _window = value);
+              setState(() => _window = value);
             },
           )
         : _UserDashboard(
             window: _window,
             isRefreshing: _isRefreshing,
             onWindowChanged: (DashboardWindow value) {
-                setState(() => _window = value);
+              setState(() => _window = value);
             },
           );
   }
@@ -94,8 +75,8 @@ class _UserDashboard extends StatelessWidget {
             final String label = e.timestamp.length >= 16
                 ? e.timestamp.substring(11, 16) // "HH:MM"
                 : (e.timestamp.length >= 10
-                    ? e.timestamp.substring(5, 10) // "MM-DD"
-                    : e.action);
+                      ? e.timestamp.substring(5, 10) // "MM-DD"
+                      : e.action);
             return ThroughputPoint(
               label: label,
               processed: e.imagesProcessed,
@@ -129,48 +110,57 @@ class _UserDashboard extends StatelessWidget {
 
         // Tier 3: use short batch ID as label so users can identify each bar.
         // Processed value uses a wave pattern since backend omits image_count.
-        const List<int> _wave = <int>[4, 7, 5, 9, 6, 8, 5];
-        return history.reversed.take(7).toList().reversed.toList()
+        const List<int> wavePattern = <int>[4, 7, 5, 9, 6, 8, 5];
+        return history.reversed
+            .take(7)
+            .toList()
+            .reversed
+            .toList()
             .asMap()
             .entries
             .map((entry) {
-          final int i = entry.key;
-          final String batchId = entry.value.id;
-          // Show last 6 chars of UUID, e.g. "a3af9" — unique and compact
-          final String shortId = batchId.length > 6
-              ? batchId.substring(batchId.length - 6)
-              : batchId;
-          return ThroughputPoint(
-            label: shortId,
-            processed: _wave[i % _wave.length],
-            queued: 0,
-          );
-        }).toList();
+              final int i = entry.key;
+              final String batchId = entry.value.id;
+              // Show last 6 chars of UUID, e.g. "a3af9" — unique and compact
+              final String shortId = batchId.length > 6
+                  ? batchId.substring(batchId.length - 6)
+                  : batchId;
+              return ThroughputPoint(
+                label: shortId,
+                processed: wavePattern[i % wavePattern.length],
+                queued: 0,
+              );
+            })
+            .toList();
       }
 
       // Tier 4: activity events with wave pattern
       if (activityEvents.isNotEmpty) {
-        const List<int> _wave = <int>[3, 6, 4, 8, 5, 7, 4];
-        return activityEvents.reversed.take(7).toList().reversed.toList()
+        const List<int> wavePattern = <int>[3, 6, 4, 8, 5, 7, 4];
+        return activityEvents.reversed
+            .take(7)
+            .toList()
+            .reversed
+            .toList()
             .asMap()
             .entries
             .map((entry) {
-          final UserActivityEvent e = entry.value;
-          final int i = entry.key;
-          final String label = e.timestamp.length >= 16
-              ? e.timestamp.substring(11, 16)
-              : 'ev${i + 1}';
-          return ThroughputPoint(
-            label: label,
-            processed: _wave[i % _wave.length],
-            queued: 0,
-          );
-        }).toList();
+              final UserActivityEvent e = entry.value;
+              final int i = entry.key;
+              final String label = e.timestamp.length >= 16
+                  ? e.timestamp.substring(11, 16)
+                  : 'ev${i + 1}';
+              return ThroughputPoint(
+                label: label,
+                processed: wavePattern[i % wavePattern.length],
+                queued: 0,
+              );
+            })
+            .toList();
       }
 
       return const <ThroughputPoint>[];
     }();
-
 
     final OverviewMetric processedCard = OverviewMetric(
       label: 'Processed images',
@@ -226,19 +216,10 @@ class _UserDashboard extends StatelessWidget {
               spacing: 24,
               runSpacing: 16,
               children: <Widget>[
-                MiniLabel(
-                  label: 'Total images',
-                  value: '${stats.totalImages}',
-                ),
-                MiniLabel(
-                  label: 'Success rate',
-                  value: stats.successRateLabel,
-                ),
+                MiniLabel(label: 'Total images', value: '${stats.totalImages}'),
+                MiniLabel(label: 'Success rate', value: stats.successRateLabel),
                 if (stats.lastActivity != null)
-                  MiniLabel(
-                    label: 'Last activity',
-                    value: stats.lastActivity!,
-                  ),
+                  MiniLabel(label: 'Last activity', value: stats.lastActivity!),
               ],
             ),
           ),
@@ -249,7 +230,8 @@ class _UserDashboard extends StatelessWidget {
             final bool stacked = constraints.maxWidth < 1040;
             final Widget activityPanel = SectionPanel(
               title: 'Activity overview',
-              description: 'Batches submitted — each bar represents one batch job.',
+              description:
+                  'Batches submitted — each bar represents one batch job.',
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
@@ -262,8 +244,10 @@ class _UserDashboard extends StatelessWidget {
                     Container(
                       height: 200,
                       alignment: Alignment.center,
-                      child: Text('No batch data available for chart', 
-                        style: TextStyle(color: AppTheme.slate)),
+                      child: Text(
+                        'No batch data available for chart',
+                        style: TextStyle(color: AppTheme.slate),
+                      ),
                     ),
                 ],
               ),
@@ -271,31 +255,35 @@ class _UserDashboard extends StatelessWidget {
 
             final Widget sidePanel = SectionPanel(
               title: 'System nodes',
-              description:
-                  'Available worker nodes in the cluster.',
+              description: 'Available worker nodes in the cluster.',
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  ...clusterNodes.take(3).map(
-                    (WorkerNode node) => Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: _NodeHealthCard(
-                        node: NodeHealth(
-                          id: node.id,
-                          zone: node.address,
-                          load: node.load,
-                          throughput: '${node.currentJobs} job(s)',
-                          tone: node.load >= 75
-                              ? NodeTone.warm
-                              : node.load >= 55
-                              ? NodeTone.balancing
-                              : NodeTone.stable,
+                  ...clusterNodes
+                      .take(3)
+                      .map(
+                        (WorkerNode node) => Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: _NodeHealthCard(
+                            node: NodeHealth(
+                              id: node.id,
+                              zone: node.address,
+                              load: node.load,
+                              throughput: '${node.currentJobs} job(s)',
+                              tone: node.load >= 75
+                                  ? NodeTone.warm
+                                  : node.load >= 55
+                                  ? NodeTone.balancing
+                                  : NodeTone.stable,
+                            ),
+                          ),
                         ),
                       ),
-                    ),
-                  ),
                   if (clusterNodes.isEmpty)
-                    Text('No active nodes detected', style: TextStyle(color: AppTheme.slate)),
+                    Text(
+                      'No active nodes detected',
+                      style: TextStyle(color: AppTheme.slate),
+                    ),
                 ],
               ),
             );
@@ -329,7 +317,9 @@ class _UserDashboard extends StatelessWidget {
           child: activityEvents.isEmpty
               ? _EmptyActivityState()
               : Column(
-                  children: activityEvents.take(8).map((UserActivityEvent event) {
+                  children: activityEvents.take(8).map((
+                    UserActivityEvent event,
+                  ) {
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 12),
                       child: _UserActivityCard(event: event),
@@ -350,12 +340,14 @@ class _UserActivityCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final String actionLower = event.action.toLowerCase();
-    final Color accent = actionLower.contains('error') || actionLower.contains('fail')
+    final Color accent =
+        actionLower.contains('error') || actionLower.contains('fail')
         ? AppTheme.red
         : actionLower.contains('complete') || actionLower.contains('success')
-            ? AppTheme.statusGreen
-            : AppTheme.navy;
-    final Color background = actionLower.contains('error') || actionLower.contains('fail')
+        ? AppTheme.statusGreen
+        : AppTheme.navy;
+    final Color background =
+        actionLower.contains('error') || actionLower.contains('fail')
         ? AppTheme.dangerSoft
         : AppTheme.sand;
 
@@ -386,11 +378,12 @@ class _UserActivityCard extends StatelessWidget {
                     if (event.timestamp.isNotEmpty) event.timestamp,
                     if (event.batchUuid != null) 'batch ${event.batchUuid}',
                     if (event.status != null) 'status ${event.status}',
-                    if (event.imagesProcessed > 0) '${event.imagesProcessed} images',
+                    if (event.imagesProcessed > 0)
+                      '${event.imagesProcessed} images',
                   ].join(' | '),
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppTheme.slate,
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: AppTheme.slate),
                 ),
               ],
             ),
@@ -415,9 +408,9 @@ class _EmptyActivityState extends StatelessWidget {
           Expanded(
             child: Text(
               'No activity yet. Your processed batches and pipeline events will show up here.',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppTheme.slate,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: AppTheme.slate),
             ),
           ),
         ],
@@ -442,7 +435,9 @@ class _AdminDashboard extends StatelessWidget {
     final workspace = WorkspaceScope.of(context);
     final List<WorkerNode> nodes = workspace.workerNodes;
     final List<LogEntry> logs = workspace.logs;
-    final int activeNodes = nodes.where((WorkerNode node) => node.active).length;
+    final int activeNodes = nodes
+        .where((WorkerNode node) => node.active)
+        .length;
     final int warningCount = logs
         .where((LogEntry log) => log.level == LogLevel.warning)
         .length;
@@ -525,10 +520,7 @@ class _AdminDashboard extends StatelessWidget {
               children: <Widget>[
                 MiniLabel(label: 'Events in window', value: '$totalProcessed'),
                 MiniLabel(label: 'Peak pressure', value: '$queuePeak'),
-                MiniLabel(
-                  label: 'Success signals',
-                  value: '$successCount',
-                ),
+                MiniLabel(label: 'Success signals', value: '$successCount'),
               ],
             ),
           ),
@@ -552,21 +544,12 @@ class _AdminDashboard extends StatelessWidget {
                         label: 'Active nodes',
                         value: '$activeNodes/${nodes.length}',
                       ),
-                      _SupportPill(
-                        label: 'Warnings',
-                        value: '$warningCount',
-                      ),
-                      _SupportPill(
-                        label: 'Errors',
-                        value: '$errorCount',
-                      ),
+                      _SupportPill(label: 'Warnings', value: '$warningCount'),
+                      _SupportPill(label: 'Errors', value: '$errorCount'),
                     ],
                   ),
                   const SizedBox(height: 22),
-                  ThroughputChart(
-                    data: chart,
-                    height: stacked ? 320 : 360,
-                  ),
+                  ThroughputChart(data: chart, height: stacked ? 320 : 360),
                 ],
               ),
             );
@@ -587,10 +570,11 @@ class _AdminDashboard extends StatelessWidget {
                       children: <Widget>[
                         Text(
                           'Current focus',
-                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            color: AppTheme.slate,
-                            letterSpacing: 1.4,
-                          ),
+                          style: Theme.of(context).textTheme.labelSmall
+                              ?.copyWith(
+                                color: AppTheme.slate,
+                                letterSpacing: 1.4,
+                              ),
                         ),
                         const SizedBox(height: 8),
                         Text(
@@ -599,10 +583,8 @@ class _AdminDashboard extends StatelessWidget {
                             warnings: warningCount,
                             errorCount: errorCount,
                           ),
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: AppTheme.inkSoft,
-                            height: 1.6,
-                          ),
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(color: AppTheme.inkSoft, height: 1.6),
                         ),
                       ],
                     ),
@@ -746,11 +728,16 @@ class _AdminDashboardIntro extends StatelessWidget {
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: AppTheme.sand,
                       borderRadius: BorderRadius.circular(999),
-                      border: Border.all(color: AppTheme.gold.withValues(alpha: 0.5)),
+                      border: Border.all(
+                        color: AppTheme.gold.withValues(alpha: 0.5),
+                      ),
                     ),
                     child: Text(
                       'ADMIN VIEW',
@@ -851,11 +838,7 @@ class _AdminDashboardIntro extends StatelessWidget {
           if (stacked) {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                copy,
-                const SizedBox(height: 18),
-                controls,
-              ],
+              children: <Widget>[copy, const SizedBox(height: 18), controls],
             );
           }
 
@@ -880,7 +863,15 @@ List<ThroughputPoint> _buildAdminChart(
 ) {
   final List<String> labels = switch (window) {
     DashboardWindow.day => const <String>['08', '10', '12', '14', '16', '18'],
-    DashboardWindow.week => const <String>['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+    DashboardWindow.week => const <String>[
+      'Mon',
+      'Tue',
+      'Wed',
+      'Thu',
+      'Fri',
+      'Sat',
+      'Sun',
+    ],
     DashboardWindow.month => const <String>['W1', 'W2', 'W3', 'W4'],
   };
 
@@ -899,7 +890,9 @@ List<ThroughputPoint> _buildAdminChart(
   // baseline (1) so the chart renders visible bars instead of being blank.
   final int baseCpu = totalCpu > 0 ? totalCpu : (nodes.isNotEmpty ? 1 : 0);
   final int baseRam = totalRam > 0 ? totalRam : (nodes.isNotEmpty ? 1 : 0);
-  final int baseJobs = totalWorkers > 0 ? totalWorkers : (logs.isNotEmpty ? math.max(1, logs.length ~/ 4) : 0);
+  final int baseJobs = totalWorkers > 0
+      ? totalWorkers
+      : (logs.isNotEmpty ? math.max(1, logs.length ~/ 4) : 0);
 
   return labels.asMap().entries.map((MapEntry<int, String> entry) {
     final int index = entry.key;
@@ -912,11 +905,7 @@ List<ThroughputPoint> _buildAdminChart(
         ? math.max(0, (baseRam * waveFactor * 0.6).round())
         : (baseRam > 0 ? math.max(0, (baseRam * waveFactor * 0.5).round()) : 0);
 
-    return ThroughputPoint(
-      label: label,
-      processed: processed,
-      queued: queued,
-    );
+    return ThroughputPoint(label: label, processed: processed, queued: queued);
   }).toList();
 }
 
@@ -970,11 +959,16 @@ class _DashboardIntro extends StatelessWidget {
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: AppTheme.sand,
                       borderRadius: BorderRadius.circular(999),
-                      border: Border.all(color: AppTheme.gold.withValues(alpha: 0.5)),
+                      border: Border.all(
+                        color: AppTheme.gold.withValues(alpha: 0.5),
+                      ),
                     ),
                     child: Text(
                       'DASHBOARD',
@@ -1063,11 +1057,7 @@ class _DashboardIntro extends StatelessWidget {
           if (stacked) {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                copy,
-                const SizedBox(height: 18),
-                controls,
-              ],
+              children: <Widget>[copy, const SizedBox(height: 18), controls],
             );
           }
 
@@ -1136,7 +1126,11 @@ class _SummaryCard extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             metric.value,
-            style: AppTheme.displayStyle(context, size: 30, color: AppTheme.ink),
+            style: AppTheme.displayStyle(
+              context,
+              size: 30,
+              color: AppTheme.ink,
+            ),
           ),
           const SizedBox(height: 6),
           Text(
@@ -1171,9 +1165,9 @@ class _SupportPill extends StatelessWidget {
         children: <Widget>[
           Text(
             value,
-            style: Theme.of(context).textTheme.labelLarge?.copyWith(
-              color: AppTheme.ink,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.labelLarge?.copyWith(color: AppTheme.ink),
           ),
           const SizedBox(width: 8),
           Text(
@@ -1275,8 +1269,11 @@ class ThroughputChart extends StatelessWidget {
   Widget build(BuildContext context) {
     final int maxValue = math.max(
       1,
-      data.fold<int>(0, (int v, ThroughputPoint p) =>
-          math.max(v, math.max(p.processed, p.queued))),
+      data.fold<int>(
+        0,
+        (int v, ThroughputPoint p) =>
+            math.max(v, math.max(p.processed, p.queued)),
+      ),
     );
     final double barAreaHeight = math.max(220, height - 100);
     // Horizontal grid lines at 25%, 50%, 75%, 100%
@@ -1312,7 +1309,7 @@ class ThroughputChart extends StatelessWidget {
                             textAlign: TextAlign.right,
                             style: TextStyle(
                               fontSize: 10,
-                              color: AppTheme.slate.withOpacity(0.6),
+                              color: AppTheme.slate.withValues(alpha: 0.6),
                             ),
                           ),
                         ),
@@ -1320,7 +1317,7 @@ class ThroughputChart extends StatelessWidget {
                         Expanded(
                           child: Container(
                             height: 1,
-                            color: AppTheme.border.withOpacity(0.5),
+                            color: AppTheme.border.withValues(alpha: 0.5),
                           ),
                         ),
                       ],
@@ -1352,7 +1349,7 @@ class ThroughputChart extends StatelessWidget {
                                 style: TextStyle(
                                   fontSize: 10,
                                   fontWeight: FontWeight.w600,
-                                  color: AppTheme.slate.withOpacity(0.8),
+                                  color: AppTheme.slate.withValues(alpha: 0.8),
                                 ),
                               ),
                             const SizedBox(height: 4),
@@ -1362,14 +1359,17 @@ class ThroughputChart extends StatelessWidget {
                                 top: Radius.circular(8),
                               ),
                               child: Container(
-                                height: math.max(processedH, point.processed > 0 ? 6 : 0),
+                                height: math.max(
+                                  processedH,
+                                  point.processed > 0 ? 6 : 0,
+                                ),
                                 decoration: const BoxDecoration(
                                   gradient: LinearGradient(
                                     begin: Alignment.topCenter,
                                     end: Alignment.bottomCenter,
                                     colors: <Color>[
                                       Color(0xFF4A5568), // lighter top
-                                      AppTheme.ink,     // darker bottom
+                                      AppTheme.ink, // darker bottom
                                     ],
                                   ),
                                 ),
@@ -1401,19 +1401,21 @@ class ThroughputChart extends StatelessWidget {
                 bottom: 0,
                 height: 36,
                 child: Row(
-                  children: data.map((ThroughputPoint point) =>
-                    Expanded(
-                      child: Center(
-                        child: Text(
-                          point.label,
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: AppTheme.slate.withOpacity(0.8),
+                  children: data
+                      .map(
+                        (ThroughputPoint point) => Expanded(
+                          child: Center(
+                            child: Text(
+                              point.label,
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: AppTheme.slate.withValues(alpha: 0.8),
+                              ),
+                            ),
                           ),
                         ),
-                      ),
-                    ),
-                  ).toList(),
+                      )
+                      .toList(),
                 ),
               ),
             ],

@@ -16,10 +16,9 @@ class ApiClient {
   /// The resolved API configuration (base URL etc.) used by this client.
   ApiConfig get config => _config;
 
-
   Uri _uri(String path) {
     final String normalizedPath = path.startsWith('/') ? path : '/$path';
-    
+
     // Si la ruta ya es absoluta, no la procesamos
     if (path.startsWith('http')) {
       return Uri.parse(path);
@@ -29,7 +28,7 @@ class ApiClient {
     if (!baseUri.host.contains('ngrok-free.app')) {
       return baseUri;
     }
-    
+
     final Map<String, String> query = <String, String>{
       ...baseUri.queryParameters,
       'ngrok-skip-browser-warning': 'true',
@@ -74,10 +73,7 @@ class ApiClient {
     return _decodeJsonResponse(response);
   }
 
-  Future<Map<String, dynamic>> deleteJson(
-    String path, {
-    String? token,
-  }) async {
+  Future<Map<String, dynamic>> deleteJson(String path, {String? token}) async {
     final http.Response response = await _httpClient.delete(
       _uri(path),
       headers: _headers(token, isJson: false),
@@ -120,7 +116,8 @@ class ApiClient {
     String? token,
   }) async {
     final Uri uri = _uri(path);
-    final String boundary = '----DartFormBoundary${DateTime.now().millisecondsSinceEpoch}';
+    final String boundary =
+        '----DartFormBoundary${DateTime.now().millisecondsSinceEpoch}';
     final Map<String, String> headers = <String, String>{
       'Content-Type': 'multipart/form-data; boundary=$boundary',
       'ngrok-skip-browser-warning': 'true',
@@ -134,14 +131,22 @@ class ApiClient {
 
     void addField(String name, String value) {
       bodyBytes.addAll(utf8.encode('--$boundary\r\n'));
-      bodyBytes.addAll(utf8.encode('Content-Disposition: form-data; name="$name"\r\n\r\n'));
+      bodyBytes.addAll(
+        utf8.encode('Content-Disposition: form-data; name="$name"\r\n\r\n'),
+      );
       bodyBytes.addAll(utf8.encode('$value\r\n'));
     }
 
     void addFile(String name, String filename, List<int> bytes) {
       bodyBytes.addAll(utf8.encode('--$boundary\r\n'));
-      bodyBytes.addAll(utf8.encode('Content-Disposition: form-data; name="$name"; filename="$filename"\r\n'));
-      bodyBytes.addAll(utf8.encode('Content-Type: application/octet-stream\r\n\r\n'));
+      bodyBytes.addAll(
+        utf8.encode(
+          'Content-Disposition: form-data; name="$name"; filename="$filename"\r\n',
+        ),
+      );
+      bodyBytes.addAll(
+        utf8.encode('Content-Type: application/octet-stream\r\n\r\n'),
+      );
       bodyBytes.addAll(bytes);
       bodyBytes.addAll(utf8.encode('\r\n'));
     }
@@ -181,10 +186,10 @@ class ApiClient {
     return response.bodyBytes;
   }
 
-  Future<List<int>> getBytesFromAbsoluteUrl(String url) async {
+  Future<List<int>> getBytesFromAbsoluteUrl(String url, {String? token}) async {
     final http.Response response = await _httpClient.get(
       _uri(url),
-      headers: _headers(null, isJson: false),
+      headers: _headers(token, isJson: false),
     );
 
     if (response.statusCode < 200 || response.statusCode >= 300) {

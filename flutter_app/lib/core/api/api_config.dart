@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 
-const String _defaultBaseUrl = 'https://ea47-181-55-22-220.ngrok-free.app/api/v1';
+const String _defaultBaseUrl = 'http://localhost:50021/api/v1';
 
 class ApiConfig {
   const ApiConfig({

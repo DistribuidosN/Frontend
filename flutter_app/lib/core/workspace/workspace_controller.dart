@@ -26,7 +26,7 @@ class WorkspaceController extends ChangeNotifier {
     );
   }
 
-  static const String _defaultAdminNodeId = 'nodo-go-1';
+  static const String _defaultAdminNodeId = 'node-1';
   static const String _defaultAdminImageUuid =
       'ab1df2d2-255c-409b-94c1-855a590e77b9';
 
@@ -1219,7 +1219,7 @@ class WorkspaceController extends ChangeNotifier {
 
     try {
       bytes = await _apiClient.getBytes(
-        '/node/batch/${batch.requestId}/download',
+        '/download-batch/${batch.requestId}',
         token: _session!.token,
       );
       _appendLog(

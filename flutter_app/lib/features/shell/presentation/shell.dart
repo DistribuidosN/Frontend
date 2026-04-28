@@ -81,6 +81,18 @@ class _ImageFlowAppState extends State<ImageFlowApp> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _workspaceController.init().then((_) {
+      if (_workspaceController.isAuthenticated) {
+        setState(() {
+          _activePage = _workspaceController.isAdmin ? AppPage.admin : AppPage.dashboard;
+        });
+      }
+    });
+  }
+
+  @override
   void dispose() {
     _workspaceController.dispose();
     super.dispose();
@@ -90,29 +102,29 @@ class _ImageFlowAppState extends State<ImageFlowApp> {
   Widget build(BuildContext context) {
     return WorkspaceScope(
       controller: _workspaceController,
-      child: AnimatedBuilder(
-        animation: _workspaceController,
-        builder: (BuildContext context, Widget? child) {
-          return MaterialApp(
-            debugShowCheckedModeBanner: false,
-            title: 'Enfok',
-            theme: AppTheme.lightTheme(),
-            scrollBehavior: const MaterialScrollBehavior().copyWith(
-              dragDevices: <PointerDeviceKind>{
-                PointerDeviceKind.touch,
-                PointerDeviceKind.mouse,
-                PointerDeviceKind.trackpad,
-                PointerDeviceKind.stylus,
-                PointerDeviceKind.invertedStylus,
-                PointerDeviceKind.unknown,
-              },
-            ),
-            home: AnimatedSwitcher(
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'Enfok',
+        theme: AppTheme.lightTheme(),
+        scrollBehavior: const MaterialScrollBehavior().copyWith(
+          dragDevices: <PointerDeviceKind>{
+            PointerDeviceKind.touch,
+            PointerDeviceKind.mouse,
+            PointerDeviceKind.trackpad,
+            PointerDeviceKind.stylus,
+            PointerDeviceKind.invertedStylus,
+            PointerDeviceKind.unknown,
+          },
+        ),
+        home: Builder(
+          builder: (BuildContext context) {
+            final workspace = WorkspaceScope.of(context);
+            return AnimatedSwitcher(
               duration: const Duration(milliseconds: 220),
               switchInCurve: Curves.easeOut,
               switchOutCurve: Curves.easeIn,
               child:
-                  (_workspaceController.isAuthenticated ||
+                  (workspace.isAuthenticated ||
                       _previewDashboardWithoutAuth)
                   ? _AppShell(
                       key: const ValueKey<String>('shell'),
@@ -121,9 +133,9 @@ class _ImageFlowAppState extends State<ImageFlowApp> {
                       onLogout: _handleLogout,
                     )
                   : _buildAuthView(),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }
@@ -153,7 +165,7 @@ class _ImageFlowAppState extends State<ImageFlowApp> {
   }
 }
 
-class _AppShell extends StatelessWidget {
+class _AppShell extends StatefulWidget {
   const _AppShell({
     super.key,
     required this.activePage,
@@ -166,8 +178,44 @@ class _AppShell extends StatelessWidget {
   final VoidCallback onLogout;
 
   @override
+  State<_AppShell> createState() => _AppShellState();
+}
+
+class _AppShellState extends State<_AppShell> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  // One ScrollController per page, kept alive across workspace rebuilds.
+  final Map<AppPage, ScrollController> _scrollControllers = {};
+
+  ScrollController _controllerFor(AppPage page) {
+    return _scrollControllers.putIfAbsent(page, () => ScrollController());
+  }
+
+  @override
+  void didUpdateWidget(_AppShell oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // When the page changes, reset the new page's scroll to top
+    if (oldWidget.activePage != widget.activePage) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final ctrl = _scrollControllers[widget.activePage];
+        if (ctrl != null && ctrl.hasClients) {
+          ctrl.jumpTo(0);
+        }
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    for (final ctrl in _scrollControllers.values) {
+      ctrl.dispose();
+    }
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    final AppPage activePage = widget.activePage;
 
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
@@ -181,7 +229,7 @@ class _AppShell extends StatelessWidget {
         );
 
         return Scaffold(
-          key: scaffoldKey,
+          key: _scaffoldKey,
           backgroundColor: AppTheme.background,
           drawer: compact
               ? Drawer(
@@ -194,9 +242,9 @@ class _AppShell extends StatelessWidget {
                         activePage: activePage,
                         onNavigate: (AppPage page) {
                           Navigator.of(context).maybePop();
-                          onNavigate(page);
+                          widget.onNavigate(page);
                         },
-                        onLogout: onLogout,
+                        onLogout: widget.onLogout,
                         compact: true,
                       ),
                     ),
@@ -214,8 +262,8 @@ class _AppShell extends StatelessWidget {
                       padding: const EdgeInsets.fromLTRB(16, 16, 0, 16),
                       child: _ShellSidebar(
                         activePage: activePage,
-                        onNavigate: onNavigate,
-                        onLogout: onLogout,
+                        onNavigate: widget.onNavigate,
+                        onLogout: widget.onLogout,
                       ),
                     ),
                   ),
@@ -233,7 +281,7 @@ class _AppShell extends StatelessWidget {
                           compact: compact,
                           activePage: activePage,
                           onMenuTap: () =>
-                              scaffoldKey.currentState?.openDrawer(),
+                              _scaffoldKey.currentState?.openDrawer(),
                         ),
                         const SizedBox(height: 16),
                         Expanded(
@@ -242,7 +290,8 @@ class _AppShell extends StatelessWidget {
                             radius: 32,
                             color: AppTheme.surface,
                             child: SingleChildScrollView(
-                              key: ValueKey<AppPage>(activePage),
+                              // Persistent controller — survives workspace rebuilds
+                              controller: _controllerFor(activePage),
                               padding: EdgeInsets.all(contentPadding),
                               child: Align(
                                 alignment: Alignment.topCenter,
@@ -252,7 +301,7 @@ class _AppShell extends StatelessWidget {
                                   ),
                                   child: _PageViewport(
                                     activePage: activePage,
-                                    onNavigate: onNavigate,
+                                    onNavigate: widget.onNavigate,
                                   ),
                                 ),
                               ),

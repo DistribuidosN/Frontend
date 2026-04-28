@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:imageflow_flutter/core/api/api_client.dart';
 import 'package:imageflow_flutter/core/api/api_config.dart';
 import 'package:imageflow_flutter/core/files/pick_images.dart';
@@ -18,15 +19,68 @@ import 'package:imageflow_flutter/features/user/domain/user_activity_event.dart'
 import 'package:imageflow_flutter/features/user/domain/user_statistics.dart';
 
 class WorkspaceController extends ChangeNotifier {
-  WorkspaceController({ApiClient? apiClient})
-    : _apiClient = apiClient ?? ApiClient(ApiConfig.resolve());
+  WorkspaceController({ApiClient? apiClient}) {
+    _apiClient = apiClient ?? ApiClient(
+      ApiConfig.resolve(),
+      onUnauthenticated: _handleUnauthenticated,
+    );
+  }
 
   static const String _defaultAdminNodeId = 'nodo-go-1';
   static const String _defaultAdminImageUuid =
       'ab1df2d2-255c-409b-94c1-855a590e77b9';
 
-  final ApiClient _apiClient;
+  late final ApiClient _apiClient;
   final Random _random = Random();
+
+  void _handleUnauthenticated() {
+    if (_session != null) {
+      _clearSessionLocally();
+      notifyListeners();
+    }
+  }
+
+  Future<void> init() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('auth_token');
+    final roleId = prefs.getInt('auth_role');
+    final identity = prefs.getString('auth_identity');
+    final userUuid = prefs.getString('auth_uuid');
+    final username = prefs.getString('auth_username');
+    
+    if (token != null && identity != null && roleId != null) {
+      _session = AuthSession(
+        token: token,
+        roleId: roleId,
+        identity: identity,
+        userUuid: userUuid,
+        username: username,
+      );
+      try {
+        await _refreshProfile(notify: false);
+      } catch (_) {}
+      notifyListeners();
+    }
+  }
+
+  Future<void> _saveSession(AuthSession session) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('auth_token', session.token);
+    await prefs.setInt('auth_role', session.roleId);
+    await prefs.setString('auth_identity', session.identity);
+    if (session.userUuid != null) await prefs.setString('auth_uuid', session.userUuid!);
+    if (session.username != null) await prefs.setString('auth_username', session.username!);
+  }
+
+  Future<void> _clearSessionLocally() async {
+    _session = null;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('auth_token');
+    await prefs.remove('auth_role');
+    await prefs.remove('auth_identity');
+    await prefs.remove('auth_uuid');
+    await prefs.remove('auth_username');
+  }
 
   AuthSession? _session;
   final List<UploadFileItem> _selectedFiles = <UploadFileItem>[];
@@ -53,7 +107,6 @@ class WorkspaceController extends ChangeNotifier {
   List<BatchGalleryImage> get latestBatchImages =>
       List<BatchGalleryImage>.unmodifiable(_latestBatchImages);
   String get apiBaseUrl => ApiConfig.resolve().baseUrl;
-  String get adminProxyBaseUrl => ApiConfig.resolve().adminProxyBaseUrl;
   String? get lastSelectionMessage => _lastSelectionMessage;
   List<HistoryRequest> get historyRequests =>
       List<HistoryRequest>.unmodifiable(_historyRequests);
@@ -67,58 +120,45 @@ class WorkspaceController extends ChangeNotifier {
   UserStatistics get userStatistics => _userStatistics;
   String get adminMetricNodeId => _adminMetricNodeId;
   String? get adminLogImageUuid => _adminLogImageUuid;
-  List<WorkerNode> get workerNodes {
-    final bool batchActive =
-        _latestBatch != null &&
-        _latestBatch!.status.toLowerCase() != 'finished' &&
-        _latestBatch!.status.toLowerCase() != 'completed';
-    return <WorkerNode>[
-      WorkerNode(
-        id: 'node-alpha',
-        address: '127.0.0.1:50051',
-        active: true,
-        load: batchActive ? 72 : 34,
-        currentJobs: batchActive ? 1 : 0,
-        totalProcessed: _historyRequests.fold<int>(
-          12,
-          (int acc, HistoryRequest item) =>
-              acc + (item.images > 0 ? item.images : 1),
-        ),
-        lastHeartbeat: _timestampLabel(DateTime.now()),
-        uptime: '2h 14m',
-      ),
-      WorkerNode(
-        id: 'node-beta',
-        address: '127.0.0.1:50052',
-        active: isAuthenticated,
-        load: batchActive ? 58 : 18,
-        currentJobs: batchActive ? 1 : 0,
-        totalProcessed: _historyRequests.fold<int>(
-          8,
-          (int acc, HistoryRequest item) =>
-              acc + ((item.images > 0 ? item.images : 1) ~/ 2),
-        ),
-        lastHeartbeat: _timestampLabel(
-          DateTime.now().subtract(const Duration(seconds: 8)),
-        ),
-        uptime: '1h 49m',
-      ),
-      WorkerNode(
-        id: 'node-gamma',
-        address: '127.0.0.1:50053',
-        active: _historyRequests.isNotEmpty,
-        load: batchActive ? 41 : 0,
-        currentJobs: batchActive ? 0 : 0,
-        totalProcessed: _historyRequests.length * 3,
-        lastHeartbeat: _historyRequests.isNotEmpty
-            ? _timestampLabel(
-                DateTime.now().subtract(const Duration(minutes: 1)),
-              )
-            : 'No heartbeat yet',
-        uptime: _historyRequests.isNotEmpty ? '44m' : 'offline',
-      ),
-    ];
+
+  /// HTTP headers to attach to authenticated image requests (Image.network).
+  Map<String, String> get authHeaders {
+    final String? token = _session?.token;
+    if (token == null || token.isEmpty) {
+      return const <String, String>{
+        'ngrok-skip-browser-warning': 'true',
+      };
+    }
+    return <String, String>{
+      'Authorization': 'Bearer $token',
+      'ngrok-skip-browser-warning': 'true',
+    };
   }
+
+  /// Returns true if [url] is a valid, renderable URL (used by Image.network).
+  bool isReachablePreviewUrl(String url) => _isReachablePreviewUrl(url);
+
+  List<WorkerNode> get workerNodes {
+    if (_adminNodeMetrics.isNotEmpty) {
+      return _adminNodeMetrics.map((AdminNodeMetric metric) {
+        return WorkerNode(
+          id: metric.id,
+          address: metric.address,
+          active: metric.active,
+          load: metric.load,
+          currentJobs: metric.currentJobs,
+          totalProcessed: metric.totalProcessed,
+          lastHeartbeat: metric.lastHeartbeat,
+          uptime: metric.uptime,
+          busyWorkers: metric.busyWorkers,
+          ramUsage: metric.ramUsage,
+        );
+      }).toList();
+    }
+
+    return const <WorkerNode>[];
+  }
+
 
   Future<void> login({required String email, required String password}) async {
     final Map<String, dynamic> json = await _apiClient.postJson(
@@ -126,13 +166,49 @@ class WorkspaceController extends ChangeNotifier {
       body: <String, dynamic>{'email': email, 'password': password},
     );
 
+    final String token = json['token'] as String? ?? '';
+    final int roleId = (json['role_id'] as num?)?.toInt() ?? 0;
+    final String? userUuid = (json['user_uuid'] as String?) ?? (json['uuid'] as String?);
+    final String? username = json['username'] as String?;
+
     _session = AuthSession(
-      token: json['token'] as String? ?? '',
-      roleId: (json['role_id'] as num?)?.toInt() ?? 0,
+      token: token,
+      roleId: roleId,
       identity: email,
-      userUuid: (json['user_uuid'] as String?) ?? (json['uuid'] as String?),
-      username: json['username'] as String?,
+      userUuid: userUuid,
+      username: username,
     );
+    await _saveSession(_session!);
+
+    // Si faltan datos en el login, intentar obtenerlos de validate
+    if (_session!.userUuid == null || _session!.userUuid!.isEmpty || _session!.username == null) {
+      try {
+        final Map<String, dynamic> validation = await _apiClient.getJson(
+          '/auth/validate',
+          token: _session!.token,
+        );
+                int? valRole = (validation['role'] as num?)?.toInt();
+        if (valRole == null && validation['role'] is String) {
+          valRole = int.tryParse(validation['role'] as String);
+        }
+        valRole ??= (validation['role_id'] as num?)?.toInt() ?? (validation['user']?['role_id'] as num?)?.toInt();
+        if (valRole == 0) valRole = null;
+
+        _session = _session!.copyWith(
+          userUuid: (validation['user_uuid'] as String?) ?? (validation['uuid'] as String?) ?? (validation['user']?['uuid'] as String?),
+          username: (validation['username'] as String?) ?? (validation['user']?['username'] as String?),
+          roleId: valRole,
+        );
+        await _saveSession(_session!);
+      } catch (e) {
+        _appendLog(
+          level: LogLevel.warning,
+          source: 'auth',
+          message: 'Token validated, but identity info could not be fully resolved.',
+          job: '-',
+        );
+      }
+    }
     _appendLog(
       level: LogLevel.success,
       source: 'auth',
@@ -244,8 +320,37 @@ class WorkspaceController extends ChangeNotifier {
     );
   }
 
-  void logout() {
-    _session = null;
+  Future<void> resetPassword({required String newPassword}) async {
+    if (_session == null || _session!.token.isEmpty) {
+      throw StateError('You need to sign in before resetting your password.');
+    }
+    await _apiClient.postJson(
+      '/auth/reset-password',
+      body: <String, dynamic>{'newPassword': newPassword},
+      token: _session!.token,
+    );
+    _appendLog(
+      level: LogLevel.success,
+      source: 'auth',
+      message: 'Password has been reset successfully.',
+      job: '-',
+    );
+  }
+
+  Future<void> logout() async {
+    if (_session != null && _session!.token.isNotEmpty) {
+      try {
+        await _apiClient.postJson('/auth/logout', body: <String, dynamic>{}, token: _session!.token);
+      } catch (e) {
+        _appendLog(
+          level: LogLevel.warning,
+          source: 'auth',
+          message: 'Remote logout failed, clearing local session anyway: $e',
+          job: '-',
+        );
+      }
+    }
+    await _clearSessionLocally();
     _selectedFiles.clear();
     _selectedFilters.clear();
     _historyRequests.clear();
@@ -363,6 +468,33 @@ class WorkspaceController extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> uploadSingleImage({
+    required String base64Data,
+    required String fileName,
+    required List<String> transformations,
+  }) async {
+    if (_session == null || _session!.token.isEmpty) {
+      throw StateError('You need to sign in to upload images.');
+    }
+
+    await _apiClient.postJson(
+      '/node/upload',
+      body: <String, dynamic>{
+        'imageData': base64Data,
+        'fileName': fileName,
+        'transformations': transformations,
+      },
+      token: _session!.token,
+    );
+
+    _appendLog(
+      level: LogLevel.success,
+      source: 'node',
+      message: 'Image $fileName uploaded successfully for synchronous processing.',
+      job: '-',
+    );
+  }
+
   Future<UploadBatchResult> submitBatch() async {
     if (_session == null || _session!.token.isEmpty) {
       throw StateError('You need to sign in before sending a batch.');
@@ -370,68 +502,108 @@ class WorkspaceController extends ChangeNotifier {
     if (_selectedFiles.isEmpty) {
       throw StateError('Select at least one image before starting processing.');
     }
-    final int totalBytes = _selectedFiles.fold<int>(
-      0,
-      (int sum, UploadFileItem file) => sum + file.sizeBytes,
-    );
-    if (totalBytes > kMaxBatchUploadBytes) {
-      throw StateError(
-        'This batch is too large to upload. Keep it under ${_formatBytes(kMaxBatchUploadBytes)} or use fewer images.',
-      );
-    }
 
-    final Map<String, dynamic> json = await _apiClient.postMultipart(
-      '/node/batch',
-      files: _selectedFiles,
-      filters: _selectedFilters.toList(),
-      token: _session!.token,
-    );
-
-    final UploadBatchResult result = UploadBatchResult(
-      requestId:
-          (json['batchId'] as String?) ??
-          (json['jobId'] as String?) ??
-          _buildRequestId(),
-      status: (json['status'] as String?) ?? 'accepted',
-      message: (json['message'] as String?) ?? 'Batch submitted successfully.',
-      fileCount: _selectedFiles.length,
-      filters: _selectedFilters.toList(),
-      fileNames: _selectedFiles
-          .map((UploadFileItem file) => file.name)
-          .toList(),
-    );
-
-    _latestBatch = result;
-    _latestBatchImages.clear();
-    _appendLog(
-      level: LogLevel.success,
-      source: 'api',
-      message:
-          'Submitted batch ${result.requestId} with ${result.fileCount} image(s).',
-      job: result.requestId,
-    );
-    try {
-      await refreshHistory(notify: false);
-    } catch (_) {
-      _appendLog(
-        level: LogLevel.warning,
-        source: 'history',
-        message: 'Batch submitted, but remote history could not be refreshed.',
-        job: result.requestId,
-      );
-    }
-    try {
-      await refreshLatestBatchImages(notify: false);
-    } catch (_) {
-      _appendLog(
-        level: LogLevel.warning,
-        source: 'gallery',
-        message: 'Batch submitted, but the gallery is not reachable yet.',
-        job: result.requestId,
-      );
-    }
+    _lastSelectionMessage = 'Submitting batch...';
     notifyListeners();
-    return result;
+
+    try {
+      final int totalBytes = _selectedFiles.fold<int>(
+        0,
+        (int sum, UploadFileItem file) => sum + file.sizeBytes,
+      );
+      if (totalBytes > kMaxBatchUploadBytes) {
+        throw StateError(
+          'This batch is too large to upload. Keep it under ${_formatBytes(kMaxBatchUploadBytes)} or use fewer images.',
+        );
+      }
+
+      final Map<String, dynamic> json = await _apiClient.postMultipart(
+        '/node/batch',
+        files: _selectedFiles,
+        filters: _selectedFilters.toList(),
+        token: _session!.token,
+      );
+
+      final UploadBatchResult result = UploadBatchResult(
+        requestId:
+            (json['batchId'] as String?) ??
+            (json['jobId'] as String?) ??
+            _buildRequestId(),
+        status: (json['status'] as String?) ?? 'accepted',
+        message: (json['message'] as String?) ?? 'Batch submitted successfully.',
+        fileCount: _selectedFiles.length,
+        filters: _selectedFilters.toList(),
+        fileNames: _selectedFiles.map((file) => file.name).toList(),
+      );
+
+      _latestBatch = result;
+      _latestBatchImages.clear();
+      _lastSelectionMessage = 'Batch submitted: ${result.requestId}';
+      
+      _appendLog(
+        level: LogLevel.success,
+        source: 'api',
+        message:
+            'Submitted batch ${result.requestId} with ${result.fileCount} image(s).',
+        job: result.requestId,
+      );
+
+      try {
+        await refreshHistory(notify: false);
+        await refreshLatestBatchImages(notify: false);
+      } catch (_) {}
+
+      notifyListeners();
+      return result;
+    } catch (e) {
+      _lastSelectionMessage = 'Error submitting batch: $e';
+      notifyListeners();
+      rethrow;
+    }
+  }
+
+  Future<void> refreshBatchStatus({bool notify = true}) async {
+    final UploadBatchResult? batch = _latestBatch;
+    if (batch == null || _session == null || _session!.token.isEmpty) {
+      return;
+    }
+
+    try {
+      final Map<String, dynamic> json = await _apiClient.getJson(
+        '/node/batch/${batch.requestId}/status',
+        token: _session!.token,
+      );
+
+      final String newStatus = (json['status'] as String?) ?? batch.status;
+      if (newStatus != batch.status) {
+        _latestBatch = UploadBatchResult(
+          requestId: batch.requestId,
+          status: newStatus,
+          message: (json['message'] as String?) ?? batch.message,
+          fileCount: batch.fileCount,
+          filters: batch.filters,
+          fileNames: batch.fileNames,
+        );
+        
+        _appendLog(
+          level: LogLevel.info,
+          source: 'api',
+          message: 'Batch ${batch.requestId} status updated: $newStatus',
+          job: batch.requestId,
+        );
+
+        if (notify) {
+          notifyListeners();
+        }
+      }
+    } catch (e) {
+      _appendLog(
+        level: LogLevel.warning,
+        source: 'api',
+        message: 'Could not refresh batch status: $e',
+        job: batch.requestId,
+      );
+    }
   }
 
   Future<void> refreshHistory({bool notify = true}) async {
@@ -439,13 +611,28 @@ class WorkspaceController extends ChangeNotifier {
       return;
     }
 
-    final dynamic payload = await _apiClient.getDecoded(
-      '/bd/batches',
-      token: _session!.token,
-    );
+    dynamic payload;
+    try {
+      payload = await _apiClient.getDecoded(
+        '/bd/batches',
+        token: _session!.token,
+      );
+    } catch (e) {
+      _appendLog(
+        level: LogLevel.warning,
+        source: 'history',
+        message: 'Remote history unavailable: $e',
+        job: '-',
+      );
+      if (notify) notifyListeners();
+      return;
+    }
+
     final List<dynamic> rows = payload is List<dynamic>
         ? payload
-        : <dynamic>[];
+        : (payload is Map<String, dynamic> && payload['batches'] is List<dynamic>)
+            ? payload['batches'] as List<dynamic>
+            : <dynamic>[];
 
     _historyRequests
       ..clear()
@@ -453,27 +640,49 @@ class WorkspaceController extends ChangeNotifier {
         rows.map((dynamic row) {
           final Map<String, dynamic> item =
               row is Map<String, dynamic> ? row : <String, dynamic>{};
+
           final Map<String, dynamic> batch =
-              item['batch'] is Map<String, dynamic>
-              ? item['batch'] as Map<String, dynamic>
-              : <String, dynamic>{};
+              (item['batch'] is Map<String, dynamic>)
+                  ? item['batch'] as Map<String, dynamic>
+                  : item;
+
           final String batchUuid =
               (batch['batch_uuid'] as String?) ??
-              (item['batch_uuid'] as String?) ??
+              (batch['uuid'] as String?) ??
+              (batch['id'] as String?) ??
               _buildRequestId();
+
           final String rawStatus =
               ((batch['status'] as String?) ?? 'PENDING').toUpperCase();
+
+          final String date = ((batch['request_time'] as String?) ??
+                               (batch['created_at'] as String?) ??
+                               '').trim();
+
+          final int images = (batch['image_count'] as num?)?.toInt() ??
+              (batch['total_images'] as num?)?.toInt() ??
+              0;
+
+          String? coverUrl =
+              (item['cover_image_url'] as String?) ?? (batch['cover_url'] as String?);
+          if (coverUrl != null &&
+              coverUrl.isNotEmpty &&
+              !coverUrl.startsWith('http') &&
+              !coverUrl.startsWith('data:')) {
+            coverUrl = _resolveRelativeUrl(coverUrl);
+          }
+
           return HistoryRequest(
             id: batchUuid,
-            date: ((batch['request_time'] as String?) ?? '').trim().isEmpty
-                ? 'Remote batch'
-                : (batch['request_time'] as String),
-            images: 0,
-            transforms: const <String>['Remote pipeline'],
-            status: _requestStatusFromString(rawStatus),
-            duration: 'Pending from backend',
-            nodes: 0,
-            coverImageUrl: item['cover_image_url'] as String?,
+            date: date.isEmpty ? 'Remote batch' : date,
+            images: images,
+            transforms: (batch['filters'] is List)
+                ? (batch['filters'] as List).cast<String>()
+                : const <String>['Remote pipeline'],
+            status: HistoryRequest.statusFromString(rawStatus),
+            duration: (batch['duration'] as String?) ?? 'Pending',
+            nodes: (batch['node_count'] as num?)?.toInt() ?? 0,
+            coverImageUrl: coverUrl,
           );
         }),
       );
@@ -518,17 +727,58 @@ class WorkspaceController extends ChangeNotifier {
     if (batch == null || _session == null || _session!.token.isEmpty) {
       return;
     }
+    await _loadGalleryForBatch(batch.requestId, notify: notify);
+  }
 
-    final dynamic payload = await _apiClient.getDecoded(
-      '/bd/gallery?batchUuid=${Uri.encodeQueryComponent(batch.requestId)}&page=1&limit=100',
-      token: _session!.token,
-    );
+  Future<void> _loadGalleryForBatch(String batchId, {bool notify = true}) async {
+    if (_session == null || _session!.token.isEmpty) return;
+
+    dynamic payload;
+    bool isFallback = false;
+    try {
+      payload = await _apiClient.getDecoded(
+        '/bd/gallery?batchUuid=${Uri.encodeQueryComponent(batchId)}&page=1&limit=100',
+        token: _session!.token,
+      );
+    } catch (_) {
+      try {
+        payload = await _apiClient.getDecoded(
+          '/node/batch/$batchId/results',
+          token: _session!.token,
+        );
+        isFallback = true;
+      } catch (e2) {
+        _appendLog(
+          level: LogLevel.warning,
+          source: 'gallery',
+          message: 'Could not load batch results: $e2',
+          job: batchId,
+        );
+        if (notify) notifyListeners();
+        return;
+      }
+    }
+
     final Map<String, dynamic> json = payload is Map<String, dynamic>
         ? payload
         : <String, dynamic>{};
-    final List<dynamic> images = json['images'] is List<dynamic>
-        ? json['images'] as List<dynamic>
-        : <dynamic>[];
+
+    List<dynamic> images = <dynamic>[];
+    if (payload is List<dynamic>) {
+      images = payload;
+    } else if (isFallback) {
+      images = json['images'] as List<dynamic>? ??
+          json['results'] as List<dynamic>? ??
+          <dynamic>[];
+    } else {
+      images = json['images'] as List<dynamic>? ??
+          json['data'] as List<dynamic>? ??
+          json['results'] as List<dynamic>? ??
+          json['items'] as List<dynamic>? ??
+          json['gallery'] as List<dynamic>? ??
+          json['content'] as List<dynamic>? ??
+          <dynamic>[];
+    }
 
     _latestBatchImages
       ..clear()
@@ -536,13 +786,27 @@ class WorkspaceController extends ChangeNotifier {
         images.map((dynamic row) {
           final Map<String, dynamic> item =
               row is Map<String, dynamic> ? row : <String, dynamic>{};
-          return BatchGalleryImage(
-            imageUuid: (item['image_uuid'] as String?) ?? '',
-            batchUuid: (item['batch_uuid'] as String?) ?? batch.requestId,
-            originalName: (item['original_name'] as String?) ?? 'result',
-            resultUrl: (item['result_path'] as String?) ?? '',
-            status: (item['status'] as String?) ?? 'PENDING',
-            nodeId: (item['node_id'] as String?) ?? '-',
+
+          if (isFallback) {
+            final String base64Data =
+                (item['base64'] as String?) ?? (item['imageData'] as String?) ?? '';
+            return BatchGalleryImage(
+              imageUuid: (item['id'] as String?) ?? (item['uuid'] as String?) ?? '',
+              batchUuid: batchId,
+              originalName:
+                  (item['name'] as String?) ?? (item['fileName'] as String?) ?? 'result',
+              resultUrl: base64Data.isNotEmpty
+                  ? 'data:image/png;base64,$base64Data'
+                  : '',
+              status: (item['status'] as String?) ?? 'COMPLETED',
+              nodeId: (item['nodeId'] as String?) ?? '-',
+            );
+          }
+
+          return BatchGalleryImage.fromJson(
+            item,
+            fallbackBatchUuid: batchId,
+            resolveUrl: _resolveRelativeUrl,
           );
         }),
       );
@@ -554,35 +818,47 @@ class WorkspaceController extends ChangeNotifier {
       }
     }
 
-    final int detectedCount = _latestBatchImages.isNotEmpty
-        ? _latestBatchImages.length
-        : ((json['total_count'] as num?)?.toInt() ?? 0);
-    final int totalFiles = batch.fileCount > 0 ? batch.fileCount : detectedCount;
-    final bool completed = totalFiles > 0 && detectedCount >= totalFiles;
-    _latestBatch = UploadBatchResult(
-      requestId: batch.requestId,
-      status: completed
-          ? 'completed'
-          : detectedCount > 0
-          ? 'processing'
-          : batch.status,
-      message: completed
-          ? 'Batch outputs are ready.'
-          : detectedCount > 0
-          ? 'Batch is generating outputs.'
-          : batch.message,
-      fileCount: totalFiles,
-      filters: batch.filters,
-      fileNames: _latestBatchImages.isNotEmpty
-          ? _latestBatchImages
-                .map((BatchGalleryImage image) => image.originalName)
-                .toList()
-          : batch.fileNames,
+    final UploadBatchResult? batch = _latestBatch;
+    if (batch != null) {
+      final int detectedCount = _latestBatchImages.isNotEmpty
+          ? _latestBatchImages.length
+          : ((json['total_count'] as num?)?.toInt() ?? 0);
+      final int totalFiles = batch.fileCount > 0 ? batch.fileCount : detectedCount;
+      final bool completed = totalFiles > 0 && detectedCount >= totalFiles;
+      _latestBatch = UploadBatchResult(
+        requestId: batch.requestId,
+        status: completed
+            ? 'completed'
+            : detectedCount > 0
+                ? 'processing'
+                : batch.status,
+        message: completed
+            ? 'Batch outputs are ready.'
+            : detectedCount > 0
+                ? 'Batch is generating outputs.'
+                : batch.message,
+        fileCount: totalFiles,
+        filters: batch.filters,
+        fileNames: _latestBatchImages.isNotEmpty
+            ? _latestBatchImages.map((BatchGalleryImage img) => img.originalName).toList()
+            : batch.fileNames,
+      );
+    }
+
+    if (notify) notifyListeners();
+  }
+
+  Future<Map<String, dynamic>> getBatchStatus(String jobId) async {
+    if (_session == null || _session!.token.isEmpty) {
+      throw StateError('You need to sign in to check batch status.');
+    }
+
+    final dynamic payload = await _apiClient.getDecoded(
+      '/node/batch/$jobId/status',
+      token: _session!.token,
     );
 
-    if (notify) {
-      notifyListeners();
-    }
+    return payload is Map<String, dynamic> ? payload : <String, dynamic>{};
   }
 
   Future<void> _refreshProfile({bool notify = true}) async {
@@ -606,11 +882,113 @@ class WorkspaceController extends ChangeNotifier {
     final String? username = user['username'] as String?;
     final int? roleId = (user['role_id'] as num?)?.toInt();
 
-    _session = _session!.copyWith(
-      userUuid: uuid ?? _session!.userUuid,
-      username: username ?? _session!.username,
-      roleId: roleId ?? _session!.roleId,
+    if (uuid != null || username != null || roleId != null) {
+      _session = _session!.copyWith(
+        userUuid: uuid,
+        username: username,
+        roleId: roleId,
+      );
+    }
+
+    if (notify) {
+      notifyListeners();
+    }
+  }
+
+  Future<void> updateProfile({required String username, int status = 1}) async {
+    if (_session == null || _session!.token.isEmpty) {
+      throw StateError('You need to sign in to update your profile.');
+    }
+
+    await _apiClient.putJson(
+      '/user/profile',
+      body: <String, dynamic>{'username': username, 'status': status},
+      token: _session!.token,
     );
+
+    _session = _session!.copyWith(username: username);
+    _appendLog(
+      level: LogLevel.success,
+      source: 'user',
+      message: 'Profile updated: $username.',
+      job: '-',
+    );
+    await _refreshProfile();
+  }
+
+  Future<void> deleteAccount() async {
+    if (_session == null || _session!.token.isEmpty) {
+      throw StateError('You need to sign in to delete your account.');
+    }
+
+    await _apiClient.deleteJson(
+      '/user/account',
+      token: _session!.token,
+    );
+
+    await logout();
+    _appendLog(
+      level: LogLevel.info,
+      source: 'user',
+      message: 'Account deleted successfully.',
+      job: '-',
+    );
+  }
+
+  Future<void> searchUser(String uid) async {
+    if (_session == null || _session!.token.isEmpty) {
+      throw StateError('You need to sign in to search users.');
+    }
+
+    final Map<String, dynamic> result = await _apiClient.getJson(
+      '/user/search?uid=${Uri.encodeComponent(uid)}',
+      token: _session!.token,
+    );
+
+    _appendLog(
+      level: LogLevel.info,
+      source: 'user',
+      message: 'Found user: ${result['username'] ?? uid}',
+      job: '-',
+    );
+  }
+
+  Future<void> refreshUserStatisticsByUuid(String uuid, {bool notify = true}) async {
+    if (_session == null || _session!.token.isEmpty) {
+      return;
+    }
+
+    final Map<String, dynamic> json = await _apiClient.getJson(
+      '/users/$uuid/statistics',
+      token: _session!.token,
+    );
+
+    _userStatistics = UserStatistics.fromJson(json);
+
+    if (notify) {
+      notifyListeners();
+    }
+  }
+
+  Future<void> refreshUserActivityByUuid(String uuid, {bool notify = true}) async {
+    if (_session == null || _session!.token.isEmpty) {
+      return;
+    }
+
+    final List<dynamic> json = await _apiClient.getDecoded(
+      '/users/$uuid/activity',
+      token: _session!.token,
+    );
+
+    _userActivity
+      ..clear()
+      ..addAll(
+        json.map((dynamic item) {
+          final Map<String, dynamic> map =
+              item is Map<String, dynamic> ? item : <String, dynamic>{};
+          return UserActivityEvent.fromJson(map);
+        }),
+      );
 
     if (notify) {
       notifyListeners();
@@ -622,7 +1000,7 @@ class WorkspaceController extends ChangeNotifier {
       return;
     }
 
-    // Prefer the UUID-based endpoint when we already know the uuid.
+    // Spec says /users/:uuid/statistics OR /user/statistics
     final String? uuid = _session!.userUuid;
     final String path = (uuid != null && uuid.isNotEmpty)
         ? '/users/$uuid/statistics'
@@ -631,15 +1009,30 @@ class WorkspaceController extends ChangeNotifier {
     dynamic payload;
     try {
       payload = await _apiClient.getDecoded(path, token: _session!.token);
-    } catch (_) {
-      // Fallback to generic endpoint if UUID variant fails.
+    } catch (e) {
+      // Fallback to generic endpoint if UUID variant is not supported by proxy
       if (path != '/user/statistics') {
-        payload = await _apiClient.getDecoded(
-          '/user/statistics',
-          token: _session!.token,
-        );
+        try {
+          payload = await _apiClient.getDecoded('/user/statistics', token: _session!.token);
+        } catch (_) {
+          _appendLog(
+            level: LogLevel.warning,
+            source: 'telemetry',
+            message: 'Failed to load user statistics: $e',
+            job: '-',
+          );
+          if (notify) notifyListeners();
+          return;
+        }
       } else {
-        rethrow;
+        _appendLog(
+          level: LogLevel.warning,
+          source: 'telemetry',
+          message: 'Failed to load user statistics: $e',
+          job: '-',
+        );
+        if (notify) notifyListeners();
+        return;
       }
     }
 
@@ -657,6 +1050,7 @@ class WorkspaceController extends ChangeNotifier {
       return;
     }
 
+    // Spec says /users/:uuid/activity OR /user/activity
     final String? uuid = _session!.userUuid;
     final String path = (uuid != null && uuid.isNotEmpty)
         ? '/users/$uuid/activity'
@@ -665,26 +1059,45 @@ class WorkspaceController extends ChangeNotifier {
     dynamic payload;
     try {
       payload = await _apiClient.getDecoded(path, token: _session!.token);
-    } catch (_) {
+    } catch (e) {
+      // Fallback to generic endpoint if UUID variant is not supported by proxy
       if (path != '/user/activity') {
-        payload = await _apiClient.getDecoded(
-          '/user/activity',
-          token: _session!.token,
-        );
+        try {
+          payload = await _apiClient.getDecoded('/user/activity', token: _session!.token);
+        } catch (_) {
+          _appendLog(
+            level: LogLevel.warning,
+            source: 'telemetry',
+            message: 'Failed to load user activity: $e',
+            job: '-',
+          );
+          if (notify) notifyListeners();
+          return;
+        }
       } else {
-        rethrow;
+        _appendLog(
+          level: LogLevel.warning,
+          source: 'telemetry',
+          message: 'Failed to load user activity: $e',
+          job: '-',
+        );
+        if (notify) notifyListeners();
+        return;
       }
     }
+
 
     final List<dynamic> rows = switch (payload) {
       final List<dynamic> list => list,
       final Map<String, dynamic> map => map['activity'] is List<dynamic>
           ? map['activity'] as List<dynamic>
-          : map['events'] is List<dynamic>
-              ? map['events'] as List<dynamic>
-              : map['data'] is List<dynamic>
-                  ? map['data'] as List<dynamic>
-                  : <dynamic>[],
+          : map['activities'] is List<dynamic>
+              ? map['activities'] as List<dynamic>
+              : map['events'] is List<dynamic>
+                  ? map['events'] as List<dynamic>
+                  : map['data'] is List<dynamic>
+                      ? map['data'] as List<dynamic>
+                      : <dynamic>[],
       _ => <dynamic>[],
     };
 
@@ -715,8 +1128,8 @@ class WorkspaceController extends ChangeNotifier {
         ? _defaultAdminNodeId
         : (nodeId ?? _adminMetricNodeId).trim();
 
-    final dynamic payload = await _apiClient.getDecodedFromAbsoluteUrl(
-      _adminProxyUrl('/admin/metrics/$targetNodeId'),
+    final dynamic payload = await _apiClient.getDecoded(
+      '/admin/metrics/$targetNodeId',
       token: _session!.token,
     );
 
@@ -761,8 +1174,8 @@ class WorkspaceController extends ChangeNotifier {
     }
 
     final String candidateImageUuid = _resolveAdminImageUuid(imageUuid);
-    final dynamic payload = await _apiClient.getDecodedFromAbsoluteUrl(
-      _adminProxyUrl('/admin/logs/$candidateImageUuid'),
+    final dynamic payload = await _apiClient.getDecoded(
+      '/admin/logs/$candidateImageUuid',
       token: _session!.token,
     );
 
@@ -876,7 +1289,7 @@ class WorkspaceController extends ChangeNotifier {
     return saved.location;
   }
 
-  bool isReachablePreviewUrl(String url) => _isReachablePreviewUrl(url);
+
 
   void _appendLog({
     required LogLevel level,
@@ -942,25 +1355,13 @@ class WorkspaceController extends ChangeNotifier {
     }
   }
 
-  RequestStatus _requestStatusFromString(String status) {
-    switch (status.toUpperCase()) {
-      case 'COMPLETED':
-      case 'CONVERTED':
-      case 'DONE':
-      case 'FINISHED':
-        return RequestStatus.completed;
-      default:
-        return RequestStatus.failed;
-    }
-  }
 
   bool _isReachablePreviewUrl(String url) {
     final Uri? uri = Uri.tryParse(url);
     if (uri == null || !uri.hasScheme) {
       return false;
     }
-    final String host = uri.host.toLowerCase();
-    return host != 'localhost' && host != '127.0.0.1';
+    return true; // Permitimos todas las URLs válidas, incluyendo localhost en desarrollo
   }
 
   String _resolveAdminImageUuid(String? requestedImageUuid) {
@@ -981,15 +1382,70 @@ class WorkspaceController extends ChangeNotifier {
     return _defaultAdminImageUuid;
   }
 
-  String _adminProxyUrl(String path) {
-    final String base = adminProxyBaseUrl.endsWith('/')
-        ? adminProxyBaseUrl.substring(0, adminProxyBaseUrl.length - 1)
-        : adminProxyBaseUrl;
-    final String normalizedPath = path.startsWith('/') ? path : '/$path';
-    return '$base$normalizedPath';
+  /// Converts a relative path (e.g. `/uploads/img.webp`) to an absolute URL
+  /// based on the configured backend host (without the `/api/v1` prefix so that
+  /// static assets are reachable).
+  String _resolveRelativeUrl(String path) {
+    try {
+      final Uri baseUri = Uri.parse(_apiClient.config.baseUrl);
+      // Use scheme + host only (strip /api/v1 path prefix for static files)
+      final String origin = '${baseUri.scheme}://${baseUri.host}${baseUri.hasPort ? ':${baseUri.port}' : ''}';
+      if (path.startsWith('/')) {
+        return '$origin$path';
+      }
+      return '$origin/$path';
+    } catch (_) {
+      return path;
+    }
+  }
+
+  /// Downloads the ZIP archive for any batch by its ID (not just the latest).
+  Future<String> downloadBatchById(String batchId) async {
+    if (_session == null || _session!.token.isEmpty) {
+      throw StateError('You need to sign in to download a batch.');
+    }
+    if (batchId.isEmpty) {
+      throw StateError('No batch ID provided for download.');
+    }
+
+    _appendLog(
+      level: LogLevel.info,
+      source: 'download',
+      message: 'Requesting ZIP archive for batch $batchId...',
+      job: batchId,
+    );
+
+    try {
+      final List<int> bytes = await _apiClient.getBytes(
+        '/node/batch/$batchId/download',
+        token: _session!.token,
+      );
+      final SavedFile saved = await saveBytes(
+        suggestedName: '$batchId-results.zip',
+        bytes: bytes,
+        mimeType: 'application/zip',
+      );
+      final String location = saved.location;
+      _appendLog(
+        level: LogLevel.success,
+        source: 'download',
+        message: 'Batch $batchId archive saved to $location.',
+        job: batchId,
+      );
+      return location;
+    } catch (e) {
+      _appendLog(
+        level: LogLevel.error,
+        source: 'download',
+        message: 'Failed to download batch $batchId: $e',
+        job: batchId,
+      );
+      rethrow;
+    }
   }
 
   @override
+
   void dispose() {
     _apiClient.dispose();
     super.dispose();

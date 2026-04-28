@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 
+const String _defaultBaseUrl = 'https://ea47-181-55-22-220.ngrok-free.app/api/v1';
+
 class ApiConfig {
   const ApiConfig({
     required this.baseUrl,
@@ -14,26 +16,25 @@ class ApiConfig {
     const String proxyFromEnvironment = String.fromEnvironment(
       'ADMIN_PROXY_BASE_URL',
     );
-    const String defaultBaseUrl = 'http://localhost:50021/api/v1';
     if (fromEnvironment.isNotEmpty) {
       return ApiConfig(
         baseUrl: fromEnvironment,
         adminProxyBaseUrl: proxyFromEnvironment.isNotEmpty
             ? proxyFromEnvironment
-            : defaultBaseUrl,
+            : _defaultBaseUrl,
       );
     }
 
     if (defaultTargetPlatform == TargetPlatform.android) {
       return const ApiConfig(
-        baseUrl: defaultBaseUrl,
-        adminProxyBaseUrl: defaultBaseUrl,
+        baseUrl: _defaultBaseUrl,
+        adminProxyBaseUrl: _defaultBaseUrl,
       );
     }
 
     return const ApiConfig(
-      baseUrl: defaultBaseUrl,
-      adminProxyBaseUrl: defaultBaseUrl,
+      baseUrl: _defaultBaseUrl,
+      adminProxyBaseUrl: _defaultBaseUrl,
     );
   }
 }

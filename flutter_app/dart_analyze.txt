@@ -1,0 +1,5 @@
+Analyzing lib...
+
+warning - features\dashboard\presentation\dashboard_page.dart:1113:7 - The declaration '_RecentBatchCard' isn't referenced. Try removing the declaration of '_RecentBatchCard'. - unused_element
+
+1 issue found.

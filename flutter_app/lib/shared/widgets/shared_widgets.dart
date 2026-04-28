@@ -256,18 +256,20 @@ class AdaptiveGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
-        final int count = math.max(
-          1,
-          (constraints.maxWidth / minItemWidth).floor(),
-        );
-        return GridView.count(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          crossAxisCount: count,
-          crossAxisSpacing: spacing,
-          mainAxisSpacing: spacing,
-          childAspectRatio: childAspectRatio,
-          children: children,
+        final double maxWidth = constraints.maxWidth.isFinite ? constraints.maxWidth : MediaQuery.of(context).size.width;
+        final int count = math.max(1, (maxWidth / minItemWidth).floor());
+                final double itemWidth = (maxWidth - (spacing * (count - 1))) / count;
+        final double itemHeight = itemWidth / childAspectRatio;
+        return Wrap(
+          spacing: spacing,
+          runSpacing: spacing,
+          children: children.map((Widget child) {
+            return SizedBox(
+              width: itemWidth,
+              height: itemHeight,
+              child: child,
+            );
+          }).toList(),
         );
       },
     );

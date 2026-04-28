@@ -40,6 +40,7 @@ class _ProgressPageState extends State<ProgressPage> {
   Future<void> _refresh() async {
     final workspace = WorkspaceScope.of(context);
     try {
+      await workspace.refreshBatchStatus(notify: false);
       await workspace.refreshLatestBatchImages(notify: false);
       await workspace.refreshHistory(notify: false);
       if (!mounted) {
@@ -202,21 +203,11 @@ class _ProgressPageState extends State<ProgressPage> {
             title: 'Completed outputs',
             description:
                 'Every image that already made it to the gallery appears here while the batch is still running.',
-            child: LayoutBuilder(
-              builder: (BuildContext context, BoxConstraints constraints) {
-                final int crossAxisCount = constraints.maxWidth >= 1200
-                    ? 5
-                    : constraints.maxWidth >= 900
-                    ? 4
-                    : 2;
-                return GridView.count(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  crossAxisCount: crossAxisCount,
-                  crossAxisSpacing: 14,
-                  mainAxisSpacing: 14,
-                  childAspectRatio: 0.88,
-                  children: images.map((BatchGalleryImage image) {
+            child: AdaptiveGrid(
+              minItemWidth: 200,
+              childAspectRatio: 0.88,
+              spacing: 14,
+              children: images.map((BatchGalleryImage image) {
                     final previewFile = workspace.selectedFiles.cast<dynamic>().firstWhere(
                       (dynamic file) => file.name == image.originalName,
                       orElse: () => null,
@@ -262,9 +253,7 @@ class _ProgressPageState extends State<ProgressPage> {
                       ],
                     );
                   }).toList(),
-                );
-              },
-            ),
+                ),
           ),
         ],
       ],

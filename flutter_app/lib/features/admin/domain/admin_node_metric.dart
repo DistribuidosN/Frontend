@@ -9,17 +9,21 @@ class AdminNodeMetric {
     required this.lastHeartbeat,
     required this.uptime,
     required this.raw,
+    this.busyWorkers = 0,
+    this.ramUsage = 0,
   });
 
   final String id;
   final String address;
   final bool active;
-  final int load;
+  final int load;       // cpu_usage %
   final int currentJobs;
   final int totalProcessed;
   final String lastHeartbeat;
   final String uptime;
   final Map<String, dynamic> raw;
+  final int busyWorkers; // busy_workers from backend
+  final int ramUsage;    // ram_usage % from backend
 
   static AdminNodeMetric? maybeFromJson(
     dynamic payload, {
@@ -42,6 +46,10 @@ class AdminNodeMetric {
         ) ??
         (status == 'active' || status == 'online' || status == 'healthy');
 
+    final int busyWorkers = _intValue(payload, <String>['busy_workers', 'active_workers', 'workers']);
+    final int cpuUsage    = _intValue(payload, <String>['cpu_usage', 'cpu_percent', 'load', 'usage', 'percentage']);
+    final int ramUsage    = _intValue(payload, <String>['ram_usage', 'memory_usage', 'mem_usage']);
+
     return AdminNodeMetric(
       id: _stringValue(payload, <String>['node_id', 'id', 'nodeId']) == ''
           ? fallbackNodeId
@@ -51,24 +59,22 @@ class AdminNodeMetric {
         <String>['address', 'host', 'endpoint', 'ip'],
       ),
       active: active,
-      load: _intValue(
-        payload,
-        <String>['load', 'cpu_usage', 'cpu_percent', 'usage', 'percentage'],
-      ),
-      currentJobs: _intValue(
-        payload,
-        <String>['current_jobs', 'active_jobs', 'jobs', 'pending_jobs'],
-      ),
+      load: cpuUsage,
+      currentJobs: busyWorkers > 0
+          ? busyWorkers
+          : _intValue(payload, <String>['current_jobs', 'active_jobs', 'jobs', 'pending_jobs']),
       totalProcessed: _intValue(
         payload,
         <String>['total_processed', 'processed', 'processed_jobs'],
       ),
       lastHeartbeat: _stringValue(
         payload,
-        <String>['last_heartbeat', 'heartbeat_at', 'updated_at'],
+        <String>['last_heartbeat', 'heartbeat_at', 'updated_at', 'reported_at'],
       ),
       uptime: _stringValue(payload, <String>['uptime', 'uptime_text']),
       raw: payload,
+      busyWorkers: busyWorkers,
+      ramUsage: ramUsage,
     );
   }
 

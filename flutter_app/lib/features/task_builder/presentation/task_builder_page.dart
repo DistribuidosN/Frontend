@@ -54,6 +54,10 @@ class _TaskBuilderPageState extends State<TaskBuilderPage> {
         blurRadius: _blur,
         rotationDegrees: _rotation,
         outputFormat: _format,
+        quality: _quality,
+        preserveMetadata: _preserveMetadata,
+        stripProfile: _stripProfile,
+        autoOptimize: _autoOptimize,
       ),
     );
 

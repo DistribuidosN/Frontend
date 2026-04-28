@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:imageflow_flutter/core/workspace/workspace_scope.dart';
 import 'package:imageflow_flutter/core/theme/app_theme.dart';
 import 'package:imageflow_flutter/shared/widgets/shared_widgets.dart';
@@ -21,6 +22,16 @@ class _SettingsPageState extends State<SettingsPage> {
     'ICO',
   ];
 
+  // Profile controllers
+  late TextEditingController _usernameController;
+  late TextEditingController _emailController;
+  
+  // Password controllers
+  late TextEditingController _currentPasswordController;
+  late TextEditingController _newPasswordController;
+  late TextEditingController _confirmPasswordController;
+
+  // Preferences state
   bool _emailNotifications = true;
   bool _processingCompleted = true;
   bool _processingFailed = true;
@@ -30,81 +41,114 @@ class _SettingsPageState extends State<SettingsPage> {
   bool _autoOptimize = true;
   bool _autoDownload = false;
 
-  // Profile editing
-  late TextEditingController _usernameCtrl;
-  late TextEditingController _newPasswordCtrl;
-  late TextEditingController _confirmPasswordCtrl;
-  bool _savingProfile = false;
-  bool _savingPassword = false;
-  String? _profileError;
-  String? _passwordError;
-  String? _profileSuccess;
-  String? _passwordSuccess;
+  bool _isSavingProfile = false;
+  bool _isUpdatingPassword = false;
 
   @override
   void initState() {
     super.initState();
-    _usernameCtrl = TextEditingController();
-    _newPasswordCtrl = TextEditingController();
-    _confirmPasswordCtrl = TextEditingController();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final workspace = WorkspaceScope.of(context);
-    if (_usernameCtrl.text.isEmpty) {
-      _usernameCtrl.text = workspace.session?.username ?? '';
-    }
+    _usernameController = TextEditingController();
+    _emailController = TextEditingController();
+    _currentPasswordController = TextEditingController();
+    _newPasswordController = TextEditingController();
+    _confirmPasswordController = TextEditingController();
+    _loadProfileData();
   }
 
   @override
   void dispose() {
-    _usernameCtrl.dispose();
-    _newPasswordCtrl.dispose();
-    _confirmPasswordCtrl.dispose();
+    _usernameController.dispose();
+    _emailController.dispose();
+    _currentPasswordController.dispose();
+    _newPasswordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
+  }
+
+  void _loadProfileData() {
+    final workspace = WorkspaceScope.of(context);
+    if (workspace.session != null) {
+      _usernameController.text = workspace.session!.username ?? 'User';
+      _emailController.text = workspace.session!.identity;
+    }
   }
 
   Future<void> _saveProfile() async {
     final workspace = WorkspaceScope.of(context);
-    final name = _usernameCtrl.text.trim();
-    if (name.isEmpty) {
-      setState(() => _profileError = 'Username cannot be empty.');
-      return;
-    }
-    setState(() { _savingProfile = true; _profileError = null; _profileSuccess = null; });
+    final messenger = ScaffoldMessenger.of(context);
+    
+    if (!mounted) return;
+    setState(() => _isSavingProfile = true);
+
     try {
-      await workspace.updateProfile(username: name);
-      if (mounted) setState(() { _profileSuccess = 'Profile updated successfully.'; _savingProfile = false; });
+      await workspace.updateProfile(username: _usernameController.text);
+      if (!mounted) return;
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Profile updated successfully')),
+      );
     } catch (e) {
-      if (mounted) setState(() { _profileError = e.toString(); _savingProfile = false; });
+      if (!mounted) return;
+      messenger.showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isSavingProfile = false);
+      }
     }
   }
 
   Future<void> _updatePassword() async {
     final workspace = WorkspaceScope.of(context);
-    final newPwd = _newPasswordCtrl.text;
-    final confirmPwd = _confirmPasswordCtrl.text;
-    if (newPwd.isEmpty) {
-      setState(() => _passwordError = 'New password cannot be empty.');
+    final messenger = ScaffoldMessenger.of(context);
+
+    if (_newPasswordController.text != _confirmPasswordController.text) {
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Passwords do not match')),
+      );
       return;
     }
-    if (newPwd != confirmPwd) {
-      setState(() => _passwordError = 'Passwords do not match.');
+
+    if (_newPasswordController.text.isEmpty) {
+      messenger.showSnackBar(
+        const SnackBar(content: Text('New password cannot be empty')),
+      );
       return;
     }
-    setState(() { _savingPassword = true; _passwordError = null; _passwordSuccess = null; });
+
+    if (!mounted) return;
+    setState(() => _isUpdatingPassword = true);
+
     try {
-      await workspace.resetPassword(newPassword: newPwd);
-      if (mounted) {
-        _newPasswordCtrl.clear();
-        _confirmPasswordCtrl.clear();
-        setState(() { _passwordSuccess = 'Password updated successfully.'; _savingPassword = false; });
-      }
+      await workspace.resetPassword(newPassword: _newPasswordController.text);
+      if (!mounted) return;
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Password updated successfully')),
+      );
+      _currentPasswordController.clear();
+      _newPasswordController.clear();
+      _confirmPasswordController.clear();
     } catch (e) {
-      if (mounted) setState(() { _passwordError = e.toString(); _savingPassword = false; });
+      if (!mounted) return;
+      messenger.showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isUpdatingPassword = false);
+      }
     }
+  }
+
+  Future<void> _copyUrl() async {
+    final workspace = WorkspaceScope.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    
+    await Clipboard.setData(ClipboardData(text: workspace.apiBaseUrl));
+    if (!mounted) return;
+    messenger.showSnackBar(
+      const SnackBar(content: Text('URL copied to clipboard')),
+    );
   }
 
   @override
@@ -132,34 +176,32 @@ class _SettingsPageState extends State<SettingsPage> {
                   iconBackground: AppTheme.sand,
                   title: 'Profile Information',
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      _SettingsLabeledFieldController(
-                        label: 'Username',
-                        controller: _usernameCtrl,
+                      _SettingsFieldPair(
+                        left: _SettingsLabeledField(
+                          label: 'Username',
+                          controller: _usernameController,
+                        ),
+                        right: _SettingsLabeledField(
+                          label: 'Email Address',
+                          controller: _emailController,
+                          keyboardType: TextInputType.emailAddress,
+                          readOnly: true,
+                        ),
                       ),
-                      const SizedBox(height: 12),
-                      _SettingsLabeledField(
-                        label: 'Email Address',
-                        initialValue: workspace.session?.identity ?? '',
-                        readOnly: true,
-                        keyboardType: TextInputType.emailAddress,
-                      ),
-                      if (_profileError != null) ...<Widget>[
-                        const SizedBox(height: 10),
-                        Text(_profileError!, style: const TextStyle(color: Colors.red, fontSize: 13)),
-                      ],
-                      if (_profileSuccess != null) ...<Widget>[
-                        const SizedBox(height: 10),
-                        Text(_profileSuccess!, style: TextStyle(color: AppTheme.statusGreen, fontSize: 13)),
-                      ],
                       const SizedBox(height: 20),
                       Align(
                         alignment: Alignment.centerRight,
                         child: FilledButton(
-                          onPressed: _savingProfile ? null : _saveProfile,
-                          child: _savingProfile
-                              ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                          onPressed: _isSavingProfile ? null : _saveProfile,
+                          child: _isSavingProfile
+                              ? const SizedBox(
+                                  height: 18,
+                                  width: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
                               : const Text('Save Changes'),
                         ),
                       ),
@@ -173,36 +215,41 @@ class _SettingsPageState extends State<SettingsPage> {
                   iconBackground: AppTheme.dangerSoft,
                   title: 'Change Password',
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      _SettingsLabeledFieldController(
-                        label: 'New Password',
-                        controller: _newPasswordCtrl,
-                        obscureText: true,
+                      _SettingsLabeledField(
+                        label: 'Current Password',
+                        controller: _currentPasswordController,
                         hintText: '••••••••',
+                        obscureText: true,
                       ),
                       const SizedBox(height: 16),
-                      _SettingsLabeledFieldController(
-                        label: 'Confirm Password',
-                        controller: _confirmPasswordCtrl,
-                        obscureText: true,
-                        hintText: '••••••••',
+                      _SettingsFieldPair(
+                        left: _SettingsLabeledField(
+                          label: 'New Password',
+                          controller: _newPasswordController,
+                          hintText: '••••••••',
+                          obscureText: true,
+                        ),
+                        right: _SettingsLabeledField(
+                          label: 'Confirm Password',
+                          controller: _confirmPasswordController,
+                          hintText: '••••••••',
+                          obscureText: true,
+                        ),
                       ),
-                      if (_passwordError != null) ...<Widget>[
-                        const SizedBox(height: 10),
-                        Text(_passwordError!, style: const TextStyle(color: Colors.red, fontSize: 13)),
-                      ],
-                      if (_passwordSuccess != null) ...<Widget>[
-                        const SizedBox(height: 10),
-                        Text(_passwordSuccess!, style: TextStyle(color: AppTheme.statusGreen, fontSize: 13)),
-                      ],
                       const SizedBox(height: 20),
                       Align(
                         alignment: Alignment.centerRight,
                         child: FilledButton(
-                          onPressed: _savingPassword ? null : _updatePassword,
-                          child: _savingPassword
-                              ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                          onPressed: _isUpdatingPassword ? null : _updatePassword,
+                          child: _isUpdatingPassword
+                              ? const SizedBox(
+                                  height: 18,
+                                  width: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
                               : const Text('Update Password'),
                         ),
                       ),
@@ -222,6 +269,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           label: 'Default Output Format',
                           initialValue: 'JPG',
                           items: _supportedOutputFormats,
+                          onChanged: (_) {},
                         ),
                         right: const _SettingsLabeledDropdown(
                           label: 'Default Quality',
@@ -249,8 +297,7 @@ class _SettingsPageState extends State<SettingsPage> {
                             setState(() => _autoOptimize = value),
                       ),
                       _SettingsCheckboxRow(
-                        label:
-                            'Automatically download results after processing',
+                        label: 'Automatically download results after processing',
                         value: _autoDownload,
                         alignment: _CheckboxAlignment.leading,
                         onChanged: (bool value) =>
@@ -260,7 +307,13 @@ class _SettingsPageState extends State<SettingsPage> {
                       Align(
                         alignment: Alignment.centerRight,
                         child: FilledButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Preferences saved'),
+                              ),
+                            );
+                          },
                           child: const Text('Save Preferences'),
                         ),
                       ),
@@ -327,59 +380,58 @@ class _SettingsPageState extends State<SettingsPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       LayoutBuilder(
-                        builder:
-                            (
-                              BuildContext context,
-                              BoxConstraints fieldConstraints,
-                            ) {
-                              final bool fieldStacked =
-                                  fieldConstraints.maxWidth < 420;
+                        builder: (
+                          BuildContext context,
+                          BoxConstraints fieldConstraints,
+                        ) {
+                          final bool fieldStacked =
+                              fieldConstraints.maxWidth < 420;
 
-                              final Widget apiField = Expanded(
-                                child: _SettingsLabeledField(
+                          final Widget apiField = Expanded(
+                            child: _SettingsLabeledField(
+                              label: 'Backend Base URL',
+                              initialValue: workspace.apiBaseUrl,
+                              readOnly: true,
+                            ),
+                          );
+
+                          final Widget copyButton = OutlinedButton(
+                            onPressed: _copyUrl,
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 15,
+                              ),
+                            ),
+                            child: const Text('Copy'),
+                          );
+
+                          if (fieldStacked) {
+                            return Column(
+                              children: <Widget>[
+                                _SettingsLabeledField(
                                   label: 'Backend Base URL',
                                   initialValue: workspace.apiBaseUrl,
                                   readOnly: true,
                                 ),
-                              );
-
-                              final Widget copyButton = OutlinedButton(
-                                onPressed: () {},
-                                style: OutlinedButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 15,
-                                  ),
+                                const SizedBox(height: 12),
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: copyButton,
                                 ),
-                                child: const Text('Copy'),
-                              );
+                              ],
+                            );
+                          }
 
-                              if (fieldStacked) {
-                                return Column(
-                                  children: <Widget>[
-                                    _SettingsLabeledField(
-                                      label: 'Backend Base URL',
-                                      initialValue: workspace.apiBaseUrl,
-                                      readOnly: true,
-                                    ),
-                                    const SizedBox(height: 12),
-                                    SizedBox(
-                                      width: double.infinity,
-                                      child: copyButton,
-                                    ),
-                                  ],
-                                );
-                              }
-
-                              return Row(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: <Widget>[
-                                  apiField,
-                                  const SizedBox(width: 12),
-                                  copyButton,
-                                ],
-                              );
-                            },
+                          return Row(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: <Widget>[
+                              apiField,
+                              const SizedBox(width: 12),
+                              copyButton,
+                            ],
+                          );
+                        },
                       ),
                       const SizedBox(height: 14),
                       SizedBox(
@@ -403,7 +455,9 @@ class _SettingsPageState extends State<SettingsPage> {
                           children: <Widget>[
                             Text(
                               'Connected endpoint',
-                              style: Theme.of(context).textTheme.bodySmall
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
                                   ?.copyWith(color: AppTheme.slate),
                             ),
                             const SizedBox(height: 8),
@@ -414,7 +468,9 @@ class _SettingsPageState extends State<SettingsPage> {
                             const SizedBox(height: 4),
                             Text(
                               'Backend proxy target',
-                              style: Theme.of(context).textTheme.bodySmall
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
                                   ?.copyWith(color: AppTheme.slate),
                             ),
                           ],
@@ -449,9 +505,10 @@ class _SettingsPageState extends State<SettingsPage> {
                       const SizedBox(height: 8),
                       Text(
                         'Check out our documentation or contact support.',
-                        style: Theme.of(
-                          context,
-                        ).textTheme.bodySmall?.copyWith(color: AppTheme.slate),
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodySmall
+                            ?.copyWith(color: AppTheme.slate),
                       ),
                       const SizedBox(height: 18),
                       SizedBox(
@@ -575,6 +632,7 @@ class _SettingsFieldPair extends StatelessWidget {
 class _SettingsLabeledField extends StatelessWidget {
   const _SettingsLabeledField({
     required this.label,
+    this.controller,
     this.initialValue,
     this.hintText,
     this.keyboardType,
@@ -583,6 +641,7 @@ class _SettingsLabeledField extends StatelessWidget {
   });
 
   final String label;
+  final TextEditingController? controller;
   final String? initialValue;
   final String? hintText;
   final TextInputType? keyboardType;
@@ -597,7 +656,8 @@ class _SettingsLabeledField extends StatelessWidget {
         Text(label, style: Theme.of(context).textTheme.labelLarge),
         const SizedBox(height: 8),
         TextFormField(
-          initialValue: initialValue,
+          controller: controller,
+          initialValue: controller == null ? initialValue : null,
           readOnly: readOnly,
           obscureText: obscureText,
           keyboardType: keyboardType,
@@ -608,35 +668,56 @@ class _SettingsLabeledField extends StatelessWidget {
   }
 }
 
-class _SettingsLabeledDropdown extends StatelessWidget {
+class _SettingsLabeledDropdown extends StatefulWidget {
   const _SettingsLabeledDropdown({
     required this.label,
     required this.initialValue,
     required this.items,
+    this.onChanged,
   });
 
   final String label;
   final String initialValue;
   final List<String> items;
+  final ValueChanged<String?>? onChanged;
+
+  @override
+  State<_SettingsLabeledDropdown> createState() =>
+      _SettingsLabeledDropdownState();
+}
+
+class _SettingsLabeledDropdownState extends State<_SettingsLabeledDropdown> {
+  late String _selectedValue;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedValue = widget.initialValue;
+  }
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text(label, style: Theme.of(context).textTheme.labelLarge),
+        Text(widget.label, style: Theme.of(context).textTheme.labelLarge),
         const SizedBox(height: 8),
         DropdownButtonFormField<String>(
-          initialValue: initialValue,
+          value: _selectedValue,
           isExpanded: true,
           decoration: _settingsInputDecoration(null),
-          items: items
+          items: widget.items
               .map(
                 (String item) =>
                     DropdownMenuItem<String>(value: item, child: Text(item)),
               )
               .toList(),
-          onChanged: (_) {},
+          onChanged: (String? value) {
+            if (value != null) {
+              setState(() => _selectedValue = value);
+              widget.onChanged?.call(value);
+            }
+          },
         ),
       ],
     );
@@ -679,9 +760,10 @@ class _SettingsCheckboxRow extends StatelessWidget {
                   Expanded(
                     child: Text(
                       label,
-                      style: Theme.of(
-                        context,
-                      ).textTheme.bodyMedium?.copyWith(color: AppTheme.slate),
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyMedium
+                          ?.copyWith(color: AppTheme.slate),
                     ),
                   ),
                 ]
@@ -689,9 +771,13 @@ class _SettingsCheckboxRow extends StatelessWidget {
                   Expanded(
                     child: Text(
                       label,
-                      style: Theme.of(context).textTheme.bodyMedium,
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyMedium
+                          ?.copyWith(color: AppTheme.slate),
                     ),
                   ),
+                  const SizedBox(width: 8),
                   checkbox,
                 ],
         ),
@@ -701,40 +787,9 @@ class _SettingsCheckboxRow extends StatelessWidget {
 }
 
 InputDecoration _settingsInputDecoration(String? hintText) {
-  return InputDecoration(hintText: hintText);
-}
-
-/// Same as [_SettingsLabeledField] but accepts a [TextEditingController]
-/// so the parent state can read / write the value.
-class _SettingsLabeledFieldController extends StatelessWidget {
-  const _SettingsLabeledFieldController({
-    required this.label,
-    required this.controller,
-    this.hintText,
-    this.obscureText = false,
-    this.keyboardType,
-  });
-
-  final String label;
-  final TextEditingController controller;
-  final String? hintText;
-  final bool obscureText;
-  final TextInputType? keyboardType;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Text(label, style: Theme.of(context).textTheme.labelLarge),
-        const SizedBox(height: 8),
-        TextField(
-          controller: controller,
-          obscureText: obscureText,
-          keyboardType: keyboardType,
-          decoration: _settingsInputDecoration(hintText),
-        ),
-      ],
-    );
-  }
+  return InputDecoration(
+    hintText: hintText,
+    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+    border: const OutlineInputBorder(),
+  );
 }

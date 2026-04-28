@@ -403,6 +403,10 @@ class _BatchBuilderSheetState extends State<_BatchBuilderSheet> {
         blurRadius: _blur,
         rotationDegrees: _rotation,
         outputFormat: _format,
+        quality: _quality,
+        preserveMetadata: _preserveMetadata,
+        stripProfile: _stripProfile,
+        autoOptimize: _autoOptimize,
       ),
     );
     Navigator.of(context).pop();
@@ -418,6 +422,10 @@ class _BatchBuilderSheetState extends State<_BatchBuilderSheet> {
         blurRadius: _blur,
         rotationDegrees: _rotation,
         outputFormat: _format,
+        quality: _quality,
+        preserveMetadata: _preserveMetadata,
+        stripProfile: _stripProfile,
+        autoOptimize: _autoOptimize,
       ),
     );
 

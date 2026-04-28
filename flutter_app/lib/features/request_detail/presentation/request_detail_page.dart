@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:imageflow_flutter/core/theme/app_theme.dart';
+import 'package:imageflow_flutter/core/workspace/workspace_scope.dart';
 import 'package:imageflow_flutter/features/logs/domain/log_entry.dart';
 import 'package:imageflow_flutter/features/logs/presentation/log_level_visuals.dart';
-import 'package:imageflow_flutter/features/request_detail/data/request_detail_mock_data.dart';
-import 'package:imageflow_flutter/features/request_detail/domain/request_detail_models.dart';
+import 'package:imageflow_flutter/features/results/domain/batch_gallery_image.dart';
 import 'package:imageflow_flutter/shared/widgets/shared_widgets.dart';
 
 class RequestDetailPage extends StatelessWidget {
@@ -11,6 +11,11 @@ class RequestDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final workspace = WorkspaceScope.of(context);
+    final latestBatch = workspace.latestBatch;
+    final galleryImages = workspace.latestBatchImages;
+    final logs = workspace.logs.where((l) => l.job == latestBatch?.requestId).toList();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -26,7 +31,7 @@ class RequestDetailPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'req-4522',
+                    latestBatch?.requestId ?? 'No active batch',
                     style: Theme.of(
                       context,
                     ).textTheme.bodySmall?.copyWith(color: AppTheme.slate),
@@ -34,39 +39,39 @@ class RequestDetailPage extends StatelessWidget {
                 ],
               ),
             ),
-            FilledButton.icon(
-              onPressed: () {},
-              icon: const Icon(Icons.download_rounded, size: 18),
-              label: const Text('Download Results'),
-            ),
+            if (latestBatch != null && latestBatch.status.toLowerCase() == 'completed')
+              FilledButton.icon(
+                onPressed: () => workspace.downloadLatestBatchArchive(),
+                icon: const Icon(Icons.download_rounded, size: 18),
+                label: const Text('Download Results'),
+              ),
           ],
         ),
         const SizedBox(height: 20),
         AdaptiveGrid(
           minItemWidth: 200,
           childAspectRatio: 1.3,
-          children: const <Widget>[
+          children: <Widget>[
             SummaryMetricCard(
               label: 'Status',
-              value: 'Completed',
-              color: AppTheme.success,
+              value: latestBatch?.status ?? 'N/A',
+              color: latestBatch?.status.toLowerCase() == 'completed' ? AppTheme.success : AppTheme.goldDeep,
             ),
             SummaryMetricCard(
               label: 'Images',
-              value: '24',
+              value: '${latestBatch?.fileCount ?? 0}',
               color: AppTheme.ink,
             ),
             SummaryMetricCard(
-              label: 'Submitted',
-              value: 'Mar 19',
+              label: 'Transformations',
+              value: '${latestBatch?.filters.length ?? 0}',
               color: AppTheme.ink,
             ),
             SummaryMetricCard(
               label: 'Duration',
-              value: '52 sec',
+              value: 'Real-time',
               color: AppTheme.ink,
             ),
-            SummaryMetricCard(label: 'Nodes', value: '8', color: AppTheme.ink),
           ],
         ),
         const SizedBox(height: 20),
@@ -80,53 +85,61 @@ class RequestDetailPage extends StatelessWidget {
                 title: 'Image Processing Details',
                 child: Column(
                   children: <Widget>[
-                    ...requestImageDetails.map((RequestImageDetail image) {
-                      return Container(
-                        margin: const EdgeInsets.only(bottom: 10),
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          color: AppTheme.canvasSoft,
-                          borderRadius: BorderRadius.circular(18),
-                        ),
-                        child: Row(
-                          children: <Widget>[
-                            const Icon(
-                              Icons.check_circle_outline,
-                              color: AppTheme.success,
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  Text(
-                                    image.name,
-                                    style: Theme.of(
-                                      context,
-                                    ).textTheme.labelMedium,
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    'Node: ${image.node}  |  ${image.start} -> ${image.end}',
-                                    style: Theme.of(context).textTheme.bodySmall
-                                        ?.copyWith(color: AppTheme.slate),
-                                  ),
-                                ],
+                    if (galleryImages.isEmpty)
+                      const Padding(
+                        padding: EdgeInsets.all(20),
+                        child: Text('No images processed yet or still loading...'),
+                      )
+                    else
+                      ...galleryImages.map((BatchGalleryImage image) {
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 10),
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            color: AppTheme.canvasSoft,
+                            borderRadius: BorderRadius.circular(18),
+                          ),
+                          child: Row(
+                            children: <Widget>[
+                              Icon(
+                                image.resultUrl.isNotEmpty
+                                    ? Icons.check_circle_outline
+                                    : Icons.pending_outlined,
+                                color: image.resultUrl.isNotEmpty
+                                    ? AppTheme.success
+                                    : AppTheme.goldDeep,
                               ),
-                            ),
-                            StatusChip(
-                              label: image.status,
-                              color: AppTheme.statusGreen,
-                              background: AppTheme.sand,
-                            ),
-                          ],
-                        ),
-                      );
-                    }),
-                    TextButton(
-                      onPressed: () {},
-                      child: const Text('Show all 24 images'),
-                    ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: <Widget>[
+                                    Text(
+                                      image.originalName,
+                                      style: Theme.of(
+                                        context,
+                                      ).textTheme.labelMedium,
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      'Node: ${image.nodeId}',
+                                      style: Theme.of(context).textTheme.bodySmall
+                                          ?.copyWith(color: AppTheme.slate),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              StatusChip(
+                                label: image.status,
+                                color: image.status.toLowerCase() == 'completed' || image.status.toLowerCase() == 'finished'
+                                    ? AppTheme.statusGreen
+                                    : AppTheme.goldDeep,
+                                background: AppTheme.sand,
+                              ),
+                            ],
+                          ),
+                        );
+                      }),
                   ],
                 ),
               ),
@@ -136,9 +149,7 @@ class RequestDetailPage extends StatelessWidget {
               child: SectionPanel(
                 title: 'Transformations',
                 child: Column(
-                  children: transformationDetails.map((
-                    TransformationDetail transform,
-                  ) {
+                  children: (latestBatch?.filters ?? []).map((String filter) {
                     return Container(
                       margin: const EdgeInsets.only(bottom: 10),
                       padding: const EdgeInsets.symmetric(
@@ -153,14 +164,9 @@ class RequestDetailPage extends StatelessWidget {
                         children: <Widget>[
                           Expanded(
                             child: Text(
-                              transform.name,
+                              filter,
                               style: Theme.of(context).textTheme.labelMedium,
                             ),
-                          ),
-                          Text(
-                            transform.value,
-                            style: Theme.of(context).textTheme.bodySmall
-                                ?.copyWith(color: AppTheme.slate),
                           ),
                         ],
                       ),
@@ -194,7 +200,9 @@ class RequestDetailPage extends StatelessWidget {
         SectionPanel(
           title: 'Processing Logs',
           child: Column(
-            children: requestLogs.map((LogEntry log) {
+            children: logs.isEmpty 
+              ? [const Padding(padding: EdgeInsets.all(20), child: Text('No logs for this request.'))]
+              : logs.map((LogEntry log) {
               return Container(
                 margin: const EdgeInsets.only(bottom: 10),
                 padding: const EdgeInsets.all(14),

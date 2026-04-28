@@ -1,0 +1,5 @@
+Analyzing flutter_app...                                        
+
+warning - The declaration '_RecentBatchCard' isn't referenced - lib\features\dashboard\presentation\dashboard_page.dart:1113:7 - unused_element
+
+1 issue found. (ran in 9.3s)

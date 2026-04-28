@@ -526,6 +526,7 @@ class WorkspaceController extends ChangeNotifier {
 
       final UploadBatchResult result = UploadBatchResult(
         requestId:
+            (json['batch_uuid'] as String?) ??
             (json['batchId'] as String?) ??
             (json['jobId'] as String?) ??
             _buildRequestId(),
@@ -665,11 +666,15 @@ class WorkspaceController extends ChangeNotifier {
 
           String? coverUrl =
               (item['cover_image_url'] as String?) ?? (batch['cover_url'] as String?);
-          if (coverUrl != null &&
-              coverUrl.isNotEmpty &&
-              !coverUrl.startsWith('http') &&
-              !coverUrl.startsWith('data:')) {
-            coverUrl = _resolveRelativeUrl(coverUrl);
+          if (coverUrl != null && coverUrl.isNotEmpty) {
+            if (!coverUrl.startsWith('http') && !coverUrl.startsWith('data:')) {
+              coverUrl = _resolveRelativeUrl(coverUrl);
+            } else if (coverUrl.contains('.ngrok-free.app')) {
+              // Patch for backend sending old ngrok domains in pre-signed URLs
+              final Uri currentUri = Uri.parse(_apiClient.config.baseUrl);
+              final Uri badUri = Uri.parse(coverUrl);
+              coverUrl = coverUrl.replaceFirst(badUri.host, currentUri.host);
+            }
           }
 
           return HistoryRequest(
@@ -1417,7 +1422,7 @@ class WorkspaceController extends ChangeNotifier {
 
     try {
       final List<int> bytes = await _apiClient.getBytes(
-        '/node/batch/$batchId/download',
+        '/download-batch/$batchId',
         token: _session!.token,
       );
       final SavedFile saved = await saveBytes(

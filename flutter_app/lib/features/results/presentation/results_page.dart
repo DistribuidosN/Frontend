@@ -23,15 +23,13 @@ class _ResultsPageState extends State<ResultsPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final workspace = WorkspaceScope.of(context);
       workspace.refreshHistory().then((_) {
-        // Si hay un batch activo (acabamos de procesar uno) y no hemos seleccionado nada manualmente
         if (workspace.latestBatch != null && _selectedBatch == null) {
           try {
-            final latestId = workspace.latestBatch!.requestId;
-            final match = workspace.historyRequests.firstWhere((b) => b.id == latestId);
-            setState(() => _selectedBatch = match);
-          } catch (_) {
-            // No se encontró en el historial, ignorar
-          }
+            final match = workspace.historyRequests.firstWhere(
+              (b) => b.id == workspace.latestBatch!.requestId
+            );
+            _openBatch(match, workspace);
+          } catch (_) {}
         }
       });
     });

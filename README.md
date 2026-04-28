@@ -9,7 +9,7 @@
   <img alt="Frontend operativo" src="https://img.shields.io/badge/Estado-Frontend%20Operativo-FACC15?style=for-the-badge&labelColor=111827&color=FACC15">
 </p>
 
-<h1 align="center">ImageFlow Frontend</h1>
+<h1 align="center">ImageFlow Frontend - Edit Test</h1>
 
 <p align="center">
   Interfaz Flutter para supervisar, configurar y recorrer un flujo distribuido de procesamiento de imagenes.

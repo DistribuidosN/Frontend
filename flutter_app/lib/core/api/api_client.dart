@@ -36,13 +36,22 @@ class ApiClient {
     return baseUri.replace(queryParameters: query);
   }
 
-  Map<String, String> _headers(String? token, {bool isJson = true}) {
-    return <String, String>{
+  Map<String, String> _headers(String? token, {bool isJson = true, String? path}) {
+    final bool isMinioImage = path != null && 
+        (path.contains('enfok-images') || path.contains('exports'));
+
+    final Map<String, String> headers = <String, String>{
       if (isJson) 'Content-Type': 'application/json',
-      if (token != null && token.isNotEmpty) 'Authorization': 'Bearer $token',
-      // Header opcional para saltar el warning de ngrok si se envía como header en lugar de query param
-      'ngrok-skip-browser-warning': 'true',
     };
+
+    if (!isMinioImage) {
+      if (token != null && token.isNotEmpty) {
+        headers['Authorization'] = 'Bearer $token';
+      }
+      headers['ngrok-skip-browser-warning'] = 'true';
+    }
+
+    return headers;
   }
 
   Future<Map<String, dynamic>> postJson(
@@ -52,7 +61,7 @@ class ApiClient {
   }) async {
     final http.Response response = await _httpClient.post(
       _uri(path),
-      headers: _headers(token),
+      headers: _headers(token, path: path),
       body: jsonEncode(body),
     );
 
@@ -66,7 +75,7 @@ class ApiClient {
   }) async {
     final http.Response response = await _httpClient.put(
       _uri(path),
-      headers: _headers(token),
+      headers: _headers(token, path: path),
       body: jsonEncode(body),
     );
 
@@ -76,7 +85,7 @@ class ApiClient {
   Future<Map<String, dynamic>> deleteJson(String path, {String? token}) async {
     final http.Response response = await _httpClient.delete(
       _uri(path),
-      headers: _headers(token, isJson: false),
+      headers: _headers(token, isJson: false, path: path),
     );
 
     return _decodeJsonResponse(response);
@@ -85,7 +94,7 @@ class ApiClient {
   Future<Map<String, dynamic>> getJson(String path, {String? token}) async {
     final http.Response response = await _httpClient.get(
       _uri(path),
-      headers: _headers(token, isJson: false),
+      headers: _headers(token, isJson: false, path: path),
     );
 
     return _decodeJsonResponse(response);
@@ -94,7 +103,7 @@ class ApiClient {
   Future<dynamic> getDecoded(String path, {String? token}) async {
     final http.Response response = await _httpClient.get(
       _uri(path),
-      headers: _headers(token, isJson: false),
+      headers: _headers(token, isJson: false, path: path),
     );
 
     return _decodeResponse(response);
@@ -103,7 +112,7 @@ class ApiClient {
   Future<dynamic> getDecodedFromAbsoluteUrl(String url, {String? token}) async {
     final http.Response response = await _httpClient.get(
       _uri(url), // _uri ya maneja absolutas
-      headers: _headers(token, isJson: false),
+      headers: _headers(token, isJson: false, path: url),
     );
 
     return _decodeResponse(response);
@@ -173,7 +182,7 @@ class ApiClient {
   Future<List<int>> getBytes(String path, {String? token}) async {
     final http.Response response = await _httpClient.get(
       _uri(path),
-      headers: _headers(token, isJson: false),
+      headers: _headers(token, isJson: false, path: path),
     );
 
     if (response.statusCode < 200 || response.statusCode >= 300) {
@@ -189,7 +198,7 @@ class ApiClient {
   Future<List<int>> getBytesFromAbsoluteUrl(String url, {String? token}) async {
     final http.Response response = await _httpClient.get(
       _uri(url),
-      headers: _headers(token, isJson: false),
+      headers: _headers(token, isJson: false, path: url),
     );
 
     if (response.statusCode < 200 || response.statusCode >= 300) {

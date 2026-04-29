@@ -1265,49 +1265,67 @@ class WorkspaceController extends ChangeNotifier {
   }
 
   Future<String> downloadLatestBatchArchive() async {
-    final UploadBatchResult? batch = _latestBatch;
-    if (batch == null) {
-      throw StateError('No batch is available for download yet.');
-    }
-    if (_session == null || _session!.token.isEmpty) {
-      throw StateError('You need to sign in before downloading files.');
-    }
+  final UploadBatchResult? batch = _latestBatch;
+  
+  if (batch == null) {
+    throw StateError('No batch is available for download yet.');
+  }
+  
+  if (_session == null || _session!.token.isEmpty) {
+    throw StateError('You need to sign in before downloading files.');
+  }
 
-    List<int> bytes;
-    String fileName = '${batch.requestId}-results.zip';
+  try {
+    // 1. Obtenemos el JSON que contiene la URL firmada
+    final Map<String, dynamic> response = await _apiClient.getJson(
+      '/download-batch/${batch.requestId}',
+      token: _session!.token,
+    );
 
-    try {
-      bytes = await _apiClient.getBytes(
-        '/download-batch/${batch.requestId}',
-        token: _session!.token,
-      );
-      _appendLog(
-        level: LogLevel.success,
-        source: 'api',
-        message: 'Downloaded archive for ${batch.requestId} from backend.',
-        job: batch.requestId,
-      );
-    } catch (error) {
-      _appendLog(
-        level: LogLevel.warning,
-        source: 'api',
-        message:
-            'Backend download unavailable for ${batch.requestId}; refusing to export original staged files as a fake ZIP.',
-        job: batch.requestId,
-      );
-      throw StateError(
-        'The backend ZIP download failed for ${batch.requestId}. The app stopped instead of exporting the original local files without filters. Details: $error',
-      );
+    final String? downloadUrl = response['download_url'];
+
+    if (downloadUrl == null || downloadUrl.isEmpty) {
+      throw StateError('The backend did not provide a valid download URL.');
     }
 
+    // Extraemos el nombre real del archivo directamente de la URL (ej: batch_uuid.zip)
+    final String fileName = Uri.parse(downloadUrl).pathSegments.last;
+
+    // 2. Descargamos los bytes usando la URL absoluta
+    // NOTA: Si no has aplicado el "limpiador" en Nginx, recuerda que enviar el 
+    // token aquí podría dar error 400. Si ya lo arreglaste, esto funcionará perfecto.
+    final List<int> bytes = await _apiClient.getBytesFromAbsoluteUrl(
+      downloadUrl,
+      token: _session?.token, 
+    );
+
+    // 3. Guardamos los bytes en el sistema de archivos
     final SavedFile saved = await saveBytes(
       suggestedName: fileName,
       bytes: bytes,
       mimeType: 'application/zip',
     );
+
+    _appendLog(
+      level: LogLevel.success,
+      source: 'api',
+      message: 'Saved archive $fileName to ${saved.location}.',
+      job: batch.requestId,
+    );
+
     notifyListeners();
     return saved.location;
+
+  } catch (error) {
+    _appendLog(
+      level: LogLevel.warning,
+      source: 'api',
+      message: 'The backend ZIP download failed for ${batch.requestId}. Details: $error',
+      job: batch.requestId,
+    );
+    rethrow;
   }
+}
 
   Future<String> downloadResultImage(String fileName) async {
     final BatchGalleryImage? remoteImage = _latestBatchImages
@@ -1471,12 +1489,28 @@ class WorkspaceController extends ChangeNotifier {
     );
 
     try {
-      final List<int> bytes = await _apiClient.getBytes(
+      // 1. Obtenemos el JSON que contiene la URL firmada
+      final Map<String, dynamic> response = await _apiClient.getJson(
         '/download-batch/$batchId',
         token: _session!.token,
       );
+
+      final String? downloadUrl = response['download_url'];
+      if (downloadUrl == null || downloadUrl.isEmpty) {
+        throw StateError('The backend did not provide a valid download URL.');
+      }
+
+      // Extraemos el nombre real del archivo directamente de la URL (ej: batch_uuid.zip)
+      final String fileName = Uri.parse(downloadUrl).pathSegments.last;
+
+      // 2. Descargamos los bytes usando la URL absoluta
+      final List<int> bytes = await _apiClient.getBytesFromAbsoluteUrl(
+        downloadUrl,
+        token: _session?.token,
+      );
+
       final SavedFile saved = await saveBytes(
-        suggestedName: '$batchId-results.zip',
+        suggestedName: fileName,
         bytes: bytes,
         mimeType: 'application/zip',
       );

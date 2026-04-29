@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 
-const String _defaultLocalBaseUrl = 'http://localhost:50021/api/v1';
-const String _defaultWebBaseUrl = 'http://172.24.14.205:50021/api/v1';
+const String _defaultLocalBaseUrl = 'http://192.168.80.22/api/v1';
+const String _defaultWebBaseUrl = 'http://192.168.80.22/api/v1';
 
 class ApiConfig {
   const ApiConfig({required this.baseUrl, required this.adminProxyBaseUrl});

@@ -46,19 +46,22 @@ class UserStatistics {
         stats['total_batches'] ??
             stats['batches_total'] ??
             stats['batches'] ??
-            stats['totalBatches'],
+            stats['totalBatches'] ??
+            stats['batchCount'],
       ),
       totalImages: asInt(
         stats['total_images'] ??
             stats['images_total'] ??
             stats['images'] ??
-            stats['totalImages'],
+            stats['totalImages'] ??
+            stats['imagesUploaded'],
       ),
       successfulImages: asInt(
         stats['successful_images'] ??
             stats['success_count'] ??
             stats['successful'] ??
-            stats['processed_images'],
+            stats['processed_images'] ??
+            stats['imagesUploaded'],
       ),
       failedImages: asInt(
         stats['failed_images'] ??
@@ -68,7 +71,8 @@ class UserStatistics {
       ),
       lastActivity: (stats['last_activity'] as String?) ??
           (stats['last_seen'] as String?) ??
-          (stats['updated_at'] as String?),
+          (stats['updated_at'] as String?) ??
+          (stats['timestamp'] as String?),
       extras: stats,
     );
   }

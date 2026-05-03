@@ -1020,10 +1020,22 @@ class WorkspaceController extends ChangeNotifier {
       return;
     }
 
-    final Map<String, dynamic> json = await _apiClient.getJson(
-      '/users/$uuid/statistics',
-      token: _session!.token,
-    );
+    dynamic payload;
+    try {
+      payload = await _apiClient.getDecoded(
+        '/users/$uuid/statistics',
+        token: _session!.token,
+      );
+    } catch (_) {
+      payload = await _apiClient.getDecoded(
+        '/user/statistics',
+        token: _session!.token,
+      );
+    }
+
+    final Map<String, dynamic> json = payload is Map<String, dynamic>
+        ? payload
+        : <String, dynamic>{};
 
     _userStatistics = UserStatistics.fromJson(json);
 
@@ -1040,10 +1052,33 @@ class WorkspaceController extends ChangeNotifier {
       return;
     }
 
-    final List<dynamic> json = await _apiClient.getDecoded(
-      '/users/$uuid/activity',
-      token: _session!.token,
-    );
+    dynamic payload;
+    try {
+      payload = await _apiClient.getDecoded(
+        '/users/$uuid/activity',
+        token: _session!.token,
+      );
+    } catch (_) {
+      payload = await _apiClient.getDecoded(
+        '/user/activity',
+        token: _session!.token,
+      );
+    }
+
+    final List<dynamic> json = switch (payload) {
+      final List<dynamic> list => list,
+      final Map<String, dynamic> map =>
+        map['activity'] is List<dynamic>
+            ? map['activity'] as List<dynamic>
+            : map['activities'] is List<dynamic>
+            ? map['activities'] as List<dynamic>
+            : map['events'] is List<dynamic>
+            ? map['events'] as List<dynamic>
+            : map['data'] is List<dynamic>
+            ? map['data'] as List<dynamic>
+            : <dynamic>[],
+      _ => <dynamic>[],
+    };
 
     _userActivity
       ..clear()
@@ -1205,9 +1240,13 @@ class WorkspaceController extends ChangeNotifier {
     );
 
     _adminMetricNodeId = targetNodeId;
+    final dynamic normalizedPayload = payload is Map<String, dynamic> &&
+            payload['data'] is List<dynamic>
+        ? payload['data']
+        : payload;
     _adminNodeMetrics
       ..clear()
-      ..addAll(switch (payload) {
+      ..addAll(switch (normalizedPayload) {
         final List<dynamic> rows =>
           rows
               .map(
@@ -1219,12 +1258,12 @@ class WorkspaceController extends ChangeNotifier {
               .whereType<AdminNodeMetric>(),
         _ => <AdminNodeMetric>[
           if (AdminNodeMetric.maybeFromJson(
-                payload,
+                normalizedPayload,
                 fallbackNodeId: targetNodeId,
               ) !=
               null)
             AdminNodeMetric.maybeFromJson(
-              payload,
+              normalizedPayload,
               fallbackNodeId: targetNodeId,
             )!,
         ],
@@ -1247,7 +1286,16 @@ class WorkspaceController extends ChangeNotifier {
     );
 
     _adminLogImageUuid = candidateImageUuid;
-    final List<dynamic> rows = payload is List<dynamic> ? payload : <dynamic>[];
+    final List<dynamic> rows = switch (payload) {
+      final List<dynamic> list => list,
+      final Map<String, dynamic> map =>
+        map['logs'] is List<dynamic>
+            ? map['logs'] as List<dynamic>
+            : map['data'] is List<dynamic>
+            ? map['data'] as List<dynamic>
+            : <dynamic>[],
+      _ => <dynamic>[],
+    };
     _adminLogs
       ..clear()
       ..addAll(
@@ -1255,6 +1303,9 @@ class WorkspaceController extends ChangeNotifier {
           final Map<String, dynamic> item = row is Map<String, dynamic>
               ? row
               : <String, dynamic>{};
+          if (!item.containsKey('image_uuid') && !item.containsKey('imageUuid')) {
+            item['imageUuid'] = candidateImageUuid;
+          }
           return AdminAuditLog.fromJson(item);
         }),
       );

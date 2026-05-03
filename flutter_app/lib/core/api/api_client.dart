@@ -24,7 +24,10 @@ class ApiClient {
       return Uri.parse(path);
     }
 
-    final Uri baseUri = Uri.parse('${_config.baseUrl}$normalizedPath');
+    final String baseUrl = normalizedPath.startsWith('/admin/')
+        ? _config.adminProxyBaseUrl
+        : _config.baseUrl;
+    final Uri baseUri = Uri.parse('$baseUrl$normalizedPath');
     if (!baseUri.host.contains('ngrok-free.app')) {
       return baseUri;
     }

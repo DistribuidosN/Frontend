@@ -34,8 +34,12 @@ class WorkspaceController extends ChangeNotifier {
 
   late final ApiClient _apiClient;
   final Random _random = Random();
+  bool _restoringSession = false;
 
   void _handleUnauthenticated() {
+    if (_restoringSession) {
+      return;
+    }
     if (_session != null) {
       _clearSessionLocally();
       notifyListeners();
@@ -51,6 +55,7 @@ class WorkspaceController extends ChangeNotifier {
     final username = prefs.getString('auth_username');
 
     if (token != null && identity != null && roleId != null) {
+      _restoringSession = true;
       _session = AuthSession(
         token: token,
         roleId: roleId,
@@ -58,9 +63,11 @@ class WorkspaceController extends ChangeNotifier {
         userUuid: userUuid,
         username: username,
       );
+      notifyListeners();
       try {
         await _refreshProfile(notify: false);
       } catch (_) {}
+      _restoringSession = false;
       notifyListeners();
     }
   }

@@ -32,6 +32,7 @@ class _ImageFlowAppState extends State<ImageFlowApp> {
   late final WorkspaceController _workspaceController = WorkspaceController();
   AuthView _authView = AuthView.login;
   AppPage _activePage = AppPage.dashboard;
+  bool _isBootstrapping = true;
 
   Future<void> _handleLogin(String email, String password) async {
     await _workspaceController.login(email: email, password: password);
@@ -47,6 +48,7 @@ class _ImageFlowAppState extends State<ImageFlowApp> {
     setState(() {
       _authView = AuthView.login;
       _activePage = AppPage.dashboard;
+      _isBootstrapping = false;
     });
   }
 
@@ -84,11 +86,15 @@ class _ImageFlowAppState extends State<ImageFlowApp> {
   void initState() {
     super.initState();
     _workspaceController.init().then((_) {
+      if (!mounted) {
+        return;
+      }
       if (_workspaceController.isAuthenticated) {
         setState(() {
           _activePage = _workspaceController.isAdmin ? AppPage.admin : AppPage.dashboard;
         });
       }
+      setState(() => _isBootstrapping = false);
     });
   }
 
@@ -119,6 +125,14 @@ class _ImageFlowAppState extends State<ImageFlowApp> {
         home: Builder(
           builder: (BuildContext context) {
             final workspace = WorkspaceScope.of(context);
+            if (_isBootstrapping) {
+              return const Scaffold(
+                backgroundColor: AppTheme.background,
+                body: Center(
+                  child: CircularProgressIndicator(),
+                ),
+              );
+            }
             return AnimatedSwitcher(
               duration: const Duration(milliseconds: 220),
               switchInCurve: Curves.easeOut,

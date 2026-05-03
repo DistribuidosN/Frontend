@@ -1,0 +1,419 @@
+\documentclass[conference]{IEEEtran}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{url}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{enumitem}
+\hypersetup{hidelinks}
+\lstset{
+  basicstyle=\ttfamily\footnotesize,
+  breaklines=true,
+  frame=single,
+  columns=fullflexible
+}
+
+\title{Documentacion Tecnica del Modulo Frontend}
+\author{
+\IEEEauthorblockN{Christian Mauricio Rodriguez Curubo, Santos Enmanuel Manosalva Aceros}
+\IEEEauthorblockA{Universidad Pontificia Bolivariana Seccional Bucaramanga\\
+Sistemas Distribuidos\\
+Docente: Audo Al\'i Diaz}
+}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Este documento describe el modulo \texttt{Frontend}, revisado en la rama \texttt{main}. La revision identifica una aplicacion Flutter orientada a la operacion de un sistema distribuido de procesamiento de imagenes, con soporte para autenticacion, carga de lotes, seguimiento de estado, historial, resultados, nodos y logs. Se analizan su estructura interna, la organizacion por features, la configuracion del cliente HTTP, el flujo de navegacion, la integracion con servicios externos y los comandos de compilacion y despliegue identificados en el repositorio.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Frontend, Flutter, Dart, interfaz de usuario, API, autenticacion, procesamiento de imagenes
+\end{IEEEkeywords}
+
+\section{Introduccion}
+La capa de interfaz de usuario constituye la representacion visible del sistema distribuido. En el conjunto revisado, esa responsabilidad recae en el modulo \texttt{Frontend}, construido con Flutter y organizado alrededor de vistas de autenticacion, paneles operativos, carga de lotes, navegacion por resultados y observabilidad del sistema.
+
+La revision se realizo sobre la rama \texttt{main}, que despues del pull quedo asociada al commit \texttt{fe3c700 fixes on images dowloads and zip}. La estructura del proyecto y los archivos principales permiten documentar su arquitectura y su relacion con el resto de la plataforma.
+
+\section{Contexto del modulo dentro del sistema distribuido}
+Si se observa el sistema desde la perspectiva de un evaluador externo, el frontend es el punto donde la complejidad distribuida se convierte en una experiencia de uso comprensible. Los modulos de autenticacion, persistencia, orquestacion y nodos ejecutores operan con protocolos, contratos y estados internos; el frontend reorganiza ese conjunto en recorridos visuales, formularios, listas, paneles y acciones de usuario.
+
+Su importancia dentro del sistema no radica en ejecutar logica pesada de negocio, sino en hacer operables las capacidades del resto de servicios. Cuando un usuario inicia sesion, crea un batch, revisa resultados, inspecciona nodos o consulta logs, el frontend actua como mediador entre la intencion humana y los endpoints del ecosistema backend.
+
+\section{Descripcion general del modulo}
+\texttt{Frontend} es una aplicacion Flutter que modela el recorrido operativo completo de un usuario del sistema. Segun el README y la estructura bajo \texttt{flutter\_app/lib}, el proyecto cubre:
+
+\begin{itemize}[leftmargin=*]
+\item autenticacion y registro;
+\item dashboard de actividad;
+\item carga de imagenes o batches;
+\item construccion de tareas o filtros;
+\item seguimiento del procesamiento;
+\item historial y detalle de solicitudes;
+\item vista de resultados;
+\item monitoreo de nodos y logs operativos.
+\end{itemize}
+
+La aplicacion se orienta tanto a usuarios operadores como a usuarios con perfil administrativo, de acuerdo con el comportamiento observado en el controlador de estado global.
+
+\section{Objetivo del modulo}
+El objetivo del frontend es servir como punto de acceso visual y operativo al sistema distribuido. A nivel tecnico, esto implica:
+
+\begin{enumerate}[leftmargin=*]
+\item capturar credenciales y mantener sesion;
+\item permitir la seleccion y carga de archivos;
+\item invocar APIs de autenticacion, procesamiento, historial y descarga;
+\item representar el avance de las solicitudes;
+\item ofrecer una vista integrada del ecosistema operativo de nodos, logs y metricas.
+\end{enumerate}
+
+\section{Rol del modulo dentro del sistema distribuido}
+Dentro del sistema, \texttt{Frontend} cumple el rol de cliente principal para interaccion humana. No ejecuta procesamiento ni persiste informacion propia del dominio, sino que:
+
+\begin{itemize}[leftmargin=*]
+\item consume APIs expuestas por capas backend;
+\item muestra resultados y estados al usuario;
+\item organiza la experiencia de navegacion entre autenticacion, carga, monitoreo e historico;
+\item traduce acciones humanas en llamadas estructuradas hacia la capa de servicios.
+\end{itemize}
+
+Por esta razon, el frontend funciona como la fachada operativa del sistema distribuido.
+
+\section{Arquitectura interna}
+La arquitectura del proyecto se organiza de forma modular alrededor de features. El arbol principal puede sintetizarse de la siguiente manera:
+
+\begin{lstlisting}
+Frontend/
+|- README.md
+|- flutter_app/
+|  |- pubspec.yaml
+|  |- lib/
+|  |  |- main.dart
+|  |  |- app.dart
+|  |  |- core/
+|  |  |- shared/
+|  |  `- features/
+|  |- android/
+|  |- ios/
+|  |- web/
+|  `- windows/
+`- assets/
+\end{lstlisting}
+
+\subsection{Nucleo de aplicacion}
+Los archivos \texttt{main.dart} y \texttt{app.dart} inician la aplicacion Flutter y establecen el punto de entrada principal.
+
+\subsection{Core}
+La carpeta \texttt{core} contiene piezas transversales como:
+\begin{itemize}[leftmargin=*]
+\item cliente HTTP;
+\item configuracion base de API;
+\item control global de workspace;
+\item utilidades de archivos.
+\end{itemize}
+
+\subsection{Features}
+La carpeta \texttt{features} contiene los modulos funcionales de interfaz. Entre ellos aparecen \texttt{auth}, \texttt{dashboard}, \texttt{history}, \texttt{logs}, \texttt{nodes}, \texttt{progress}, \texttt{request\_detail}, \texttt{results}, \texttt{settings}, \texttt{shell}, \texttt{task\_builder}, \texttt{upload} y \texttt{user}.
+
+\section{Patron de organizacion identificado}
+El proyecto no presenta una arquitectura hexagonal estricta en el sentido tradicional utilizado para servicios backend. En cambio, el codigo muestra una organizacion modular por \emph{features}, apoyada en un nucleo transversal \texttt{core} y en modelos de dominio ligeros dentro de cada caracteristica. Esta estrategia es comun en aplicaciones Flutter porque facilita agrupar interfaz, modelos y comportamiento alrededor de recorridos funcionales concretos.
+
+La separacion observada puede interpretarse del siguiente modo:
+\begin{itemize}[leftmargin=*]
+\item \texttt{features/*/presentation}: contiene paginas, vistas y componentes de interfaz;
+\item \texttt{features/*/domain}: define modelos de datos y estructuras asociadas a cada caso funcional;
+\item \texttt{core/api}: encapsula comunicacion HTTP y configuracion de endpoints;
+\item \texttt{core/workspace}: centraliza estado de sesion, contexto operativo y coordinacion general de la experiencia;
+\item \texttt{core/files}: abstrae operaciones dependientes de plataforma para seleccion y guardado de archivos;
+\item \texttt{shared/widgets}: concentra componentes reutilizables de interfaz.
+\end{itemize}
+
+Esta organizacion no contradice los principios de separacion de responsabilidades; simplemente los adapta al contexto de una aplicacion cliente. El frontend no implementa puertos y adaptadores con la misma formalidad que un backend hexagonal, pero si distingue entre vista, modelos, servicios de integracion y utilidades transversales.
+
+\section{Separacion de responsabilidades}
+La separacion de responsabilidades del frontend se apoya en el reparto entre experiencia visual, estado de aplicacion y acceso a servicios. Las pantallas y componentes de presentacion resuelven interaccion y navegacion; los modelos de dominio representan la informacion que viaja por la aplicacion; el cliente HTTP y la configuracion de API encapsulan la comunicacion externa; y el controlador de workspace coordina sesion, configuracion contextual y transiciones globales.
+
+Esta distribucion es especialmente relevante para un lector externo porque demuestra que la aplicacion no se reduce a un conjunto disperso de pantallas. Existe una estructura modular donde cada feature encapsula su propio vocabulario funcional, mientras el \texttt{core} proporciona servicios compartidos que evitan duplicacion y facilitan coherencia entre pantallas.
+
+\section{Tecnologias utilizadas}
+El archivo \texttt{pubspec.yaml} permite identificar las tecnologias principales:
+
+\begin{itemize}[leftmargin=*]
+\item \textbf{Flutter}: framework UI multiplataforma.
+\item \textbf{Dart}: lenguaje de implementacion.
+\item \textbf{Material 3}: base visual.
+\item \textbf{http}: consumo de APIs.
+\item \textbf{file\_picker}: seleccion de archivos.
+\item \textbf{archive}: soporte para empaquetado y descargas.
+\item \textbf{shared\_preferences}: persistencia ligera de sesion.
+\item \textbf{flutter\_svg}: soporte grafico.
+\item \textbf{google\_fonts}: configuracion tipografica.
+\end{itemize}
+
+\section{Estructura del proyecto}
+El frontend sigue una estructura por features, con un nucleo compartido y componentes reutilizables. Esta organizacion favorece la cohesion semantica de cada area funcional. El siguiente resumen ilustra esta distribucion:
+
+\begin{lstlisting}
+flutter_app/lib/
+|- main.dart
+|- app.dart
+|- core/
+|  |- api/
+|  |- files/
+|  |- theme/
+|  `- workspace/
+|- shared/widgets/
+`- features/
+   |- auth/
+   |- dashboard/
+   |- history/
+   |- logs/
+   |- nodes/
+   |- progress/
+   |- request_detail/
+   |- results/
+   |- settings/
+   |- shell/
+   |- task_builder/
+   |- upload/
+   `- user/
+\end{lstlisting}
+
+\section{Archivos principales}
+Durante la revision se identificaron como archivos principales:
+
+\begin{itemize}[leftmargin=*]
+\item \texttt{flutter\_app/pubspec.yaml}
+\item \texttt{flutter\_app/lib/main.dart}
+\item \texttt{flutter\_app/lib/app.dart}
+\item \texttt{flutter\_app/lib/core/api/api\_client.dart}
+\item \texttt{flutter\_app/lib/core/api/api\_config.dart}
+\item \texttt{flutter\_app/lib/core/workspace/workspace\_controller.dart}
+\item \texttt{README.md}
+\item \texttt{flutter\_app/README.md}
+\end{itemize}
+
+\section{Configuracion del entorno}
+El frontend no utiliza un archivo \texttt{.env} clasico dentro del arbol revisado. En su lugar, emplea variables de compilacion resueltas mediante \texttt{String.fromEnvironment}. Esta estrategia es coherente con aplicaciones Flutter que se construyen para distintas plataformas y entornos.
+
+\section{Variables de entorno}
+En \texttt{api\_config.dart} se detectan dos variables de configuracion:
+
+\begin{lstlisting}
+API_BASE_URL
+ADMIN_PROXY_BASE_URL
+\end{lstlisting}
+
+El archivo establece una URL base por defecto:
+
+\begin{lstlisting}
+http://192.168.80.22/api/v1
+\end{lstlisting}
+
+Durante la ejecucion o compilacion es posible suministrar valores mediante \texttt{--dart-define}, por ejemplo:
+
+\begin{lstlisting}
+flutter run --dart-define=API_BASE_URL=http://localhost:50021/api/v1
+\end{lstlisting}
+
+\section{Instalacion de dependencias}
+La instalacion del proyecto se realiza desde \texttt{flutter\_app}:
+
+\begin{lstlisting}
+cd flutter_app
+flutter pub get
+\end{lstlisting}
+
+Este comando resuelve las dependencias declaradas en \texttt{pubspec.yaml} y prepara la aplicacion para ejecucion o build.
+
+\section{Ejecucion del modulo}
+Segun los archivos README y la estructura revisada, el frontend puede ejecutarse en distintos targets:
+
+\begin{lstlisting}
+cd flutter_app
+flutter run -d chrome
+\end{lstlisting}
+
+o bien en escritorio Windows:
+
+\begin{lstlisting}
+cd flutter_app
+flutter run -d windows
+\end{lstlisting}
+
+\section{Compilacion o pruebas}
+Durante la revision se utilizaron los siguientes comandos:
+
+\begin{lstlisting}
+flutter pub get
+flutter analyze
+flutter build web
+\end{lstlisting}
+
+Estos comandos corresponden a preparacion de dependencias, analisis estatico y compilacion de una version web del proyecto.
+
+\section{Descripcion detallada del funcionamiento}
+El comportamiento funcional del frontend gira alrededor de un controlador de estado central, \texttt{WorkspaceController}, que:
+
+\begin{itemize}[leftmargin=*]
+\item mantiene la sesion autenticada;
+\item gestiona archivos seleccionados;
+\item invoca rutas de autenticacion;
+\item realiza cargas de imagenes y batches;
+\item consulta historial, resultados, logs y metricas;
+\item administra descargas de resultados.
+\end{itemize}
+
+Este controlador parece cumplir el papel de capa de aplicacion del cliente, desacoplando el codigo de las vistas respecto del detalle exacto de cada solicitud HTTP.
+
+\section{Organizacion de componentes, vistas, rutas y servicios}
+La estructura de features refleja las vistas principales del sistema:
+
+\begin{itemize}[leftmargin=*]
+\item \texttt{auth}: login, registro y recuperacion de contrasena.
+\item \texttt{dashboard}: vista agregada del estado del sistema.
+\item \texttt{upload}: seleccion de archivos y envio de lotes.
+\item \texttt{task\_builder}: construccion de filtros o transformaciones.
+\item \texttt{progress}: seguimiento del procesamiento.
+\item \texttt{results}: visualizacion de resultados.
+\item \texttt{history}: historial de solicitudes.
+\item \texttt{nodes}: monitoreo de nodos.
+\item \texttt{logs}: observabilidad operativa.
+\end{itemize}
+
+El modulo \texttt{shell} parece encargarse de la navegacion principal y del layout general de la aplicacion.
+
+\section{Flujo de navegacion}
+El flujo de navegacion identificado a partir de la estructura es el siguiente:
+
+\begin{enumerate}[leftmargin=*]
+\item el usuario ingresa por autenticacion;
+\item una vez autenticado, accede a un shell de aplicacion;
+\item desde el shell se desplaza a carga, dashboard, progreso, historial o resultados;
+\item perfiles administrativos tienen acceso adicional a nodos y logs;
+\item desde la vista de historial o resultados se pueden consultar detalles y descargas.
+\end{enumerate}
+
+Esta navegacion esta alineada con un sistema en el que operadores y administradores comparten la misma aplicacion con variaciones de permisos.
+
+\section{Endpoints, servicios o funciones principales}
+El archivo \texttt{workspace\_controller.dart} muestra las rutas consumidas por el frontend. Entre ellas se observan:
+
+\subsection{Autenticacion}
+\begin{itemize}[leftmargin=*]
+\item \texttt{/auth/login}
+\item \texttt{/auth/register}
+\item \texttt{/auth/forget-password}
+\item \texttt{/auth/reset-password}
+\item \texttt{/auth/logout}
+\item \texttt{/auth/validate}
+\end{itemize}
+
+\subsection{Procesamiento y batches}
+\begin{itemize}[leftmargin=*]
+\item \texttt{/node/upload}
+\item \texttt{/node/batch}
+\item \texttt{/node/batch/\{id\}/status}
+\item \texttt{/node/batch/\{id\}/results}
+\item \texttt{/download-batch/\{batchId\}}
+\end{itemize}
+
+\subsection{Persistencia e historial}
+\begin{itemize}[leftmargin=*]
+\item \texttt{/bd/batches}
+\item \texttt{/bd/gallery?batchUuid=...}
+\end{itemize}
+
+\subsection{Usuario y administracion}
+\begin{itemize}[leftmargin=*]
+\item \texttt{/user/profile}
+\item \texttt{/user/account}
+\item \texttt{/user/search?uid=...}
+\item \texttt{/users/\{uuid\}/statistics}
+\item \texttt{/users/\{uuid\}/activity}
+\item \texttt{/admin/metrics/\{nodeId\}}
+\item \texttt{/admin/logs/\{imageUuid\}}
+\end{itemize}
+
+\section{Modelos, estructuras, entidades o componentes principales}
+El frontend utiliza estructuras de dominio en varios paquetes bajo \texttt{features}. Entre los componentes conceptuales observados se incluyen:
+
+\begin{itemize}[leftmargin=*]
+\item \texttt{AuthSession}
+\item \texttt{UploadBatchResult}
+\item \texttt{HistoryRequest}
+\item \texttt{BatchGalleryImage}
+\item \texttt{WorkerNode}
+\item \texttt{UserStatistics}
+\item \texttt{UserActivityEvent}
+\item \texttt{AdminNodeMetric}
+\item \texttt{AdminAuditLog}
+\end{itemize}
+
+Estas entidades permiten que la interfaz modele, desde el lado cliente, distintos aspectos del sistema distribuido.
+
+\section{Flujo de datos}
+El flujo de datos del frontend puede expresarse asi:
+
+\begin{lstlisting}
+Usuario
+   -> Vista Flutter
+   -> WorkspaceController
+   -> ApiClient
+   -> Backend HTTP
+   -> Respuesta JSON o binaria
+   -> Actualizacion de estado y UI
+\end{lstlisting}
+
+Para descargas, el flujo incluye obtencion de una URL firmada o recurso descargable, lectura de bytes y almacenamiento local o descarga en navegador.
+
+\section{Integracion con otros modulos}
+Segun las rutas consumidas, el frontend no se integra con los modulos internos mediante acceso directo a contratos SOAP o a servicios de bajo nivel. Mas bien, utiliza una capa HTTP que agrega rutas de autenticacion, usuario, node, bd y admin.
+
+Desde esta observacion, la integracion con el resto del sistema puede describirse asi:
+\begin{itemize}[leftmargin=*]
+\item se autentica utilizando rutas de \texttt{Auth} expuestas hacia el cliente;
+\item interactua con operaciones de procesamiento y batch a traves de rutas \texttt{/node/*};
+\item consulta historial y galeria mediante rutas \texttt{/bd/*};
+\item accede a informacion administrativa de logs y metricas.
+\end{itemize}
+
+\section{Manejo de imagenes, autenticacion y consumo de API}
+El frontend maneja archivos e imagenes en varios niveles:
+
+\begin{itemize}[leftmargin=*]
+\item seleccion de archivos mediante \texttt{file\_picker};
+\item envio multipart para batches;
+\item resolucion de imagenes remotas o URLs relativas;
+\item descarga de resultados como bytes o ZIP;
+\item persistencia de token y datos basicos de sesion con \texttt{shared\_preferences}.
+\end{itemize}
+
+En autenticacion, el frontend conserva el token, lo reusa en cabeceras \texttt{Authorization} y mantiene el estado del usuario a traves del controlador central.
+
+\section{Conclusion tecnica}
+Segun la estructura revisada, \texttt{Frontend} es una aplicacion Flutter de alcance amplio que modela la experiencia completa de uso del sistema distribuido. Su organizacion por features, el uso de un controlador central de workspace y la separacion entre configuracion, cliente HTTP y vistas permiten identificar una arquitectura cliente relativamente ordenada y coherente con una plataforma de procesamiento distribuido. Dentro del ecosistema, este modulo constituye la interfaz operativa desde la cual se activan, observan y consultan los flujos del sistema.
+
+\begin{thebibliography}{9}
+\bibitem{frontend-readme}
+Repositorio \texttt{Frontend}, archivos \texttt{README.md} y \texttt{flutter\_app/README.md}, rama \texttt{main}.
+
+\bibitem{frontend-pubspec}
+Repositorio \texttt{Frontend}, archivo \texttt{flutter\_app/pubspec.yaml}, rama \texttt{main}.
+
+\bibitem{frontend-workspace}
+Repositorio \texttt{Frontend}, archivo \texttt{flutter\_app/lib/core/workspace/workspace\_controller.dart}, rama \texttt{main}.
+
+\bibitem{frontend-commit}
+Repositorio \texttt{Frontend}, commit \texttt{fe3c700 fixes on images dowloads and zip}.
+\end{thebibliography}
+
+\end{document}

@@ -1,0 +1,132 @@
+Nombre del modulo: Frontend
+Rama revisada: main
+Fecha de revision: 2026-04-29
+Ultimo commit revisado:
+- Hash completo: fe3c7004bfe7a84436130d90f8234fe00039187f
+- Resumen: fe3c700 fixes on images dowloads and zip
+
+1. Descripcion general
+Frontend es una aplicacion Flutter orientada a operadores y administradores del sistema de procesamiento distribuido. Implementa autenticacion, carga de lotes, monitoreo, resultados, historial, nodos y logs.
+
+2. Objetivo del modulo
+Ofrecer la interfaz de usuario del sistema y consumir servicios REST para autenticacion, carga de imagenes, seguimiento de batches, galeria de resultados, metricas y descargas.
+
+3. Tecnologias usadas
+- Flutter 3.41.7
+- Dart 3.11.5
+- Material 3
+- `google_fonts`
+- `flutter_svg`
+- `http`
+- `file_picker`
+- `archive`
+- `shared_preferences`
+
+4. Estructura de carpetas importante
+- `flutter_app/lib/main.dart`: entrypoint
+- `flutter_app/lib/app.dart`: aplicacion raiz
+- `flutter_app/lib/core/api`: cliente HTTP y configuracion base
+- `flutter_app/lib/core/workspace`: controlador principal de estado e integracion
+- `flutter_app/lib/features/*`: modulos funcionales (auth, dashboard, upload, history, logs, nodes, results, settings, etc.)
+- `flutter_app/pubspec.yaml`: dependencias
+- `flutter_app/web`, `windows`, `android`, `ios`: targets de plataforma
+
+5. Instalacion
+Prerequisitos:
+- Flutter SDK instalado
+- Dart incluido con Flutter
+
+Comandos ejecutables:
+- `cd flutter_app`
+- `flutter pub get`
+- `flutter run -d chrome`
+- `flutter run -d windows`
+
+6. Ejecucion
+Comandos recomendados:
+- Desarrollo web: `flutter run -d chrome`
+- Desarrollo escritorio: `flutter run -d windows`
+- Build web: `flutter build web`
+
+7. Variables de entorno necesarias
+No usa `.env` tradicional; usa compile-time defines:
+- `API_BASE_URL`
+- `ADMIN_PROXY_BASE_URL`
+
+Valor por defecto observado en codigo:
+- `http://192.168.80.22/api/v1`
+
+Ejemplo de build con parametros:
+- `flutter run --dart-define=API_BASE_URL=http://localhost:50021/api/v1`
+- `flutter run --dart-define=ADMIN_PROXY_BASE_URL=http://localhost:50021/api/v1`
+
+8. Endpoints o funcionalidades principales
+Rutas consumidas por `WorkspaceController`:
+- Auth:
+  - `/auth/login`
+  - `/auth/register`
+  - `/auth/forget-password`
+  - `/auth/reset-password`
+  - `/auth/logout`
+  - `/auth/validate`
+- Node / procesamiento:
+  - `/node/upload`
+  - `/node/batch`
+  - `/node/batch/{id}/status`
+  - `/node/batch/{id}/results`
+- Bd / historial:
+  - `/bd/batches`
+  - `/bd/gallery?batchUuid=...`
+- Usuario:
+  - `/user/profile`
+  - `/user/account`
+  - `/user/search?uid=...`
+  - `/users/{uuid}/statistics`
+  - `/users/{uuid}/activity`
+- Admin:
+  - `/admin/metrics/{nodeId}`
+  - `/admin/logs/{imageUuid}`
+- Descargas:
+  - `/download-batch/{batchId}`
+
+Funcionalidades UI:
+- Login, registro y recuperacion de clave
+- Carga sincrona y por lotes
+- Dashboard e historial
+- Galeria de resultados y descarga ZIP
+- Vistas admin para nodos, metricas y logs
+
+9. Dependencias importantes
+- `cupertino_icons`
+- `google_fonts`
+- `flutter_svg`
+- `http`
+- `file_picker`
+- `archive`
+- `shared_preferences`
+
+10. Relacion con otros modulos
+- El frontend no parece hablar directamente con `ServerApp`, `Bd` o `Auth`.
+- La integracion real observada es con un gateway REST adicional existente en el workspace (`Backend`), cuyo README expone precisamente `/api/v1/auth`, `/api/v1/user` y `/api/v1/node`.
+- Ese gateway `Backend` se comunica hacia `ServerApp` por SOAP y hacia `Auth` por REST.
+
+11. Problemas encontrados
+- `ApiConfig` trae una IP fija por defecto (`192.168.80.22`), lo que acopla el frontend a un entorno concreto.
+- Las rutas usadas por el frontend dependen del gateway `Backend`; si ese gateway no esta desplegado, el frontend no se integra correctamente con los modulos seleccionados.
+- El conjunto de rutas `/admin/*`, `/bd/*` y `/download-batch/*` no forma parte de `Auth` ni de `Bd` tal como estan expuestos directamente; necesitan proxy o agregacion adicional.
+- La variable `API_BASE_URL` es opcional, pero su ausencia deja el sistema apuntando a un host no portable.
+
+12. Recomendaciones
+- Hacer obligatorio `API_BASE_URL` por entorno de build o al menos reemplazar la IP fija por defaults locales/documentados.
+- Documentar explicitamente la dependencia del gateway `Backend`.
+- Mantener una matriz de compatibilidad de rutas entre frontend y backend proxy.
+- Incorporar smoke tests de conectividad contra entorno real.
+
+13. Estado final
+Parcialmente listo
+
+14. Evidencia de compilacion o pruebas ejecutadas
+- `git pull origin main`: ejecutado y actualizado.
+- `flutter pub get`: ejecutado con exito.
+- `flutter analyze`: ejecutado con resultado `No issues found!`.
+- `flutter build web`: ejecutado con exito (`Built build\web`).

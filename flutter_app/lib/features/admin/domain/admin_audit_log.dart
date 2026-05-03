@@ -21,7 +21,9 @@ class AdminAuditLog {
         .toLowerCase();
     return AdminAuditLog(
       id: (json['id'] as num?)?.toInt(),
-      imageUuid: (json['image_uuid'] as String?) ?? '',
+      imageUuid: (json['image_uuid'] as String?) ??
+          (json['imageUuid'] as String?) ??
+          '',
       level: switch (rawLevel) {
         'success' => LogLevel.success,
         'warning' || 'warn' => LogLevel.warning,
@@ -29,7 +31,9 @@ class AdminAuditLog {
         _ => LogLevel.info,
       },
       message: (json['message'] as String?) ?? 'No message',
-      createdAt: (json['created_at'] as String?) ?? '',
+      createdAt: (json['created_at'] as String?) ??
+          (json['timestamp'] as String?) ??
+          '',
     );
   }
 }

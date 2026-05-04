@@ -198,7 +198,7 @@ class _UserDashboard extends StatelessWidget {
         const SizedBox(height: 20),
         AdaptiveGrid(
           minItemWidth: 240,
-          childAspectRatio: 1.35,
+          childAspectRatio: 1.12,
           children: <Widget>[
             _SummaryCard(metric: processedCard, tone: _SummaryTone.primary),
             _SummaryCard(metric: batchesCard, tone: _SummaryTone.neutral),
@@ -1102,9 +1102,10 @@ class _SummaryCard extends StatelessWidget {
       color: tone == _SummaryTone.primary
           ? AppTheme.surfaceContainer
           : AppTheme.white,
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(18),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           Container(
             width: 44,
@@ -1115,29 +1116,41 @@ class _SummaryCard extends StatelessWidget {
             ),
             child: Icon(metric.icon, color: accent, size: 20),
           ),
-          const Spacer(),
-          Text(
-            metric.label.toUpperCase(),
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: AppTheme.slate,
-              letterSpacing: 1.4,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            metric.value,
-            style: AppTheme.displayStyle(
-              context,
-              size: 30,
-              color: AppTheme.ink,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            metric.note,
-            style: Theme.of(
-              context,
-            ).textTheme.bodySmall?.copyWith(color: AppTheme.slate),
+          const SizedBox(height: 12),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Text(
+                metric.label.toUpperCase(),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: AppTheme.slate,
+                  letterSpacing: 1.4,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                metric.value,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppTheme.displayStyle(
+                  context,
+                  size: 28,
+                  color: AppTheme.ink,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                metric.note,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: AppTheme.slate),
+              ),
+            ],
           ),
         ],
       ),

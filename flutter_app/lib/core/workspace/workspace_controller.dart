@@ -55,19 +55,63 @@ class WorkspaceController extends ChangeNotifier {
     final username = prefs.getString('auth_username');
 
     if (token != null && identity != null && roleId != null) {
-      _restoringSession = true;
-      _session = AuthSession(
-        token: token,
-        roleId: roleId,
-        identity: identity,
-        userUuid: userUuid,
-        username: username,
-      );
-      notifyListeners();
       try {
+        _restoringSession = true;
+        _session = AuthSession(
+          token: token,
+          roleId: roleId,
+          identity: identity,
+          userUuid: userUuid,
+          username: username,
+        );
+        notifyListeners();
         await _refreshProfile(notify: false);
+        await _hydrateSessionData();
       } catch (_) {}
-      _restoringSession = false;
+      finally {
+        _restoringSession = false;
+        notifyListeners();
+      }
+    }
+  }
+
+  Future<void> _hydrateSessionData({bool notify = false}) async {
+    if (_session == null || _session!.token.isEmpty) {
+      return;
+    }
+
+    await refreshHistory(notify: false);
+    await refreshUserStatistics(notify: false);
+    await refreshUserActivity(notify: false);
+
+    if (isAdmin) {
+      try {
+        await refreshAdminMetrics(notify: false);
+      } catch (e) {
+        _appendLog(
+          level: LogLevel.warning,
+          source: 'admin',
+          message: 'Admin metrics endpoint is not reachable right now: $e',
+          job: '-',
+        );
+      }
+      try {
+        await refreshAdminLogs(notify: false);
+      } catch (e) {
+        _appendLog(
+          level: LogLevel.warning,
+          source: 'admin',
+          message: 'Admin logs endpoint is not reachable right now: $e',
+          job: '-',
+        );
+      }
+    }
+
+    if (_latestBatch != null) {
+      await refreshLatestBatchImages(notify: false);
+    }
+
+    if (notify) {
       notifyListeners();
     }
   }
@@ -247,59 +291,7 @@ class WorkspaceController extends ChangeNotifier {
         job: '-',
       );
     }
-    try {
-      await refreshHistory(notify: false);
-    } catch (_) {
-      _appendLog(
-        level: LogLevel.warning,
-        source: 'history',
-        message: 'Signed in, but remote history could not be loaded yet.',
-        job: '-',
-      );
-    }
-    try {
-      await refreshUserStatistics(notify: false);
-    } catch (_) {
-      _appendLog(
-        level: LogLevel.warning,
-        source: 'telemetry',
-        message:
-            'Signed in, but user statistics endpoint is not reachable yet.',
-        job: '-',
-      );
-    }
-    try {
-      await refreshUserActivity(notify: false);
-    } catch (_) {
-      _appendLog(
-        level: LogLevel.warning,
-        source: 'telemetry',
-        message: 'Signed in, but user activity endpoint is not reachable yet.',
-        job: '-',
-      );
-    }
-    if (isAdmin) {
-      try {
-        await refreshAdminMetrics(notify: false);
-      } catch (_) {
-        _appendLog(
-          level: LogLevel.warning,
-          source: 'admin',
-          message: 'Admin metrics endpoint is not reachable right now.',
-          job: '-',
-        );
-      }
-      try {
-        await refreshAdminLogs(notify: false);
-      } catch (_) {
-        _appendLog(
-          level: LogLevel.warning,
-          source: 'admin',
-          message: 'Admin logs endpoint is not reachable right now.',
-          job: '-',
-        );
-      }
-    }
+    await _hydrateSessionData();
     notifyListeners();
   }
 

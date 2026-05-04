@@ -519,16 +519,18 @@ class SummaryMetricCard extends StatelessWidget {
         children: <Widget>[
           Text(
             label,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
             style: Theme.of(
               context,
             ).textTheme.bodySmall?.copyWith(color: AppTheme.slate),
           ),
-          const Spacer(),
+          const SizedBox(height: 10),
           Text(
             value,
-            style: AppTheme.displayStyle(context, size: 28, color: color),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
+            style: AppTheme.displayStyle(context, size: 28, color: color),
           ),
         ],
       ),

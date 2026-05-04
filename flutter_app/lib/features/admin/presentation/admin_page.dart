@@ -9,43 +9,115 @@ import 'package:imageflow_flutter/features/logs/domain/log_entry.dart';
 import 'package:imageflow_flutter/features/shell/domain/app_page.dart';
 import 'package:imageflow_flutter/shared/widgets/shared_widgets.dart';
 
-class AdminPage extends StatelessWidget {
+class AdminPage extends StatefulWidget {
   const AdminPage({super.key, required this.onNavigate});
 
   final ValueChanged<AppPage> onNavigate;
+
+  @override
+  State<AdminPage> createState() => _AdminPageState();
+}
+
+class _AdminPageState extends State<AdminPage> {
+  final TextEditingController _nodeIdController = TextEditingController();
+  final TextEditingController _imageUuidController = TextEditingController();
+  bool _initialized = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_initialized) {
+      return;
+    }
+    final workspace = WorkspaceScope.of(context);
+    _nodeIdController.text = workspace.adminMetricNodeId;
+    final String initialImageUuid = workspace.adminLogImageUuid?.trim().isNotEmpty == true
+        ? workspace.adminLogImageUuid!.trim()
+        : workspace.latestBatchImages.isNotEmpty
+        ? workspace.latestBatchImages.first.imageUuid.trim()
+        : '';
+    _imageUuidController.text = initialImageUuid;
+    _initialized = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      _refreshAll();
+    });
+  }
+
+  @override
+  void dispose() {
+    _nodeIdController.dispose();
+    _imageUuidController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _refreshAll() async {
+    final workspace = WorkspaceScope.of(context);
+    final String nodeId = _nodeIdController.text.trim();
+    final String imageUuid = _imageUuidController.text.trim();
+
+    try {
+      await workspace.refreshAdminMetrics(
+        nodeId: nodeId.isEmpty ? null : nodeId,
+      );
+    } catch (_) {}
+
+    try {
+      await workspace.refreshAdminLogs(
+        imageUuid: imageUuid.isEmpty ? null : imageUuid,
+      );
+    } catch (_) {}
+  }
+
+  Future<void> _refreshMetrics() async {
+    final workspace = WorkspaceScope.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final String nodeId = _nodeIdController.text.trim();
+    try {
+      await workspace.refreshAdminMetrics(
+        nodeId: nodeId.isEmpty ? null : nodeId,
+      );
+    } catch (error) {
+      if (!mounted) return;
+      messenger.showSnackBar(
+        SnackBar(content: Text('Could not refresh node metrics: $error')),
+      );
+    }
+  }
+
+  Future<void> _refreshLogs() async {
+    final workspace = WorkspaceScope.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final String imageUuid = _imageUuidController.text.trim();
+    try {
+      await workspace.refreshAdminLogs(
+        imageUuid: imageUuid.isEmpty ? null : imageUuid,
+      );
+    } catch (error) {
+      if (!mounted) return;
+      messenger.showSnackBar(
+        SnackBar(content: Text('Could not refresh admin logs: $error')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final workspace = WorkspaceScope.of(context);
     final List<AdminNodeMetric> nodes = workspace.adminNodeMetrics;
     final List<AdminAuditLog> logs = workspace.adminLogs;
-    final int activeNodes = nodes
-        .where((AdminNodeMetric node) => node.active)
-        .length;
-    final int errorLogs = logs
-        .where((AdminAuditLog log) => log.level == LogLevel.error)
-        .length;
-    final int warningLogs = logs
-        .where((AdminAuditLog log) => log.level == LogLevel.warning)
-        .length;
-    final int successLogs = logs
-        .where((AdminAuditLog log) => log.level == LogLevel.success)
-        .length;
-    final int infoLogs = logs
-        .where((AdminAuditLog log) => log.level == LogLevel.info)
-        .length;
+    final int activeNodes = nodes.where((AdminNodeMetric node) => node.active).length;
+    final int errorLogs = logs.where((AdminAuditLog log) => log.level == LogLevel.error).length;
+    final int warningLogs = logs.where((AdminAuditLog log) => log.level == LogLevel.warning).length;
+    final int successLogs = logs.where((AdminAuditLog log) => log.level == LogLevel.success).length;
+    final int infoLogs = logs.where((AdminAuditLog log) => log.level == LogLevel.info).length;
     final int avgLoad = nodes.isEmpty
         ? 0
-        : (nodes.fold<int>(
-                    0,
-                    (int acc, AdminNodeMetric node) => acc + node.load,
-                  ) /
-                  nodes.length)
-              .round();
-    final int totalJobs = nodes.fold<int>(
-      0,
-      (int acc, AdminNodeMetric node) => acc + node.currentJobs,
-    );
+        : (nodes.fold<int>(0, (int acc, AdminNodeMetric node) => acc + node.load) / nodes.length)
+            .round();
+    final int totalJobs = nodes.fold<int>(0, (int acc, AdminNodeMetric node) => acc + node.currentJobs);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -60,6 +132,59 @@ class AdminPage extends StatelessWidget {
             color: AppTheme.goldDeep,
             background: AppTheme.sand,
             icon: Icons.verified_user_outlined,
+          ),
+        ),
+        const SizedBox(height: 20),
+        AppSurface(
+          radius: AppTheme.radii.xl,
+          child: Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: <Widget>[
+              FilterField(
+                icon: Icons.dns_outlined,
+                label: 'Node ID for metrics lookup',
+                width: 320,
+                controller: _nodeIdController,
+                onSubmitted: (_) => _refreshMetrics(),
+              ),
+              FilterField(
+                icon: Icons.image_search_outlined,
+                label: 'Image UUID for log lookup',
+                width: 360,
+                controller: _imageUuidController,
+                onSubmitted: (_) => _refreshLogs(),
+              ),
+              ChipFilter(
+                icon: Icons.refresh_rounded,
+                label: 'Refresh all',
+                onPressed: _refreshAll,
+              ),
+              ChipFilter(
+                icon: Icons.history_rounded,
+                label: 'Use latest batch',
+                onPressed: workspace.latestBatchImages.isNotEmpty
+                    ? () {
+                        setState(() {
+                          _imageUuidController.text =
+                              workspace.latestBatchImages.first.imageUuid.trim();
+                        });
+                        _refreshLogs();
+                      }
+                    : null,
+              ),
+              ChipFilter(
+                icon: Icons.restore_rounded,
+                label: 'Default node',
+                onPressed: () {
+                  setState(() {
+                    _nodeIdController.text = workspace.adminMetricNodeId;
+                  });
+                  _refreshMetrics();
+                },
+              ),
+            ],
           ),
         ),
         const SizedBox(height: 20),
@@ -99,21 +224,21 @@ class AdminPage extends StatelessWidget {
               description: 'Review auth, batch and infrastructure events.',
               value: '${logs.length} events',
               icon: Icons.description_outlined,
-              onTap: () => onNavigate(AppPage.logs),
+              onTap: () => widget.onNavigate(AppPage.logs),
             ),
             _AdminActionCard(
               title: 'Node metrics',
               description: 'Inspect worker load, active jobs and heartbeats.',
               value: nodes.isEmpty ? 'No backend data yet' : '$totalJobs active jobs',
               icon: Icons.dns_outlined,
-              onTap: () => onNavigate(AppPage.nodes),
+              onTap: () => widget.onNavigate(AppPage.nodes),
             ),
             _AdminActionCard(
               title: 'System posture',
               description: 'Stay on health, capacity and event monitoring.',
               value: '$successLogs success signals',
               icon: Icons.shield_outlined,
-              onTap: () => onNavigate(AppPage.admin),
+              onTap: () => widget.onNavigate(AppPage.admin),
             ),
           ],
         ),
@@ -130,9 +255,7 @@ class AdminPage extends StatelessWidget {
                     ? '$errorLogs active errors'
                     : '$warningLogs warnings',
                 color: errorLogs > 0 ? AppTheme.red : AppTheme.goldDeep,
-                background: errorLogs > 0
-                    ? AppTheme.dangerSoft
-                    : AppTheme.sand,
+                background: errorLogs > 0 ? AppTheme.dangerSoft : AppTheme.sand,
               ),
               child: Column(
                 children: <Widget>[
@@ -234,9 +357,8 @@ class AdminPage extends StatelessWidget {
                                     children: <Widget>[
                                       Text(
                                         log.message,
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyMedium,
+                                        style:
+                                            Theme.of(context).textTheme.bodyMedium,
                                       ),
                                       const SizedBox(height: 6),
                                       Text(
@@ -319,9 +441,10 @@ class _AdminActionCard extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             description,
-            style: Theme.of(
-              context,
-            ).textTheme.bodySmall?.copyWith(color: AppTheme.slate, height: 1.45),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: AppTheme.slate,
+                  height: 1.45,
+                ),
             maxLines: 3,
             overflow: TextOverflow.ellipsis,
           ),
@@ -333,8 +456,8 @@ class _AdminActionCard extends StatelessWidget {
                 child: Text(
                   value,
                   style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                    color: AppTheme.ink,
-                  ),
+                        color: AppTheme.ink,
+                      ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -381,9 +504,10 @@ class _MetricBarCard extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             subtitle,
-            style: Theme.of(
-              context,
-            ).textTheme.bodySmall?.copyWith(color: AppTheme.slate, height: 1.6),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: AppTheme.slate,
+                  height: 1.6,
+                ),
           ),
           const SizedBox(height: 18),
           ...items.map((item) {
@@ -412,8 +536,8 @@ class _MetricBarCard extends StatelessWidget {
                         child: Text(
                           item.detail,
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppTheme.slate,
-                          ),
+                                color: AppTheme.slate,
+                              ),
                         ),
                       ),
                     ],
@@ -448,8 +572,8 @@ class _BackendEmptyCard extends StatelessWidget {
       child: Text(
         message,
         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-          color: AppTheme.slate,
-        ),
+              color: AppTheme.slate,
+            ),
       ),
     );
   }

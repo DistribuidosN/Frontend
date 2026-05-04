@@ -2,9 +2,6 @@ import 'package:flutter/foundation.dart';
 
 const String _defaultLocalBaseUrl = 'http://localhost:50021/api/v1';
 const String _defaultWebBaseUrl = 'http://localhost:50021/api/v1';
-const String _defaultLocalAdminProxyBaseUrl = 'http://127.0.0.1:8787';
-const String _defaultWebAdminProxyBaseUrl = 'http://127.0.0.1:8787';
-
 class ApiConfig {
   const ApiConfig({required this.baseUrl, required this.adminProxyBaseUrl});
 
@@ -21,29 +18,25 @@ class ApiConfig {
         baseUrl: fromEnvironment,
         adminProxyBaseUrl: proxyFromEnvironment.isNotEmpty
             ? proxyFromEnvironment
-            : (kIsWeb
-                  ? _defaultWebAdminProxyBaseUrl
-                  : _defaultLocalAdminProxyBaseUrl),
+            : fromEnvironment,
       );
     }
 
     final String resolvedDefaultBaseUrl = kIsWeb
         ? _defaultWebBaseUrl
         : _defaultLocalBaseUrl;
-    final String resolvedDefaultAdminProxyBaseUrl = kIsWeb
-        ? _defaultWebAdminProxyBaseUrl
-        : _defaultLocalAdminProxyBaseUrl;
 
     if (defaultTargetPlatform == TargetPlatform.android) {
+      const String androidBaseUrl = 'http://10.0.2.2:50021/api/v1';
       return ApiConfig(
-        baseUrl: 'http://10.0.2.2:50021/api/v1',
-        adminProxyBaseUrl: 'http://10.0.2.2:8787',
+        baseUrl: androidBaseUrl,
+        adminProxyBaseUrl: androidBaseUrl,
       );
     }
 
     return ApiConfig(
       baseUrl: resolvedDefaultBaseUrl,
-      adminProxyBaseUrl: resolvedDefaultAdminProxyBaseUrl,
+      adminProxyBaseUrl: resolvedDefaultBaseUrl,
     );
   }
 }

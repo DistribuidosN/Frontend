@@ -4,8 +4,48 @@ import 'package:imageflow_flutter/core/workspace/workspace_scope.dart';
 import 'package:imageflow_flutter/features/admin/domain/admin_node_metric.dart';
 import 'package:imageflow_flutter/shared/widgets/shared_widgets.dart';
 
-class NodesPage extends StatelessWidget {
+class NodesPage extends StatefulWidget {
   const NodesPage({super.key});
+
+  @override
+  State<NodesPage> createState() => _NodesPageState();
+}
+
+class _NodesPageState extends State<NodesPage> {
+  final TextEditingController _nodeIdController = TextEditingController();
+  bool _initialized = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_initialized) {
+      return;
+    }
+    final workspace = WorkspaceScope.of(context);
+    _nodeIdController.text = workspace.adminMetricNodeId;
+    _initialized = true;
+  }
+
+  @override
+  void dispose() {
+    _nodeIdController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _refreshMetrics(BuildContext context) async {
+    final workspace = WorkspaceScope.of(context);
+    final String nodeId = _nodeIdController.text.trim();
+    try {
+      await workspace.refreshAdminMetrics(nodeId: nodeId.isEmpty ? null : nodeId);
+    } catch (error) {
+      if (!context.mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not refresh node metrics: $error')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,9 +80,53 @@ class NodesPage extends StatelessWidget {
           description:
               'Read the backend node metrics endpoint for the configured node lookup.',
           actions: OutlinedButton.icon(
-            onPressed: () => workspace.refreshAdminMetrics(),
+            onPressed: () => _refreshMetrics(context),
             icon: const Icon(Icons.refresh_rounded, size: 18),
             label: const Text('Refresh Metrics'),
+          ),
+        ),
+        const SizedBox(height: 20),
+        AppSurface(
+          radius: AppTheme.radii.xl,
+          child: Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: <Widget>[
+              FilterField(
+                icon: Icons.dns_outlined,
+                label: 'Node ID for metrics lookup',
+                width: 340,
+                controller: _nodeIdController,
+                onSubmitted: (_) => _refreshMetrics(context),
+              ),
+              ChipFilter(
+                icon: Icons.refresh_rounded,
+                label: 'Refresh metrics',
+                onPressed: () => _refreshMetrics(context),
+              ),
+              ChipFilter(
+                icon: Icons.restore_rounded,
+                label: 'Use default node',
+                onPressed: () {
+                  setState(() {
+                    _nodeIdController.text = workspace.adminMetricNodeId;
+                  });
+                },
+              ),
+              StatusChip(
+                label: 'Backend endpoint',
+                color: AppTheme.goldDeep,
+                background: AppTheme.sand,
+                icon: Icons.link_rounded,
+              ),
+              StatusChip(
+                label: workspace.adminMetricNodeId,
+                color: AppTheme.navy,
+                background: AppTheme.surfaceContainer,
+                icon: Icons.dns_outlined,
+              ),
+            ],
           ),
         ),
         const SizedBox(height: 20),
@@ -71,28 +155,6 @@ class NodesPage extends StatelessWidget {
               color: AppTheme.red,
             ),
           ],
-        ),
-        const SizedBox(height: 20),
-        AppSurface(
-          radius: AppTheme.radii.xl,
-          child: Wrap(
-            spacing: 10,
-            runSpacing: 10,
-            children: <Widget>[
-              const StatusChip(
-                label: 'Backend endpoint',
-                color: AppTheme.goldDeep,
-                background: AppTheme.sand,
-                icon: Icons.link_rounded,
-              ),
-              StatusChip(
-                label: workspace.adminMetricNodeId,
-                color: AppTheme.navy,
-                background: AppTheme.surfaceContainer,
-                icon: Icons.dns_outlined,
-              ),
-            ],
-          ),
         ),
         const SizedBox(height: 20),
         if (workerNodes.isEmpty)
@@ -167,16 +229,18 @@ class NodesPage extends StatelessWidget {
                                   Expanded(
                                     child: Text(
                                       node.id,
-                                      style: Theme.of(
-                                        context,
-                                      ).textTheme.titleMedium,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium,
                                     ),
                                   ),
                                 ],
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                node.address.isEmpty ? 'No address returned' : node.address,
+                                node.address.isEmpty
+                                    ? 'No address returned'
+                                    : node.address,
                                 overflow: TextOverflow.ellipsis,
                                 style: Theme.of(context).textTheme.bodySmall
                                     ?.copyWith(
@@ -201,9 +265,10 @@ class NodesPage extends StatelessWidget {
                       children: <Widget>[
                         Text(
                           'Current Load',
-                          style: Theme.of(
-                            context,
-                          ).textTheme.bodySmall?.copyWith(color: AppTheme.slate),
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodySmall
+                              ?.copyWith(color: AppTheme.slate),
                         ),
                         const Spacer(),
                         Text(

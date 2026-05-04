@@ -27,6 +27,15 @@ class HistoryRequest {
   final int nodes;
   final String? coverImageUrl;
 
+  DateTime? get parsedDate {
+    final String raw = date.trim();
+    if (raw.isEmpty || raw == 'Remote batch') {
+      return null;
+    }
+    return DateTime.tryParse(raw) ??
+        DateTime.tryParse(raw.replaceFirst(' ', 'T'));
+  }
+
   static RequestStatus statusFromString(String raw) {
     switch (raw.toUpperCase()) {
       case 'COMPLETED':

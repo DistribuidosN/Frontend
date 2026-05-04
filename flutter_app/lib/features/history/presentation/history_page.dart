@@ -5,15 +5,140 @@ import 'package:imageflow_flutter/features/history/domain/history_request.dart';
 import 'package:imageflow_flutter/features/shell/domain/app_page.dart';
 import 'package:imageflow_flutter/shared/widgets/shared_widgets.dart';
 
-class HistoryPage extends StatelessWidget {
+class HistoryPage extends StatefulWidget {
   const HistoryPage({super.key, required this.onNavigate});
 
   final ValueChanged<AppPage> onNavigate;
 
   @override
+  State<HistoryPage> createState() => _HistoryPageState();
+}
+
+class _HistoryPageState extends State<HistoryPage> {
+  final TextEditingController _searchController = TextEditingController();
+  _HistoryStatusFilter _statusFilter = _HistoryStatusFilter.all;
+  DateTimeRange? _dateRange;
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _pickDateRange(BuildContext context) async {
+    final List<DateTime> dates = WorkspaceScope.of(context).historyRequests
+        .map((HistoryRequest request) => request.parsedDate)
+        .whereType<DateTime>()
+        .toList();
+
+    final DateTime firstDate = dates.isEmpty
+        ? DateTime.now().subtract(const Duration(days: 30))
+        : dates.reduce((DateTime a, DateTime b) => a.isBefore(b) ? a : b);
+    final DateTime lastDate = dates.isEmpty
+        ? DateTime.now()
+        : dates.reduce((DateTime a, DateTime b) => a.isAfter(b) ? a : b);
+
+    final DateTimeRange? picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateUtils.dateOnly(firstDate),
+      lastDate: DateUtils.dateOnly(lastDate.add(const Duration(days: 1))),
+      initialDateRange: _dateRange,
+    );
+    if (!mounted) return;
+    setState(() => _dateRange = picked);
+  }
+
+  bool _matchesSearch(HistoryRequest request) {
+    final String query = _searchController.text.trim().toLowerCase();
+    if (query.isEmpty) {
+      return true;
+    }
+    final String haystack = <String>[
+      request.id,
+      request.date,
+      request.duration,
+      request.status.name,
+      request.images.toString(),
+      request.nodes.toString(),
+      request.transforms.join(' '),
+    ].join(' ').toLowerCase();
+    return haystack.contains(query);
+  }
+
+  bool _matchesStatus(HistoryRequest request) {
+    return switch (_statusFilter) {
+      _HistoryStatusFilter.all => true,
+      _HistoryStatusFilter.completed => request.status == RequestStatus.completed,
+      _HistoryStatusFilter.processing => request.status == RequestStatus.processing,
+      _HistoryStatusFilter.received => request.status == RequestStatus.received,
+      _HistoryStatusFilter.pending => request.status == RequestStatus.pending,
+      _HistoryStatusFilter.failed => request.status == RequestStatus.failed,
+    };
+  }
+
+  bool _matchesDateRange(HistoryRequest request) {
+    if (_dateRange == null) {
+      return true;
+    }
+    final DateTime? parsed = request.parsedDate;
+    if (parsed == null) {
+      return false;
+    }
+    final DateTime start = DateUtils.dateOnly(_dateRange!.start);
+    final DateTime end = DateUtils.dateOnly(_dateRange!.end)
+        .add(const Duration(days: 1))
+        .subtract(const Duration(microseconds: 1));
+    return !parsed.isBefore(start) && !parsed.isAfter(end);
+  }
+
+  Future<void> _refreshHistory(BuildContext context) async {
+    final workspace = WorkspaceScope.of(context);
+    await workspace.refreshHistory();
+  }
+
+  void _clearFilters() {
+    setState(() {
+      _searchController.clear();
+      _statusFilter = _HistoryStatusFilter.all;
+      _dateRange = null;
+    });
+  }
+
+  String _rangeLabel() {
+    if (_dateRange == null) {
+      return 'Date Range';
+    }
+    final DateTime start = _dateRange!.start;
+    final DateTime end = _dateRange!.end;
+    return '${_shortDate(start)} - ${_shortDate(end)}';
+  }
+
+  String _shortDate(DateTime date) {
+    const List<String> months = <String>[
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+    return '${months[date.month - 1]} ${date.day}';
+  }
+
+  @override
   Widget build(BuildContext context) {
     final workspace = WorkspaceScope.of(context);
-    final List<HistoryRequest> historyRequests = workspace.historyRequests;
+    final List<HistoryRequest> historyRequests = workspace.historyRequests
+        .where(_matchesSearch)
+        .where(_matchesStatus)
+        .where(_matchesDateRange)
+        .toList();
 
     return AppSurface(
       radius: 32,
@@ -30,10 +155,10 @@ class HistoryPage extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'View all previous image processing requests',
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(color: AppTheme.slate),
+              'Search by request ID, transform stack, status or date.',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: AppTheme.slate,
+                  ),
             ),
             const SizedBox(height: 20),
             AppSurface(
@@ -41,40 +166,93 @@ class HistoryPage extends StatelessWidget {
               child: Wrap(
                 spacing: 12,
                 runSpacing: 12,
-                children: const <Widget>[
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: <Widget>[
                   FilterField(
                     icon: Icons.search_rounded,
                     label: 'Search by request ID, transformations...',
                     width: 440,
+                    controller: _searchController,
+                    onChanged: (_) => setState(() {}),
                   ),
                   ChipFilter(
                     icon: Icons.date_range_outlined,
-                    label: 'Date Range',
+                    label: _rangeLabel(),
+                    selected: _dateRange != null,
+                    onPressed: () => _pickDateRange(context),
                   ),
                   ChipFilter(
                     icon: Icons.filter_alt_outlined,
-                    label: 'Filters',
+                    label: 'Clear filters',
+                    onPressed: _clearFilters,
+                    selected: false,
+                  ),
+                  ChipFilter(
+                    icon: Icons.refresh_rounded,
+                    label: 'Refresh history',
+                    onPressed: workspace.isAuthenticated
+                        ? () => _refreshHistory(context)
+                        : null,
+                    selected: false,
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 16),
-            Align(
-              alignment: Alignment.centerRight,
-              child: OutlinedButton.icon(
-                onPressed: workspace.isAuthenticated
-                    ? () => workspace.refreshHistory()
-                    : null,
-                icon: const Icon(Icons.refresh_rounded, size: 18),
-                label: const Text('Refresh history'),
-              ),
+            Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              children: <Widget>[
+                _StatusToggle(
+                  label: 'All',
+                  selected: _statusFilter == _HistoryStatusFilter.all,
+                  onTap: () => setState(
+                    () => _statusFilter = _HistoryStatusFilter.all,
+                  ),
+                ),
+                _StatusToggle(
+                  label: 'Completed',
+                  selected: _statusFilter == _HistoryStatusFilter.completed,
+                  onTap: () => setState(
+                    () => _statusFilter = _HistoryStatusFilter.completed,
+                  ),
+                ),
+                _StatusToggle(
+                  label: 'Processing',
+                  selected: _statusFilter == _HistoryStatusFilter.processing,
+                  onTap: () => setState(
+                    () => _statusFilter = _HistoryStatusFilter.processing,
+                  ),
+                ),
+                _StatusToggle(
+                  label: 'Received',
+                  selected: _statusFilter == _HistoryStatusFilter.received,
+                  onTap: () => setState(
+                    () => _statusFilter = _HistoryStatusFilter.received,
+                  ),
+                ),
+                _StatusToggle(
+                  label: 'Pending',
+                  selected: _statusFilter == _HistoryStatusFilter.pending,
+                  onTap: () => setState(
+                    () => _statusFilter = _HistoryStatusFilter.pending,
+                  ),
+                ),
+                _StatusToggle(
+                  label: 'Failed',
+                  selected: _statusFilter == _HistoryStatusFilter.failed,
+                  onTap: () => setState(
+                    () => _statusFilter = _HistoryStatusFilter.failed,
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 20),
             if (historyRequests.isEmpty)
               const AppSurface(
                 color: AppTheme.surfaceRaised,
                 child: Text(
-                  'No remote batches are loaded yet. Submit one from Upload or refresh the backend history.',
+                  'No remote batches match the current filters. Clear filters or refresh the backend history.',
                 ),
               )
             else
@@ -91,13 +269,24 @@ class HistoryPage extends StatelessWidget {
                           final Widget status = StatusChip(
                             label: request.status == RequestStatus.completed
                                 ? 'completed'
+                                : request.status == RequestStatus.processing
+                                ? 'processing'
+                                : request.status == RequestStatus.received
+                                ? 'received'
+                                : request.status == RequestStatus.failed
+                                ? 'failed'
                                 : 'pending',
                             color: request.status == RequestStatus.completed
                                 ? AppTheme.statusGreen
-                                : AppTheme.goldDeep,
-                            background:
-                                request.status == RequestStatus.completed
+                                : request.status == RequestStatus.failed
+                                ? AppTheme.red
+                                : request.status == RequestStatus.processing
+                                ? AppTheme.goldDeep
+                                : AppTheme.slate,
+                            background: request.status == RequestStatus.completed
                                 ? AppTheme.sand
+                                : request.status == RequestStatus.failed
+                                ? AppTheme.dangerSoft
                                 : AppTheme.surfaceContainer,
                           );
                           final Widget idColumn = Column(
@@ -109,7 +298,7 @@ class HistoryPage extends StatelessWidget {
                                   if (!context.mounted) {
                                     return;
                                   }
-                                  onNavigate(AppPage.results);
+                                  widget.onNavigate(AppPage.results);
                                 },
                                 style: TextButton.styleFrom(
                                   padding: EdgeInsets.zero,
@@ -130,8 +319,7 @@ class HistoryPage extends StatelessWidget {
                               ),
                             ],
                           );
-                          final List<String> previewTransforms = request
-                              .transforms
+                          final List<String> previewTransforms = request.transforms
                               .take(3)
                               .toList();
                           final Widget transforms = Row(
@@ -198,7 +386,7 @@ class HistoryPage extends StatelessWidget {
                                   if (!context.mounted) {
                                     return;
                                   }
-                                  onNavigate(AppPage.results);
+                                  widget.onNavigate(AppPage.results);
                                 },
                               ),
                               const SizedBox(width: 8),
@@ -319,6 +507,32 @@ class HistoryPage extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+enum _HistoryStatusFilter { all, completed, processing, received, pending, failed }
+
+class _StatusToggle extends StatelessWidget {
+  const _StatusToggle({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlinedButton(
+      onPressed: onTap,
+      style: OutlinedButton.styleFrom(
+        backgroundColor: selected ? AppTheme.navy : null,
+        foregroundColor: selected ? AppTheme.white : AppTheme.navy,
+      ),
+      child: Text(label),
     );
   }
 }

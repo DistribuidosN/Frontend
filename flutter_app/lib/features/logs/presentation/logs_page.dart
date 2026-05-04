@@ -5,8 +5,57 @@ import 'package:imageflow_flutter/features/admin/domain/admin_audit_log.dart';
 import 'package:imageflow_flutter/features/logs/presentation/log_level_visuals.dart';
 import 'package:imageflow_flutter/shared/widgets/shared_widgets.dart';
 
-class LogsPage extends StatelessWidget {
+class LogsPage extends StatefulWidget {
   const LogsPage({super.key});
+
+  @override
+  State<LogsPage> createState() => _LogsPageState();
+}
+
+class _LogsPageState extends State<LogsPage> {
+  final TextEditingController _imageUuidController = TextEditingController();
+  bool _initialized = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_initialized) {
+      return;
+    }
+    final workspace = WorkspaceScope.of(context);
+    final String seed = workspace.adminLogImageUuid?.trim().isNotEmpty == true
+        ? workspace.adminLogImageUuid!.trim()
+        : workspace.latestBatchImages.isNotEmpty
+        ? workspace.latestBatchImages.first.imageUuid.trim()
+        : '';
+    if (seed.isNotEmpty) {
+      _imageUuidController.text = seed;
+    }
+    _initialized = true;
+  }
+
+  @override
+  void dispose() {
+    _imageUuidController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _refreshLogs(BuildContext context) async {
+    final workspace = WorkspaceScope.of(context);
+    final String imageUuid = _imageUuidController.text.trim();
+    try {
+      await workspace.refreshAdminLogs(
+        imageUuid: imageUuid.isEmpty ? null : imageUuid,
+      );
+    } catch (error) {
+      if (!context.mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not refresh admin logs: $error')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +71,7 @@ class LogsPage extends StatelessWidget {
           description:
               'Read the backend admin log feed without exposing user-owned media.',
           actions: OutlinedButton.icon(
-            onPressed: () => workspace.refreshAdminLogs(),
+            onPressed: () => _refreshLogs(context),
             icon: const Icon(Icons.refresh_rounded, size: 18),
             label: const Text('Refresh Logs'),
           ),
@@ -31,9 +80,34 @@ class LogsPage extends StatelessWidget {
         AppSurface(
           radius: AppTheme.radii.xl,
           child: Wrap(
-            spacing: 10,
-            runSpacing: 10,
+            spacing: 12,
+            runSpacing: 12,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: <Widget>[
+              FilterField(
+                icon: Icons.image_search_outlined,
+                label: 'Image UUID for log lookup',
+                width: 380,
+                controller: _imageUuidController,
+                onSubmitted: (_) => _refreshLogs(context),
+              ),
+              ChipFilter(
+                icon: Icons.refresh_rounded,
+                label: 'Refresh logs',
+                onPressed: () => _refreshLogs(context),
+              ),
+              ChipFilter(
+                icon: Icons.restore_rounded,
+                label: 'Use latest image',
+                onPressed: workspace.latestBatchImages.isNotEmpty
+                    ? () {
+                        setState(() {
+                          _imageUuidController.text =
+                              workspace.latestBatchImages.first.imageUuid.trim();
+                        });
+                      }
+                    : null,
+              ),
               StatusChip(
                 label: 'Backend endpoint',
                 color: AppTheme.goldDeep,
@@ -46,13 +120,6 @@ class LogsPage extends StatelessWidget {
                 background: AppTheme.surfaceContainer,
                 icon: Icons.description_outlined,
               ),
-              if ((workspace.adminLogImageUuid ?? '').isNotEmpty)
-                StatusChip(
-                  label: 'Image log lookup active',
-                  color: AppTheme.slate,
-                  background: AppTheme.surfaceContainer,
-                  icon: Icons.image_search_outlined,
-                ),
             ],
           ),
         ),
@@ -66,8 +133,7 @@ class LogsPage extends StatelessWidget {
         else
           SectionPanel(
             title: 'Recent Logs',
-            description:
-                'Live events returned by the admin log endpoint.',
+            description: 'Live events returned by the admin log endpoint.',
             child: Column(
               children: systemLogs.map((AdminAuditLog log) {
                 return Container(

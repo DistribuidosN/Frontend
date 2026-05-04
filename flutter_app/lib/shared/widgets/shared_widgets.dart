@@ -465,17 +465,29 @@ class FilterField extends StatelessWidget {
     required this.icon,
     required this.label,
     this.width,
+    this.controller,
+    this.onChanged,
+    this.onSubmitted,
+    this.autofocus = false,
   });
 
   final IconData icon;
   final String label;
   final double? width;
+  final TextEditingController? controller;
+  final ValueChanged<String>? onChanged;
+  final ValueChanged<String>? onSubmitted;
+  final bool autofocus;
 
   @override
   Widget build(BuildContext context) {
     return ConstrainedBox(
       constraints: BoxConstraints(maxWidth: width ?? 360, minHeight: 48),
       child: TextField(
+        controller: controller,
+        autofocus: autofocus,
+        onChanged: onChanged,
+        onSubmitted: onSubmitted,
         decoration: InputDecoration(hintText: label, prefixIcon: Icon(icon)),
       ),
     );
@@ -483,17 +495,29 @@ class FilterField extends StatelessWidget {
 }
 
 class ChipFilter extends StatelessWidget {
-  const ChipFilter({super.key, required this.icon, required this.label});
+  const ChipFilter({
+    super.key,
+    required this.icon,
+    required this.label,
+    this.onPressed,
+    this.selected = false,
+  });
 
   final IconData icon;
   final String label;
+  final VoidCallback? onPressed;
+  final bool selected;
 
   @override
   Widget build(BuildContext context) {
     return OutlinedButton.icon(
-      onPressed: () {},
+      onPressed: onPressed,
       icon: Icon(icon, size: 18),
       label: Text(label),
+      style: OutlinedButton.styleFrom(
+        backgroundColor: selected ? AppTheme.navy : null,
+        foregroundColor: selected ? AppTheme.white : null,
+      ),
     );
   }
 }

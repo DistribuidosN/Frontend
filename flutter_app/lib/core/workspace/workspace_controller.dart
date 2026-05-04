@@ -730,6 +730,10 @@ class WorkspaceController extends ChangeNotifier {
           );
         }),
       );
+    _historyRequests.sort(
+      (HistoryRequest a, HistoryRequest b) =>
+          _historySortKey(b).compareTo(_historySortKey(a)),
+    );
 
     if (_latestBatch == null && _historyRequests.isNotEmpty) {
       final HistoryRequest first = _historyRequests.first;
@@ -1454,6 +1458,16 @@ class WorkspaceController extends ChangeNotifier {
     final String mm = time.minute.toString().padLeft(2, '0');
     final String ss = time.second.toString().padLeft(2, '0');
     return '$hh:$mm:$ss';
+  }
+
+  DateTime _historySortKey(HistoryRequest request) {
+    final String raw = request.date.trim();
+    if (raw.isEmpty || raw == 'Remote batch') {
+      return DateTime.fromMillisecondsSinceEpoch(0);
+    }
+    return DateTime.tryParse(raw) ??
+        DateTime.tryParse(raw.replaceFirst(' ', 'T')) ??
+        DateTime.fromMillisecondsSinceEpoch(0);
   }
 
   String _mimeTypeForFile(String fileName) {

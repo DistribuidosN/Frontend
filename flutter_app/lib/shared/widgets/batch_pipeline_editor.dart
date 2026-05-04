@@ -304,7 +304,7 @@ class _BatchPipelineEditorState extends State<BatchPipelineEditor> {
                             setState(() => _cropEnabled = value),
                         child: AdaptiveGrid(
                           minItemWidth: 160,
-                          childAspectRatio: 2.2,
+                          childAspectRatio: 1.55,
                           children: <Widget>[
                             _TextEntryField(
                               label: 'Left',
@@ -1082,14 +1082,21 @@ class _TextEntryField extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Text(label, style: Theme.of(context).textTheme.labelLarge),
-        const SizedBox(height: 8),
+        const SizedBox(height: 4),
         TextFormField(
           initialValue: value,
           onChanged: onChanged,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          textAlignVertical: TextAlignVertical.center,
+          style: Theme.of(context).textTheme.bodyMedium,
           decoration: InputDecoration(
             hintText: hintText,
             helperText: helperText,
+            isDense: true,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 10,
+            ),
           ),
         ),
       ],

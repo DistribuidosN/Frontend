@@ -62,23 +62,33 @@ class WorkspaceController extends ChangeNotifier {
     final username = prefs.getString('auth_username');
 
     if (token != null && identity != null && roleId != null) {
+      _restoringSession = true;
+      _session = AuthSession(
+        token: token,
+        roleId: roleId,
+        identity: identity,
+        userUuid: userUuid,
+        username: username,
+      );
+      notifyListeners();
       try {
-        _restoringSession = true;
-        _session = AuthSession(
-          token: token,
-          roleId: roleId,
-          identity: identity,
-          userUuid: userUuid,
-          username: username,
-        );
-        notifyListeners();
         await _refreshProfile(notify: false);
-        await _hydrateSessionData();
-      } catch (_) {}
-      finally {
-        _restoringSession = false;
-        notifyListeners();
+      } catch (e) {
+        debugPrint('[INIT] profile refresh failed (non-fatal): $e');
+        // No borramos la sesión aquí — el token puede ser válido aunque
+        // /user/profile falle por red. Solo borramos si _handleUnauthenticated
+        // se dispara explícitamente via 401/403.
       }
+      try {
+        // Solo hidratar si la sesión sigue activa (no fue borrada por 401)
+        if (_session != null) {
+          await _hydrateSessionData();
+        }
+      } catch (e) {
+        debugPrint('[INIT] hydration failed (non-fatal): $e');
+      }
+      _restoringSession = false;
+      notifyListeners();
     }
   }
 
@@ -1247,48 +1257,76 @@ class WorkspaceController extends ChangeNotifier {
       '[ADMIN METRICS] start nodeId=$targetNodeId explicit=${nodeId != null && nodeId.trim().isNotEmpty}',
     );
 
-    final bool explicitNodeLookup = nodeId != null && nodeId.trim().isNotEmpty;
-    final List<_AdminNodeRef> nodeRefs = explicitNodeLookup
-        ? <_AdminNodeRef>[_AdminNodeRef(id: targetNodeId, address: '')]
-        : await _loadAdminNodeRefs();
-    debugPrint(
-      '[ADMIN METRICS] refs=${nodeRefs.map((ref) => '${ref.id}(${ref.address})').join(', ')}',
-    );
-
-    final List<AdminNodeMetric> collectedMetrics = <AdminNodeMetric>[];
-    final Iterable<_AdminNodeRef> refsToQuery = nodeRefs.isEmpty
-        ? <_AdminNodeRef>[_AdminNodeRef(id: targetNodeId, address: '')]
-        : nodeRefs;
-
-    for (final _AdminNodeRef ref in refsToQuery) {
-      debugPrint('[ADMIN METRICS] GET /metrics/${ref.id}');
-      final dynamic payload = await _apiClient.getDecoded(
-        '/metrics/${ref.id}',
-        token: _session!.token,
-      );
-      debugPrint(
-        '[ADMIN METRICS] payload(${ref.id})=${payload.runtimeType} $payload',
-      );
-      final AdminNodeMetric? metric = _latestAdminMetricFromPayload(
-        payload,
-        fallbackNodeId: ref.id,
-        fallbackAddress: ref.address,
-      );
-      if (metric != null) {
-        collectedMetrics.add(metric);
-        debugPrint(
-          '[ADMIN METRICS] parsed ${metric.id} active=${metric.active} load=${metric.load} jobs=${metric.currentJobs} processed=${metric.totalProcessed}',
-        );
+    try {
+      final bool explicitNodeLookup = nodeId != null && nodeId.trim().isNotEmpty;
+      List<_AdminNodeRef> nodeRefs = <_AdminNodeRef>[];
+      if (explicitNodeLookup) {
+        nodeRefs = <_AdminNodeRef>[_AdminNodeRef(id: targetNodeId, address: '')];
       } else {
-        debugPrint('[ADMIN METRICS] no metric parsed for ${ref.id}');
+        try {
+          nodeRefs = await _loadAdminNodeRefs();
+        } catch (e) {
+          debugPrint('[ADMIN METRICS] /nodes failed, using default node: $e');
+          nodeRefs = <_AdminNodeRef>[];
+        }
       }
-    }
+      debugPrint(
+        '[ADMIN METRICS] refs=${nodeRefs.map((ref) => '${ref.id}(${ref.address})').join(', ')}',
+      );
 
-    _adminMetricNodeId = refsToQuery.first.id;
-    _adminNodeMetrics
-      ..clear()
-      ..addAll(collectedMetrics);
-    debugPrint('[ADMIN METRICS] final count=${_adminNodeMetrics.length}');
+      final List<AdminNodeMetric> collectedMetrics = <AdminNodeMetric>[];
+      final Iterable<_AdminNodeRef> refsToQuery = nodeRefs.isEmpty
+          ? <_AdminNodeRef>[_AdminNodeRef(id: targetNodeId, address: '')]
+          : nodeRefs;
+
+      for (final _AdminNodeRef ref in refsToQuery) {
+        try {
+          debugPrint('[ADMIN METRICS] GET /admin/metrics/${ref.id}');
+          final dynamic payload = await _apiClient.getDecoded(
+            '/admin/metrics/${ref.id}',
+            token: _session!.token,
+          );
+          debugPrint(
+            '[ADMIN METRICS] payload(${ref.id})=${payload.runtimeType} $payload',
+          );
+          final AdminNodeMetric? metric = _latestAdminMetricFromPayload(
+            payload,
+            fallbackNodeId: ref.id,
+            fallbackAddress: ref.address,
+          );
+          if (metric != null) {
+            collectedMetrics.add(metric);
+            debugPrint(
+              '[ADMIN METRICS] parsed ${metric.id} active=${metric.active} load=${metric.load} jobs=${metric.currentJobs} processed=${metric.totalProcessed}',
+            );
+          } else {
+            debugPrint('[ADMIN METRICS] no metric parsed for ${ref.id}');
+          }
+        } catch (e) {
+          debugPrint('[ADMIN METRICS] error fetching /metrics/${ref.id}: $e');
+          _appendLog(
+            level: LogLevel.warning,
+            source: 'admin',
+            message: 'Could not fetch metrics for node ${ref.id}: $e',
+            job: '-',
+          );
+        }
+      }
+
+      _adminMetricNodeId = refsToQuery.first.id;
+      _adminNodeMetrics
+        ..clear()
+        ..addAll(collectedMetrics);
+      debugPrint('[ADMIN METRICS] final count=${_adminNodeMetrics.length}');
+    } catch (e) {
+      debugPrint('[ADMIN METRICS] unexpected error: $e');
+      _appendLog(
+        level: LogLevel.warning,
+        source: 'admin',
+        message: 'Admin metrics refresh failed: $e',
+        job: '-',
+      );
+    }
 
     if (notify) {
       notifyListeners();
@@ -1304,38 +1342,49 @@ class WorkspaceController extends ChangeNotifier {
     debugPrint(
       '[ADMIN LOGS] start imageUuid=$candidateImageUuid requested=${imageUuid ?? ''}',
     );
-    final dynamic payload = await _apiClient.getDecoded(
-      '/logs/$candidateImageUuid',
-      token: _session!.token,
-    );
-    debugPrint('[ADMIN LOGS] payload=${payload.runtimeType} $payload');
 
-    _adminLogImageUuid = candidateImageUuid;
-    final List<dynamic> rows = switch (payload) {
-      final List<dynamic> list => list,
-      final Map<String, dynamic> map =>
-        map['logs'] is List<dynamic>
-            ? map['logs'] as List<dynamic>
-            : map['data'] is List<dynamic>
-            ? map['data'] as List<dynamic>
-            : <dynamic>[],
-      _ => <dynamic>[],
-    };
-    debugPrint('[ADMIN LOGS] rows=${rows.length}');
-    _adminLogs
-      ..clear()
-      ..addAll(
-        rows.map((dynamic row) {
-          final Map<String, dynamic> item = row is Map<String, dynamic>
-              ? row
-              : <String, dynamic>{};
-          if (!item.containsKey('image_uuid') && !item.containsKey('imageUuid')) {
-            item['imageUuid'] = candidateImageUuid;
-          }
-          return AdminAuditLog.fromJson(item);
-        }),
+    try {
+      final dynamic payload = await _apiClient.getDecoded(
+        '/admin/logs/$candidateImageUuid',
+        token: _session!.token,
       );
-    debugPrint('[ADMIN LOGS] final count=${_adminLogs.length}');
+      debugPrint('[ADMIN LOGS] payload=${payload.runtimeType} $payload');
+
+      _adminLogImageUuid = candidateImageUuid;
+      final List<dynamic> rows = switch (payload) {
+        final List<dynamic> list => list,
+        final Map<String, dynamic> map =>
+          map['logs'] is List<dynamic>
+              ? map['logs'] as List<dynamic>
+              : map['data'] is List<dynamic>
+              ? map['data'] as List<dynamic>
+              : <dynamic>[],
+        _ => <dynamic>[],
+      };
+      debugPrint('[ADMIN LOGS] rows=${rows.length}');
+      _adminLogs
+        ..clear()
+        ..addAll(
+          rows.map((dynamic row) {
+            final Map<String, dynamic> item = row is Map<String, dynamic>
+                ? row
+                : <String, dynamic>{};
+            if (!item.containsKey('image_uuid') && !item.containsKey('imageUuid')) {
+              item['imageUuid'] = candidateImageUuid;
+            }
+            return AdminAuditLog.fromJson(item);
+          }),
+        );
+      debugPrint('[ADMIN LOGS] final count=${_adminLogs.length}');
+    } catch (e) {
+      debugPrint('[ADMIN LOGS] error fetching /logs/$candidateImageUuid: $e');
+      _appendLog(
+        level: LogLevel.warning,
+        source: 'admin',
+        message: 'Could not fetch admin logs for image $candidateImageUuid: $e',
+        job: '-',
+      );
+    }
 
     if (notify) {
       notifyListeners();

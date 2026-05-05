@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -20,7 +21,36 @@ class DashboardPage extends StatefulWidget {
 
 class _DashboardPageState extends State<DashboardPage> {
   DashboardWindow _window = DashboardWindow.week;
-  final bool _isRefreshing = false;
+  bool _isRefreshing = false;
+  Timer? _refreshTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    // Auto-refresh every 30 seconds
+    _refreshTimer = Timer.periodic(const Duration(seconds: 30), (_) {
+      _doRefresh();
+    });
+  }
+
+  @override
+  void dispose() {
+    _refreshTimer?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _doRefresh() async {
+    if (!mounted) return;
+    final workspace = WorkspaceScope.of(context);
+    if (!workspace.isAuthenticated) return;
+    setState(() => _isRefreshing = true);
+    try {
+      await workspace.refreshUserStatistics(notify: true);
+      await workspace.refreshUserActivity(notify: true);
+      await workspace.refreshHistory(notify: true);
+    } catch (_) {}
+    if (mounted) setState(() => _isRefreshing = false);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,6 +63,7 @@ class _DashboardPageState extends State<DashboardPage> {
             onWindowChanged: (DashboardWindow value) {
               setState(() => _window = value);
             },
+            onRefresh: _doRefresh,
           )
         : _UserDashboard(
             window: _window,
@@ -40,6 +71,7 @@ class _DashboardPageState extends State<DashboardPage> {
             onWindowChanged: (DashboardWindow value) {
               setState(() => _window = value);
             },
+            onRefresh: _doRefresh,
           );
   }
 }
@@ -49,11 +81,13 @@ class _UserDashboard extends StatelessWidget {
     required this.window,
     required this.isRefreshing,
     required this.onWindowChanged,
+    required this.onRefresh,
   });
 
   final DashboardWindow window;
   final bool isRefreshing;
   final ValueChanged<DashboardWindow> onWindowChanged;
+  final VoidCallback onRefresh;
 
   @override
   Widget build(BuildContext context) {
@@ -194,6 +228,7 @@ class _UserDashboard extends StatelessWidget {
           isRefreshing: isRefreshing,
           window: window,
           onWindowChanged: onWindowChanged,
+          onRefresh: onRefresh,
         ),
         const SizedBox(height: 20),
         AdaptiveGrid(
@@ -424,11 +459,13 @@ class _AdminDashboard extends StatelessWidget {
     required this.window,
     required this.isRefreshing,
     required this.onWindowChanged,
+    required this.onRefresh,
   });
 
   final DashboardWindow window;
   final bool isRefreshing;
   final ValueChanged<DashboardWindow> onWindowChanged;
+  final VoidCallback onRefresh;
 
   @override
   Widget build(BuildContext context) {
@@ -472,6 +509,7 @@ class _AdminDashboard extends StatelessWidget {
           activeNodes: activeNodes,
           totalNodes: nodes.length,
           warnings: warningCount,
+          onRefresh: onRefresh,
         ),
         const SizedBox(height: 20),
         AdaptiveGrid(
@@ -703,6 +741,7 @@ class _AdminDashboardIntro extends StatelessWidget {
     required this.activeNodes,
     required this.totalNodes,
     required this.warnings,
+    required this.onRefresh,
   });
 
   final bool isRefreshing;
@@ -711,6 +750,7 @@ class _AdminDashboardIntro extends StatelessWidget {
   final int activeNodes;
   final int totalNodes;
   final int warnings;
+  final VoidCallback onRefresh;
 
   @override
   Widget build(BuildContext context) {
@@ -747,15 +787,38 @@ class _AdminDashboardIntro extends StatelessWidget {
                       ),
                     ),
                   ),
-                  if (isRefreshing)
-                    const Padding(
-                      padding: EdgeInsets.only(left: 12),
-                      child: SizedBox(
-                        width: 14,
-                        height: 14,
-                        child: CircularProgressIndicator(strokeWidth: 2),
+                  const SizedBox(width: 10),
+                  GestureDetector(
+                    onTap: isRefreshing ? null : onRefresh,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: AppTheme.surfaceContainer,
+                        borderRadius: BorderRadius.circular(999),
+                        border: Border.all(color: AppTheme.outlineVariant),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (isRefreshing)
+                            const SizedBox(
+                              width: 12,
+                              height: 12,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          else
+                            const Icon(Icons.refresh_rounded, size: 13, color: AppTheme.navy),
+                          const SizedBox(width: 5),
+                          Text(
+                            isRefreshing ? 'Updating...' : 'Refresh now',
+                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              color: AppTheme.navy,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
+                  ),
                 ],
               ),
               const SizedBox(height: 16),
@@ -931,11 +994,13 @@ class _DashboardIntro extends StatelessWidget {
     required this.isRefreshing,
     required this.window,
     required this.onWindowChanged,
+    required this.onRefresh,
   });
 
   final bool isRefreshing;
   final DashboardWindow window;
   final ValueChanged<DashboardWindow> onWindowChanged;
+  final VoidCallback onRefresh;
 
   @override
   Widget build(BuildContext context) {

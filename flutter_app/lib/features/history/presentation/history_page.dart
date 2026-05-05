@@ -31,18 +31,20 @@ class _HistoryPageState extends State<HistoryPage> {
         .whereType<DateTime>()
         .toList();
 
-    final DateTime firstDate = dates.isEmpty
-        ? DateTime.now().subtract(const Duration(days: 30))
-        : dates.reduce((DateTime a, DateTime b) => a.isBefore(b) ? a : b);
-    final DateTime lastDate = dates.isEmpty
-        ? DateTime.now()
-        : dates.reduce((DateTime a, DateTime b) => a.isAfter(b) ? a : b);
+    // Siempre abrimos un rango amplio: desde el batch más antiguo (o -365 días)
+    // hasta hoy +1 día. Esto evita que el picker falle cuando hay 1 solo batch.
+    final DateTime earliest = dates.isEmpty
+        ? DateTime.now().subtract(const Duration(days: 365))
+        : dates.reduce((DateTime a, DateTime b) => a.isBefore(b) ? a : b)
+            .subtract(const Duration(days: 1));
+    final DateTime latest = DateTime.now().add(const Duration(days: 1));
 
     final DateTimeRange? picked = await showDateRangePicker(
       context: context,
-      firstDate: DateUtils.dateOnly(firstDate),
-      lastDate: DateUtils.dateOnly(lastDate.add(const Duration(days: 1))),
+      firstDate: DateUtils.dateOnly(earliest),
+      lastDate: DateUtils.dateOnly(latest),
       initialDateRange: _dateRange,
+      helpText: 'Filter by date range',
     );
     if (!mounted) return;
     setState(() => _dateRange = picked);

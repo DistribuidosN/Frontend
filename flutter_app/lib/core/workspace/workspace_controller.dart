@@ -36,6 +36,8 @@ class WorkspaceController extends ChangeNotifier {
   }
 
   static const String _defaultAdminNodeId = 'node-1';
+  // Nodos conocidos del clúster — se usan cuando /nodes no está disponible
+  static const List<String> _knownNodeIds = <String>['node-1', 'node-2', 'node-3'];
   static const String _defaultAdminImageUuid =
       'ab1df2d2-255c-409b-94c1-855a590e77b9';
 
@@ -1275,8 +1277,9 @@ class WorkspaceController extends ChangeNotifier {
       );
 
       final List<AdminNodeMetric> collectedMetrics = <AdminNodeMetric>[];
+      // Si /nodes no devuelve nada, consultar los 3 nodos conocidos del clúster
       final Iterable<_AdminNodeRef> refsToQuery = nodeRefs.isEmpty
-          ? <_AdminNodeRef>[_AdminNodeRef(id: targetNodeId, address: '')]
+          ? _knownNodeIds.map((String id) => _AdminNodeRef(id: id, address: ''))
           : nodeRefs;
 
       for (final _AdminNodeRef ref in refsToQuery) {

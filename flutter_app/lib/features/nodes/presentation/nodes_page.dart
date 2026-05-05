@@ -112,6 +112,7 @@ class _NodesPageState extends State<NodesPage> {
                   setState(() {
                     _nodeIdController.text = workspace.adminMetricNodeId;
                   });
+                  _refreshMetrics(context);
                 },
               ),
               StatusChip(

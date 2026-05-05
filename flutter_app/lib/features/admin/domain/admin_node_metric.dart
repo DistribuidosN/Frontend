@@ -57,7 +57,7 @@ class AdminNodeMetric {
 
     final int busyWorkers = _intValue(
       json,
-      <String>['busy_workers', 'active_workers', 'workers', 'activeJobs'],
+      <String>['workers_busy', 'busy_workers', 'active_workers', 'workers', 'activeJobs'],
     );
     final int cpuUsage = _intValue(
       json,
@@ -68,10 +68,11 @@ class AdminNodeMetric {
       <String>['ram_usage', 'memory_usage', 'mem_usage', 'memoryUsage'],
     );
 
+    final String nodeId = _stringValue(json, <String>['node_id', 'id', 'nodeId']);
+    final String uptimeText = _stringValue(json, <String>['uptime', 'uptime_text']);
+
     return AdminNodeMetric(
-      id: _stringValue(json, <String>['node_id', 'id', 'nodeId']) == ''
-          ? fallbackNodeId
-          : _stringValue(json, <String>['node_id', 'id', 'nodeId']),
+      id: nodeId.isEmpty ? fallbackNodeId : nodeId,
       address: _stringValue(
         json,
         <String>['address', 'host', 'endpoint', 'ip', 'nodeAddress'],
@@ -82,17 +83,39 @@ class AdminNodeMetric {
           ? busyWorkers
           : _intValue(
               json,
-              <String>['current_jobs', 'active_jobs', 'jobs', 'pending_jobs', 'activeJobs'],
+              <String>[
+                'current_jobs',
+                'active_jobs',
+                'jobs',
+                'pending_jobs',
+                'activeJobs',
+                'workers_busy',
+              ],
             ),
       totalProcessed: _intValue(
         json,
-        <String>['total_processed', 'processed', 'processed_jobs', 'totalJobs'],
+        <String>[
+          'total_processed',
+          'processed',
+          'processed_jobs',
+          'totalJobs',
+          'tasks_done',
+        ],
       ),
       lastHeartbeat: _stringValue(
         json,
-        <String>['last_heartbeat', 'heartbeat_at', 'updated_at', 'reported_at', 'timestamp'],
+        <String>[
+          'last_heartbeat',
+          'heartbeat_at',
+          'updated_at',
+          'reported_at',
+          'timestamp',
+          'log_time',
+        ],
       ),
-      uptime: _stringValue(json, <String>['uptime', 'uptime_text']),
+      uptime: uptimeText.isNotEmpty
+          ? uptimeText
+          : _formatUptime(_intValue(json, <String>['uptime_seconds'])),
       raw: json,
       busyWorkers: busyWorkers,
       ramUsage: ramUsage,
@@ -161,5 +184,21 @@ class AdminNodeMetric {
       }
     }
     return null;
+  }
+
+  static String _formatUptime(int seconds) {
+    if (seconds <= 0) {
+      return '';
+    }
+    final int days = seconds ~/ 86400;
+    final int hours = (seconds % 86400) ~/ 3600;
+    final int minutes = (seconds % 3600) ~/ 60;
+    final int remainingSeconds = seconds % 60;
+    final List<String> parts = <String>[];
+    if (days > 0) parts.add('${days}d');
+    if (hours > 0) parts.add('${hours}h');
+    if (minutes > 0) parts.add('${minutes}m');
+    if (remainingSeconds > 0 || parts.isEmpty) parts.add('${remainingSeconds}s');
+    return parts.join(' ');
   }
 }

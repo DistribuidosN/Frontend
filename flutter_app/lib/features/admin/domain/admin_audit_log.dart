@@ -31,7 +31,9 @@ class AdminAuditLog {
         _ => LogLevel.info,
       },
       message: (json['message'] as String?) ?? 'No message',
-      createdAt: (json['created_at'] as String?) ??
+      createdAt: (json['log_time'] as String?) ??
+          (json['logTime'] as String?) ??
+          (json['created_at'] as String?) ??
           (json['timestamp'] as String?) ??
           '',
     );

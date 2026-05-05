@@ -1238,7 +1238,7 @@ class WorkspaceController extends ChangeNotifier {
         : (nodeId ?? _adminMetricNodeId).trim();
 
     final dynamic payload = await _apiClient.getDecoded(
-      '/admin/metrics/$targetNodeId',
+      '/metrics/$targetNodeId',
       token: _session!.token,
     );
 
@@ -1284,7 +1284,7 @@ class WorkspaceController extends ChangeNotifier {
 
     final String candidateImageUuid = _resolveAdminImageUuid(imageUuid);
     final dynamic payload = await _apiClient.getDecoded(
-      '/admin/logs/$candidateImageUuid',
+      '/logs/$candidateImageUuid',
       token: _session!.token,
     );
 

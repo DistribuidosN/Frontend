@@ -105,6 +105,7 @@ class _LogsPageState extends State<LogsPage> {
                           _imageUuidController.text =
                               workspace.latestBatchImages.first.imageUuid.trim();
                         });
+                        _refreshLogs(context);
                       }
                     : null,
               ),

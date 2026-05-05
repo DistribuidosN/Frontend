@@ -25,14 +25,11 @@ class ApiClient {
       return Uri.parse(path);
     }
 
-    final bool isAdminRoute = normalizedPath.startsWith('/admin/');
-    final String baseUrl = isAdminRoute
-        ? _config.adminProxyBaseUrl
-        : _config.baseUrl;
+    final String baseUrl = _config.baseUrl;
     final Uri baseUri = Uri.parse('$baseUrl$normalizedPath');
     if (kDebugMode) {
       debugPrint(
-        '[API CLIENT] path=$normalizedPath admin=$isAdminRoute base=$baseUrl final=$baseUri',
+        '[API CLIENT] path=$normalizedPath base=$baseUrl final=$baseUri',
       );
     }
     if (!baseUri.host.contains('ngrok-free.app')) {

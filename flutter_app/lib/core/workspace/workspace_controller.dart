@@ -35,9 +35,6 @@ class WorkspaceController extends ChangeNotifier {
         );
   }
 
-  static const String _defaultAdminNodeId = 'node-1';
-  // Nodos conocidos del clúster — se usan cuando /nodes no está disponible
-  static const List<String> _knownNodeIds = <String>['node-1', 'node-2', 'node-3'];
   static const String _defaultAdminImageUuid =
       'ab1df2d2-255c-409b-94c1-855a590e77b9';
 
@@ -169,7 +166,7 @@ class WorkspaceController extends ChangeNotifier {
   final List<UserActivityEvent> _userActivity = <UserActivityEvent>[];
   UserStatistics _userStatistics = UserStatistics.empty();
   String? _lastSelectionMessage;
-  String _adminMetricNodeId = _defaultAdminNodeId;
+  String _adminMetricNodeId = '';
   String? _adminLogImageUuid;
   UploadBatchResult? _latestBatch;
 
@@ -397,7 +394,7 @@ class WorkspaceController extends ChangeNotifier {
     _adminNodeMetrics.clear();
     _userActivity.clear();
     _userStatistics = UserStatistics.empty();
-    _adminMetricNodeId = _defaultAdminNodeId;
+    _adminMetricNodeId = '';
     _adminLogImageUuid = null;
     _latestBatch = null;
     _appendLog(
@@ -1252,9 +1249,7 @@ class WorkspaceController extends ChangeNotifier {
       return;
     }
 
-    final String targetNodeId = (nodeId ?? _adminMetricNodeId).trim().isEmpty
-        ? _defaultAdminNodeId
-        : (nodeId ?? _adminMetricNodeId).trim();
+    final String targetNodeId = (nodeId ?? _adminMetricNodeId).trim();
     debugPrint(
       '[ADMIN METRICS] start nodeId=$targetNodeId explicit=${nodeId != null && nodeId.trim().isNotEmpty}',
     );
@@ -1277,10 +1272,12 @@ class WorkspaceController extends ChangeNotifier {
       );
 
       final List<AdminNodeMetric> collectedMetrics = <AdminNodeMetric>[];
-      // Si /nodes no devuelve nada, consultar los 3 nodos conocidos del clúster
-      final Iterable<_AdminNodeRef> refsToQuery = nodeRefs.isEmpty
-          ? _knownNodeIds.map((String id) => _AdminNodeRef(id: id, address: ''))
-          : nodeRefs;
+      // Si /nodes no devuelve nada, no intentamos adivinar nodos.
+      final Iterable<_AdminNodeRef> refsToQuery = nodeRefs;
+
+      if (refsToQuery.isEmpty) {
+        debugPrint('[ADMIN METRICS] No nodes available to query metrics.');
+      }
 
       for (final _AdminNodeRef ref in refsToQuery) {
         try {
@@ -1316,7 +1313,9 @@ class WorkspaceController extends ChangeNotifier {
         }
       }
 
-      _adminMetricNodeId = refsToQuery.first.id;
+      if (refsToQuery.isNotEmpty) {
+        _adminMetricNodeId = refsToQuery.first.id;
+      }
       _adminNodeMetrics
         ..clear()
         ..addAll(collectedMetrics);

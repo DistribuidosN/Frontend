@@ -1,57 +1,26 @@
 import 'package:flutter/foundation.dart';
 
-const String _defaultLocalBaseUrl = 'http://localhost:50021/api/v1';
-const String _defaultWebBaseUrl = 'http://10.152.164.62:50021/api/v1';
+const String _defaultBaseUrl = 'https://ea47-181-55-22-220.ngrok-free.app/api/v1';
+
 class ApiConfig {
-  const ApiConfig({required this.baseUrl, required this.adminProxyBaseUrl});
+  const ApiConfig({required this.baseUrl});
 
   final String baseUrl;
-  final String adminProxyBaseUrl;
 
   static ApiConfig resolve() {
     const String fromEnvironment = String.fromEnvironment('API_BASE_URL');
-    const String proxyFromEnvironment = String.fromEnvironment(
-      'ADMIN_PROXY_BASE_URL',
-    );
+    
     if (fromEnvironment.isNotEmpty) {
       if (kDebugMode) {
-        debugPrint(
-          '[API CONFIG] env baseUrl=$fromEnvironment adminProxy=${proxyFromEnvironment.isNotEmpty ? proxyFromEnvironment : fromEnvironment}',
-        );
+        debugPrint('[API CONFIG] env baseUrl=$fromEnvironment');
       }
-      return ApiConfig(
-        baseUrl: fromEnvironment,
-        adminProxyBaseUrl: proxyFromEnvironment.isNotEmpty
-            ? proxyFromEnvironment
-            : fromEnvironment,
-      );
-    }
-
-    final String resolvedDefaultBaseUrl = kIsWeb
-        ? _defaultWebBaseUrl
-        : _defaultLocalBaseUrl;
-
-    if (defaultTargetPlatform == TargetPlatform.android) {
-      const String androidBaseUrl = 'http://10.0.2.2:50021/api/v1';
-      if (kDebugMode) {
-        debugPrint(
-          '[API CONFIG] android baseUrl=$androidBaseUrl adminProxy=$androidBaseUrl',
-        );
-      }
-      return ApiConfig(
-        baseUrl: androidBaseUrl,
-        adminProxyBaseUrl: androidBaseUrl,
-      );
+      return ApiConfig(baseUrl: fromEnvironment);
     }
 
     if (kDebugMode) {
-      debugPrint(
-        '[API CONFIG] default baseUrl=$resolvedDefaultBaseUrl adminProxy=$resolvedDefaultBaseUrl',
-      );
+      debugPrint('[API CONFIG] default baseUrl=$_defaultBaseUrl');
     }
-    return ApiConfig(
-      baseUrl: resolvedDefaultBaseUrl,
-      adminProxyBaseUrl: resolvedDefaultBaseUrl,
-    );
+    
+    return ApiConfig(baseUrl: _defaultBaseUrl);
   }
 }

@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:imageflow_flutter/core/api/api_config.dart';
 import 'package:imageflow_flutter/core/api/api_exception.dart';
@@ -32,6 +33,11 @@ class ApiClient {
         ? _config.adminProxyBaseUrl
         : _config.baseUrl;
     final Uri baseUri = Uri.parse('$baseUrl$normalizedPath');
+    if (kDebugMode) {
+      debugPrint(
+        '[API CLIENT] path=$normalizedPath admin=$isAdminRoute base=$baseUrl final=$baseUri',
+      );
+    }
     if (!baseUri.host.contains('ngrok-free.app')) {
       return baseUri;
     }

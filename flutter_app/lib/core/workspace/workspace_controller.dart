@@ -1243,11 +1243,17 @@ class WorkspaceController extends ChangeNotifier {
     final String targetNodeId = (nodeId ?? _adminMetricNodeId).trim().isEmpty
         ? _defaultAdminNodeId
         : (nodeId ?? _adminMetricNodeId).trim();
+    debugPrint(
+      '[ADMIN METRICS] start nodeId=$targetNodeId explicit=${nodeId != null && nodeId.trim().isNotEmpty}',
+    );
 
     final bool explicitNodeLookup = nodeId != null && nodeId.trim().isNotEmpty;
     final List<_AdminNodeRef> nodeRefs = explicitNodeLookup
         ? <_AdminNodeRef>[_AdminNodeRef(id: targetNodeId, address: '')]
         : await _loadAdminNodeRefs();
+    debugPrint(
+      '[ADMIN METRICS] refs=${nodeRefs.map((ref) => '${ref.id}(${ref.address})').join(', ')}',
+    );
 
     final List<AdminNodeMetric> collectedMetrics = <AdminNodeMetric>[];
     final Iterable<_AdminNodeRef> refsToQuery = nodeRefs.isEmpty
@@ -1255,9 +1261,13 @@ class WorkspaceController extends ChangeNotifier {
         : nodeRefs;
 
     for (final _AdminNodeRef ref in refsToQuery) {
+      debugPrint('[ADMIN METRICS] GET /metrics/${ref.id}');
       final dynamic payload = await _apiClient.getDecoded(
         '/metrics/${ref.id}',
         token: _session!.token,
+      );
+      debugPrint(
+        '[ADMIN METRICS] payload(${ref.id})=${payload.runtimeType} $payload',
       );
       final AdminNodeMetric? metric = _latestAdminMetricFromPayload(
         payload,
@@ -1266,6 +1276,11 @@ class WorkspaceController extends ChangeNotifier {
       );
       if (metric != null) {
         collectedMetrics.add(metric);
+        debugPrint(
+          '[ADMIN METRICS] parsed ${metric.id} active=${metric.active} load=${metric.load} jobs=${metric.currentJobs} processed=${metric.totalProcessed}',
+        );
+      } else {
+        debugPrint('[ADMIN METRICS] no metric parsed for ${ref.id}');
       }
     }
 
@@ -1273,6 +1288,7 @@ class WorkspaceController extends ChangeNotifier {
     _adminNodeMetrics
       ..clear()
       ..addAll(collectedMetrics);
+    debugPrint('[ADMIN METRICS] final count=${_adminNodeMetrics.length}');
 
     if (notify) {
       notifyListeners();
@@ -1285,10 +1301,14 @@ class WorkspaceController extends ChangeNotifier {
     }
 
     final String candidateImageUuid = _resolveAdminImageUuid(imageUuid);
+    debugPrint(
+      '[ADMIN LOGS] start imageUuid=$candidateImageUuid requested=${imageUuid ?? ''}',
+    );
     final dynamic payload = await _apiClient.getDecoded(
       '/logs/$candidateImageUuid',
       token: _session!.token,
     );
+    debugPrint('[ADMIN LOGS] payload=${payload.runtimeType} $payload');
 
     _adminLogImageUuid = candidateImageUuid;
     final List<dynamic> rows = switch (payload) {
@@ -1301,6 +1321,7 @@ class WorkspaceController extends ChangeNotifier {
             : <dynamic>[],
       _ => <dynamic>[],
     };
+    debugPrint('[ADMIN LOGS] rows=${rows.length}');
     _adminLogs
       ..clear()
       ..addAll(
@@ -1314,6 +1335,7 @@ class WorkspaceController extends ChangeNotifier {
           return AdminAuditLog.fromJson(item);
         }),
       );
+    debugPrint('[ADMIN LOGS] final count=${_adminLogs.length}');
 
     if (notify) {
       notifyListeners();
@@ -1321,10 +1343,12 @@ class WorkspaceController extends ChangeNotifier {
   }
 
   Future<List<_AdminNodeRef>> _loadAdminNodeRefs() async {
+    debugPrint('[ADMIN NODES] GET /nodes');
     final dynamic payload = await _apiClient.getDecoded(
       '/nodes',
       token: _session!.token,
     );
+    debugPrint('[ADMIN NODES] payload=${payload.runtimeType} $payload');
 
     final List<dynamic> rows = switch (payload) {
       final List<dynamic> list => list,
@@ -1335,11 +1359,12 @@ class WorkspaceController extends ChangeNotifier {
             ? map['data'] as List<dynamic>
             : map['items'] is List<dynamic>
             ? map['items'] as List<dynamic>
-            : <dynamic>[],
+        : <dynamic>[],
       _ => <dynamic>[],
     };
+    debugPrint('[ADMIN NODES] rows=${rows.length}');
 
-    return rows
+    final List<_AdminNodeRef> refs = rows
         .map((dynamic row) {
           final Map<String, dynamic> item = row is Map<String, dynamic>
               ? row
@@ -1368,6 +1393,8 @@ class WorkspaceController extends ChangeNotifier {
         })
         .whereType<_AdminNodeRef>()
         .toList(growable: false);
+    debugPrint('[ADMIN NODES] parsed=${refs.map((ref) => ref.id).join(', ')}');
+    return refs;
   }
 
   AdminNodeMetric? _latestAdminMetricFromPayload(
@@ -1375,6 +1402,7 @@ class WorkspaceController extends ChangeNotifier {
     required String fallbackNodeId,
     String? fallbackAddress,
   }) {
+    debugPrint('[ADMIN METRICS] parse payload type=${payload.runtimeType}');
     final dynamic normalizedPayload = payload is Map<String, dynamic> &&
             payload['data'] is List<dynamic>
         ? payload['data']

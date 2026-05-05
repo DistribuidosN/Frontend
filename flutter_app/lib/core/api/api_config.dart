@@ -14,6 +14,11 @@ class ApiConfig {
       'ADMIN_PROXY_BASE_URL',
     );
     if (fromEnvironment.isNotEmpty) {
+      if (kDebugMode) {
+        debugPrint(
+          '[API CONFIG] env baseUrl=$fromEnvironment adminProxy=${proxyFromEnvironment.isNotEmpty ? proxyFromEnvironment : fromEnvironment}',
+        );
+      }
       return ApiConfig(
         baseUrl: fromEnvironment,
         adminProxyBaseUrl: proxyFromEnvironment.isNotEmpty
@@ -28,12 +33,22 @@ class ApiConfig {
 
     if (defaultTargetPlatform == TargetPlatform.android) {
       const String androidBaseUrl = 'http://10.0.2.2:50021/api/v1';
+      if (kDebugMode) {
+        debugPrint(
+          '[API CONFIG] android baseUrl=$androidBaseUrl adminProxy=$androidBaseUrl',
+        );
+      }
       return ApiConfig(
         baseUrl: androidBaseUrl,
         adminProxyBaseUrl: androidBaseUrl,
       );
     }
 
+    if (kDebugMode) {
+      debugPrint(
+        '[API CONFIG] default baseUrl=$resolvedDefaultBaseUrl adminProxy=$resolvedDefaultBaseUrl',
+      );
+    }
     return ApiConfig(
       baseUrl: resolvedDefaultBaseUrl,
       adminProxyBaseUrl: resolvedDefaultBaseUrl,

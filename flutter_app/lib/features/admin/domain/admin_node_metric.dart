@@ -28,6 +28,7 @@ class AdminNodeMetric {
   static AdminNodeMetric? maybeFromJson(
     dynamic payload, {
     required String fallbackNodeId,
+    String? fallbackAddress,
   }) {
     if (payload is! Map<String, dynamic>) {
       return null;
@@ -76,7 +77,12 @@ class AdminNodeMetric {
       address: _stringValue(
         json,
         <String>['address', 'host', 'endpoint', 'ip', 'nodeAddress'],
-      ),
+      ).isNotEmpty
+          ? _stringValue(
+              json,
+              <String>['address', 'host', 'endpoint', 'ip', 'nodeAddress'],
+            )
+          : (fallbackAddress ?? ''),
       active: active,
       load: cpuUsage,
       currentJobs: busyWorkers > 0

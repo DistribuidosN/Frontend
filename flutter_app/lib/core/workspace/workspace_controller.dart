@@ -18,6 +18,13 @@ import 'package:imageflow_flutter/features/upload/domain/upload_file_item.dart';
 import 'package:imageflow_flutter/features/user/domain/user_activity_event.dart';
 import 'package:imageflow_flutter/features/user/domain/user_statistics.dart';
 
+class _AdminNodeRef {
+  const _AdminNodeRef({required this.id, required this.address});
+
+  final String id;
+  final String address;
+}
+
 class WorkspaceController extends ChangeNotifier {
   WorkspaceController({ApiClient? apiClient}) {
     _apiClient =
@@ -1237,40 +1244,35 @@ class WorkspaceController extends ChangeNotifier {
         ? _defaultAdminNodeId
         : (nodeId ?? _adminMetricNodeId).trim();
 
-    final dynamic payload = await _apiClient.getDecoded(
-      '/metrics/$targetNodeId',
-      token: _session!.token,
-    );
+    final bool explicitNodeLookup = nodeId != null && nodeId.trim().isNotEmpty;
+    final List<_AdminNodeRef> nodeRefs = explicitNodeLookup
+        ? <_AdminNodeRef>[_AdminNodeRef(id: targetNodeId, address: '')]
+        : await _loadAdminNodeRefs();
 
-    _adminMetricNodeId = targetNodeId;
-    final dynamic normalizedPayload = payload is Map<String, dynamic> &&
-            payload['data'] is List<dynamic>
-        ? payload['data']
-        : payload;
+    final List<AdminNodeMetric> collectedMetrics = <AdminNodeMetric>[];
+    final Iterable<_AdminNodeRef> refsToQuery = nodeRefs.isEmpty
+        ? <_AdminNodeRef>[_AdminNodeRef(id: targetNodeId, address: '')]
+        : nodeRefs;
+
+    for (final _AdminNodeRef ref in refsToQuery) {
+      final dynamic payload = await _apiClient.getDecoded(
+        '/metrics/${ref.id}',
+        token: _session!.token,
+      );
+      final AdminNodeMetric? metric = _latestAdminMetricFromPayload(
+        payload,
+        fallbackNodeId: ref.id,
+        fallbackAddress: ref.address,
+      );
+      if (metric != null) {
+        collectedMetrics.add(metric);
+      }
+    }
+
+    _adminMetricNodeId = refsToQuery.first.id;
     _adminNodeMetrics
       ..clear()
-      ..addAll(switch (normalizedPayload) {
-        final List<dynamic> rows =>
-          rows
-              .map(
-                (dynamic row) => AdminNodeMetric.maybeFromJson(
-                  row,
-                  fallbackNodeId: targetNodeId,
-                ),
-              )
-              .whereType<AdminNodeMetric>(),
-        _ => <AdminNodeMetric>[
-          if (AdminNodeMetric.maybeFromJson(
-                normalizedPayload,
-                fallbackNodeId: targetNodeId,
-              ) !=
-              null)
-            AdminNodeMetric.maybeFromJson(
-              normalizedPayload,
-              fallbackNodeId: targetNodeId,
-            )!,
-        ],
-      });
+      ..addAll(collectedMetrics);
 
     if (notify) {
       notifyListeners();
@@ -1316,6 +1318,90 @@ class WorkspaceController extends ChangeNotifier {
     if (notify) {
       notifyListeners();
     }
+  }
+
+  Future<List<_AdminNodeRef>> _loadAdminNodeRefs() async {
+    final dynamic payload = await _apiClient.getDecoded(
+      '/nodes',
+      token: _session!.token,
+    );
+
+    final List<dynamic> rows = switch (payload) {
+      final List<dynamic> list => list,
+      final Map<String, dynamic> map =>
+        map['nodes'] is List<dynamic>
+            ? map['nodes'] as List<dynamic>
+            : map['data'] is List<dynamic>
+            ? map['data'] as List<dynamic>
+            : map['items'] is List<dynamic>
+            ? map['items'] as List<dynamic>
+            : <dynamic>[],
+      _ => <dynamic>[],
+    };
+
+    return rows
+        .map((dynamic row) {
+          final Map<String, dynamic> item = row is Map<String, dynamic>
+              ? row
+              : <String, dynamic>{};
+          final String nodeId = _firstString(
+            item,
+            <String>['node_id', 'nodeId', 'id'],
+          );
+          if (nodeId.isEmpty) {
+            return null;
+          }
+          final String host = _firstString(
+            item,
+            <String>['address', 'host', 'ip', 'nodeAddress'],
+          );
+          final String port = _firstString(
+            item,
+            <String>['port', 'nodePort'],
+          );
+          final String address = host.isEmpty
+              ? ''
+              : port.isEmpty
+              ? host
+              : '$host:$port';
+          return _AdminNodeRef(id: nodeId, address: address);
+        })
+        .whereType<_AdminNodeRef>()
+        .toList(growable: false);
+  }
+
+  AdminNodeMetric? _latestAdminMetricFromPayload(
+    dynamic payload, {
+    required String fallbackNodeId,
+    String? fallbackAddress,
+  }) {
+    final dynamic normalizedPayload = payload is Map<String, dynamic> &&
+            payload['data'] is List<dynamic>
+        ? payload['data']
+        : payload;
+
+    if (normalizedPayload is List<dynamic>) {
+      if (normalizedPayload.isEmpty) {
+        return null;
+      }
+      for (final dynamic row in normalizedPayload) {
+        final AdminNodeMetric? metric = AdminNodeMetric.maybeFromJson(
+          row,
+          fallbackNodeId: fallbackNodeId,
+          fallbackAddress: fallbackAddress,
+        );
+        if (metric != null) {
+          return metric;
+        }
+      }
+      return null;
+    }
+
+    return AdminNodeMetric.maybeFromJson(
+      normalizedPayload,
+      fallbackNodeId: fallbackNodeId,
+      fallbackAddress: fallbackAddress,
+    );
   }
 
   Future<String> downloadLatestBatchArchive() async {
@@ -1516,6 +1602,19 @@ class WorkspaceController extends ChangeNotifier {
       }
     }
     return _defaultAdminImageUuid;
+  }
+
+  static String _firstString(Map<String, dynamic> json, List<String> keys) {
+    for (final String key in keys) {
+      final dynamic value = json[key];
+      if (value is String && value.trim().isNotEmpty) {
+        return value.trim();
+      }
+      if (value is num && value.toString().trim().isNotEmpty) {
+        return value.toString().trim();
+      }
+    }
+    return '';
   }
 
   /// Converts a relative path (e.g. `/uploads/img.webp`) to an absolute URL

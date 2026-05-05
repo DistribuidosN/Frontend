@@ -24,7 +24,11 @@ class ApiClient {
       return Uri.parse(path);
     }
 
-    final String baseUrl = normalizedPath.startsWith('/admin/')
+    final bool isAdminRoute = normalizedPath.startsWith('/admin/') ||
+        normalizedPath.startsWith('/metrics') ||
+        normalizedPath.startsWith('/logs') ||
+        normalizedPath.startsWith('/nodes');
+    final String baseUrl = isAdminRoute
         ? _config.adminProxyBaseUrl
         : _config.baseUrl;
     final Uri baseUri = Uri.parse('$baseUrl$normalizedPath');

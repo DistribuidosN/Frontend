@@ -58,6 +58,8 @@ class _AdminPageState extends State<AdminPage> {
     final String imageUuid = _imageUuidController.text.trim();
 
     try {
+      await workspace.refreshHistory(notify: false);
+      await workspace.refreshLatestBatchImages(notify: false);
       await workspace.refreshAdminMetrics();
     } catch (_) {}
 
@@ -259,7 +261,7 @@ class _AdminPageState extends State<AdminPage> {
                   if (nodes.isEmpty)
                     _BackendEmptyCard(
                       message:
-                          'The backend did not return node metrics for ${workspace.adminMetricNodeId}.',
+                          'The backend did not return node metrics yet. Try refreshing all nodes or verify node-1, node-2 and node-3.',
                     )
                   else
                     _MetricBarCard(

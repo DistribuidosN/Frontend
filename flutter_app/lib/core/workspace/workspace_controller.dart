@@ -102,6 +102,9 @@ class WorkspaceController extends ChangeNotifier {
     }
 
     await refreshHistory(notify: false);
+    if (_latestBatch != null) {
+      await refreshLatestBatchImages(notify: false);
+    }
     await refreshUserStatistics(notify: false);
     await refreshUserActivity(notify: false);
 

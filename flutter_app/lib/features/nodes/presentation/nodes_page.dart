@@ -21,8 +21,7 @@ class _NodesPageState extends State<NodesPage> {
     if (_initialized) {
       return;
     }
-    final workspace = WorkspaceScope.of(context);
-    _nodeIdController.text = workspace.adminMetricNodeId;
+    _nodeIdController.text = '';
     _initialized = true;
   }
 
@@ -95,7 +94,7 @@ class _NodesPageState extends State<NodesPage> {
             children: <Widget>[
               FilterField(
                 icon: Icons.dns_outlined,
-                label: 'Node ID for metrics lookup',
+                label: 'Node ID optional (empty = node-1, node-2, node-3)',
                 width: 340,
                 controller: _nodeIdController,
                 onSubmitted: (_) => _refreshMetrics(context),
@@ -107,10 +106,10 @@ class _NodesPageState extends State<NodesPage> {
               ),
               ChipFilter(
                 icon: Icons.restore_rounded,
-                label: 'Use default node',
+                label: 'All nodes',
                 onPressed: () {
                   setState(() {
-                    _nodeIdController.text = workspace.adminMetricNodeId;
+                    _nodeIdController.clear();
                   });
                   _refreshMetrics(context);
                 },
@@ -122,7 +121,9 @@ class _NodesPageState extends State<NodesPage> {
                 icon: Icons.link_rounded,
               ),
               StatusChip(
-                label: workspace.adminMetricNodeId,
+                label: workerNodes.isEmpty
+                    ? 'node-1 / node-2 / node-3'
+                    : workerNodes.map((AdminNodeMetric node) => node.id).join(' / '),
                 color: AppTheme.navy,
                 background: AppTheme.surfaceContainer,
                 icon: Icons.dns_outlined,

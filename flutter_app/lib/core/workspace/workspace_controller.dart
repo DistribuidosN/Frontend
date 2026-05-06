@@ -37,6 +37,11 @@ class WorkspaceController extends ChangeNotifier {
 
   static const String _defaultAdminImageUuid =
       'ab1df2d2-255c-409b-94c1-855a590e77b9';
+  static const List<String> _defaultAdminNodeIds = <String>[
+    'node-1',
+    'node-2',
+    'node-3',
+  ];
 
   late final ApiClient _apiClient;
   final Random _random = Random();
@@ -1263,16 +1268,19 @@ class WorkspaceController extends ChangeNotifier {
         try {
           nodeRefs = await _loadAdminNodeRefs();
         } catch (e) {
-          debugPrint('[ADMIN METRICS] /nodes failed, using default node: $e');
-          nodeRefs = <_AdminNodeRef>[];
+          debugPrint('[ADMIN METRICS] /nodes failed, using default cluster: $e');
+          nodeRefs = _defaultAdminNodeRefs();
         }
+      }
+      if (!explicitNodeLookup && nodeRefs.isEmpty) {
+        debugPrint('[ADMIN METRICS] /nodes returned empty, using default cluster.');
+        nodeRefs = _defaultAdminNodeRefs();
       }
       debugPrint(
         '[ADMIN METRICS] refs=${nodeRefs.map((ref) => '${ref.id}(${ref.address})').join(', ')}',
       );
 
       final List<AdminNodeMetric> collectedMetrics = <AdminNodeMetric>[];
-      // Si /nodes no devuelve nada, no intentamos adivinar nodos.
       final Iterable<_AdminNodeRef> refsToQuery = nodeRefs;
 
       if (refsToQuery.isEmpty) {
@@ -1446,6 +1454,12 @@ class WorkspaceController extends ChangeNotifier {
         .toList(growable: false);
     debugPrint('[ADMIN NODES] parsed=${refs.map((ref) => ref.id).join(', ')}');
     return refs;
+  }
+
+  static List<_AdminNodeRef> _defaultAdminNodeRefs() {
+    return _defaultAdminNodeIds
+        .map((String id) => _AdminNodeRef(id: id, address: ''))
+        .toList(growable: false);
   }
 
   AdminNodeMetric? _latestAdminMetricFromPayload(

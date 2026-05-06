@@ -30,7 +30,7 @@ class _AdminPageState extends State<AdminPage> {
       return;
     }
     final workspace = WorkspaceScope.of(context);
-    _nodeIdController.text = workspace.adminMetricNodeId;
+    _nodeIdController.text = '';
     final String initialImageUuid = workspace.adminLogImageUuid?.trim().isNotEmpty == true
         ? workspace.adminLogImageUuid!.trim()
         : workspace.latestBatchImages.isNotEmpty
@@ -55,13 +55,10 @@ class _AdminPageState extends State<AdminPage> {
 
   Future<void> _refreshAll() async {
     final workspace = WorkspaceScope.of(context);
-    final String nodeId = _nodeIdController.text.trim();
     final String imageUuid = _imageUuidController.text.trim();
 
     try {
-      await workspace.refreshAdminMetrics(
-        nodeId: nodeId.isEmpty ? null : nodeId,
-      );
+      await workspace.refreshAdminMetrics();
     } catch (_) {}
 
     try {
@@ -144,7 +141,7 @@ class _AdminPageState extends State<AdminPage> {
             children: <Widget>[
               FilterField(
                 icon: Icons.dns_outlined,
-                label: 'Node ID for metrics lookup',
+                label: 'Node ID optional (empty = node-1, node-2, node-3)',
                 width: 320,
                 controller: _nodeIdController,
                 onSubmitted: (_) => _refreshMetrics(),
@@ -176,12 +173,12 @@ class _AdminPageState extends State<AdminPage> {
               ),
               ChipFilter(
                 icon: Icons.restore_rounded,
-                label: 'Default node',
+                label: 'All nodes',
                 onPressed: () {
                   setState(() {
-                    _nodeIdController.text = workspace.adminMetricNodeId;
+                    _nodeIdController.clear();
                   });
-                  _refreshMetrics();
+                  _refreshAll();
                 },
               ),
             ],
